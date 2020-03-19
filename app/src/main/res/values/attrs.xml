@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="GlobalAttrs">
+
+        <!-- Generic Visual Components -->
+        <attr name="toolBarColor" format="color"/>
+        <attr name="bottomBarColor" format="color"/>
+
+        <!-- Icon Colors -->
+        <attr name="primaryIconColor" format="color"/>
+
+        <!-- Text Colors -->
+        <attr name="primaryTextColor" format="color"/>
+        <attr name="secondaryTextColor" format="color"/>
+
+        <!-- Component Colors -->
+        <attr name="dividerColor" format="color"/>
+
+    </declare-styleable>
+</resources>

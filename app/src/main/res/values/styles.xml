@@ -1,0 +1,30 @@
+<resources>
+
+    <!-- Light Theme. -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimaryForLight</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDarkForLight</item>
+        <item name="colorAccent">@color/colorAccentForLight</item>
+        <item name="android:windowBackground">@color/colorBackgroundForLight</item>
+
+        <item name="primaryTextColor">@color/colorPrimaryForLight</item>
+        <item name="secondaryTextColor">@color/colorPrimaryDarkForLight</item>
+    </style>
+
+    <!-- Launch Theme -->
+    <style name="AppTheme.Launcher">
+        <item name="android:windowBackground">@drawable/launch_screen</item>
+    </style>
+
+    <!-- Dark Theme. -->
+    <style name="AppThemeDark" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimaryForDark</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDarkForDark</item>
+        <item name="colorAccent">@color/colorAccentForDark</item>
+        <item name="android:windowBackground">@color/colorBackgroundForDark</item>
+
+        <item name="primaryTextColor">@color/colorPrimaryForDark</item>
+        <item name="secondaryTextColor">@color/colorPrimaryDarkForDark</item>
+    </style>
+
+</resources>

@@ -1,0 +1,6 @@
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <string name="app_name">Pelion Device Management</string>
+    <string name="version_format">Version: <xliff:g id="view">%1$s</xliff:g></string>
+    <string name="logo_description">App Logo</string>
+</resources>
