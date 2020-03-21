@@ -3,8 +3,7 @@
     <declare-styleable name="GlobalAttrs">
 
         <!-- Generic Visual Components -->
-        <attr name="toolBarColor" format="color"/>
-        <attr name="bottomBarColor" format="color"/>
+        <attr name="colorBackground" format="color" />
 
         <!-- Icon Colors -->
         <attr name="primaryIconColor" format="color"/>
@@ -15,6 +14,9 @@
 
         <!-- Component Colors -->
         <attr name="dividerColor" format="color"/>
+
+        <attr name="iconEmail" format="reference" />
+        <attr name="iconLock" format="reference"/>
 
     </declare-styleable>
 </resources>

@@ -4,8 +4,6 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
-import androidx.appcompat.widget.Toolbar
-import androidx.fragment.app.Fragment
 import com.arm.peliondevicemanagement.BuildConfig
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.helpers.LogHelper
@@ -23,30 +21,6 @@ open class BaseActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         LogHelper.debug(tag = TAG, msg = "onCreate")
-    }
-
-    protected fun setupToolbar(toolbar: Toolbar, title: String?, iconResId: Int?){
-        /*if (!SharedPrefHelper.isDarkThemeEnabled()) {
-            //toolbar.context.setTheme(R.style.ToolBarThemeLight)
-            //toolbar.tvTitleToolbar?.setTextColor(ContextCompat.getColor(this, R.color.text_color_white_for_light))
-        } else {
-            //toolbar.context.setTheme(R.style.ToolBarThemeDark)
-            //toolbar.tvTitleToolbar?.setTextColor(ContextCompat.getColor(this, R.color.text_color_white))
-        }
-
-        setSupportActionBar(toolbar)
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-
-        if (iconResId != null)
-            supportActionBar!!.setHomeAsUpIndicator(iconResId)
-        else {
-            when (SharedPrefHelper.isDarkThemeEnabled()) {
-                true -> supportActionBar!!.setHomeAsUpIndicator(R.drawable.ic_back_white)
-                false -> supportActionBar!!.setHomeAsUpIndicator(R.drawable.ic_back_dark)
-            }
-        }
-
-        supportActionBar!!.title = null*/
     }
 
     internal fun isAccountNotSelected(): Boolean =
@@ -92,59 +66,10 @@ open class BaseActivity : AppCompatActivity() {
         finish()
     }
 
-    internal fun addFragment(containerId: Int, fragment: Fragment, isForward: Boolean) {
-        supportFragmentManager.beginTransaction()
-            .apply {
-                when (isForward) {
-                    true -> setCustomAnimations(R.anim.right_in, R.anim.right_out)
-                    false -> setCustomAnimations(R.anim.left_in, R.anim.left_out)
-                }
-                add(containerId, fragment, fragment.javaClass.simpleName)
-            }
-            .commitAllowingStateLoss()
-    }
-
-    private fun removeFragment(fragment: Fragment, isForward: Boolean) {
-        supportFragmentManager.beginTransaction()
-            .apply {
-                when (isForward) {
-                    true -> setCustomAnimations(R.anim.right_in, R.anim.right_out)
-                    false -> setCustomAnimations(R.anim.left_in, R.anim.left_out)
-                }
-                remove(fragment)
-            }
-            .commitAllowingStateLoss()
-    }
-
-    internal fun replaceFragment(containerId: Int, fragment: Fragment, isForward: Boolean) {
-        supportFragmentManager.beginTransaction()
-            .apply {
-                when (isForward) {
-                    true -> setCustomAnimations(R.anim.right_in, R.anim.right_out)
-                    false -> setCustomAnimations(R.anim.left_in, R.anim.left_out)
-                }
-                replace(containerId, fragment, fragment.javaClass.simpleName)
-            }
-            .commitAllowingStateLoss()
-    }
-
-    internal fun removeAndAddFragment(containerId: Int, fragmentAdd: Fragment, fragmentRemove: Fragment, isForward: Boolean) {
-        supportFragmentManager.beginTransaction()
-            .apply {
-                when (isForward) {
-                    true -> setCustomAnimations(R.anim.right_in, R.anim.right_out)
-                    false -> setCustomAnimations(R.anim.left_in, R.anim.left_out)
-                }
-                remove(fragmentRemove)
-                add(containerId, fragmentAdd, fragmentAdd.javaClass.simpleName)
-            }
-            .commitAllowingStateLoss()
-    }
-
     internal fun callNewLoginWithFinish() {
         SharedPrefHelper.clearUserData(removeCredentials = true, removeAccountId = true)
         fireIntentWithFinish(
-            intent = Intent(this@BaseActivity, LaunchActivity::class.java),
+            intent = Intent(this@BaseActivity, HostActivity::class.java),
             isForward = false)
     }
 

@@ -3,4 +3,17 @@
     <string name="app_name">Pelion Device Management</string>
     <string name="version_format">Version: <xliff:g id="view">%1$s</xliff:g></string>
     <string name="logo_description">App Logo</string>
+
+    <string name="email_header">Email/Username</string>
+    <string name="password_header">Password</string>
+    <string name="signin_text">Sign In</string>
+    <string name="signout_text">Sign Out</string>
+
+    <string name="switch_account">Switch Account</string>
+    <string name="profile">Profile</string>
+    <string name="settings">Settings</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 </resources>

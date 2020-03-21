@@ -7,12 +7,23 @@
         <item name="colorAccent">@color/colorAccentForLight</item>
         <item name="android:windowBackground">@color/colorBackgroundForLight</item>
 
-        <item name="primaryTextColor">@color/colorPrimaryForLight</item>
-        <item name="secondaryTextColor">@color/colorPrimaryDarkForLight</item>
+        <item name="colorBackground">@color/colorBackgroundForLight</item>
+
+        <item name="primaryTextColor">@color/colorPrimaryForDark</item>
+        <item name="secondaryTextColor">@color/colorPrimaryDarkForDark</item>
+
+        <!--<item name="primaryIconColor">@color/colorPrimaryDarkForLight</item>-->
+
+        <item name="iconEmail">@drawable/ic_mail_dark</item>
+        <item name="iconLock">@drawable/ic_lock_dark</item>
     </style>
 
     <!-- Launch Theme -->
     <style name="AppTheme.Launcher">
+        <item name="android:windowBackground">@drawable/launch_screen</item>
+    </style>
+
+    <style name="AppThemeDark.Launcher">
         <item name="android:windowBackground">@drawable/launch_screen</item>
     </style>
 
@@ -23,8 +34,13 @@
         <item name="colorAccent">@color/colorAccentForDark</item>
         <item name="android:windowBackground">@color/colorBackgroundForDark</item>
 
-        <item name="primaryTextColor">@color/colorPrimaryForDark</item>
-        <item name="secondaryTextColor">@color/colorPrimaryDarkForDark</item>
+        <item name="colorBackground">@color/colorBackgroundForDark</item>
+
+        <item name="primaryTextColor">@color/colorPrimaryForLight</item>
+        <item name="secondaryTextColor">@color/colorPrimaryDarkForLight</item>
+
+        <item name="iconEmail">@drawable/ic_mail_light</item>
+        <item name="iconLock">@drawable/ic_lock_light</item>
     </style>
 
 </resources>

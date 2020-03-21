@@ -24,7 +24,7 @@
         android:theme="@style/AppTheme"
         tools:targetApi="n">
 
-        <activity android:name="com.arm.peliondevicemanagement.screens.activities.LaunchActivity"
+        <activity android:name=".screens.activities.HostActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden"

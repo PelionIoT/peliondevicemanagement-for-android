@@ -2,20 +2,27 @@ package com.arm.peliondevicemanagement
 
 import android.app.Application
 import android.content.res.Configuration
+import com.arm.peliondevicemanagement.components.CloudRepository
 import com.arm.peliondevicemanagement.helpers.LogHelper
+import com.arm.peliondevicemanagement.services.CloudAPIService
 
 class AppController : Application() {
 
     companion object {
         private val TAG: String = AppController::class.java.simpleName
-
         internal var appController: AppController? = null
+        private var cloudRepository: CloudRepository? = null
+        private var cloudAPIService: CloudAPIService? = null
+
+        internal fun getCloudRepoManager(): CloudRepository = cloudRepository!!
     }
 
     override fun onCreate() {
         super.onCreate()
         LogHelper.debug(TAG, "onApplicationCreate()")
         appController = this
+        cloudAPIService = CloudAPIService()
+        cloudRepository = CloudRepository(cloudAPIService!!)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration?) {

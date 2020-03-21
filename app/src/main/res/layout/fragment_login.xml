@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:id="@+id/llLogo"
+        android:layout_marginTop="120dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/logo_image_view"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:contentDescription="@string/logo_description"
+            android:src="@drawable/logo_arm"
+            android:scaleType="fitCenter" />
+
+        <include
+            layout="@layout/layout_version"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="5dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:id="@+id/loginView"
+        android:layout_marginTop="50dp"
+        android:layout_below="@id/llLogo">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtEmailHeader"
+            android:layout_marginStart="50dp"
+            android:layout_marginEnd="50dp"
+            android:alpha="0.9"
+            android:background="@drawable/input_border">
+
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="?attr/iconEmail"
+                android:scaleType="center"/>
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/email_header"
+                android:fontFamily="@font/lato_regular"
+                android:inputType="textEmailAddress"
+                android:layout_marginStart="10dp"
+                android:id="@+id/emailInputTxt"
+                android:layout_gravity="center"
+                android:singleLine="true"
+                android:textColor="?attr/primaryTextColor"
+                android:textColorHint="?attr/secondaryTextColor"
+                android:background="@android:color/transparent"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtPasswordHeader"
+            android:layout_below="@id/txtEmailHeader"
+            android:layout_marginTop="15dp"
+            android:layout_marginStart="50dp"
+            android:layout_marginEnd="50dp"
+            android:alpha="0.9"
+            android:background="@drawable/input_border">
+
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="?attr/iconLock"
+                android:scaleType="center"/>
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/password_header"
+                android:fontFamily="@font/lato_regular"
+                android:layout_marginStart="10dp"
+                android:inputType="textPassword"
+                android:id="@+id/passwordInputTxt"
+                android:singleLine="true"
+                android:layout_gravity="center"
+                android:textColor="?attr/primaryTextColor"
+                android:textColorHint="?attr/secondaryTextColor"
+                android:background="@android:color/transparent"/>
+
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="30dp"
+            android:layout_marginStart="130dp"
+            android:layout_marginEnd="130dp"
+            android:text="@string/signin_text"
+            android:layout_below="@id/txtPasswordHeader"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            app:iconPadding="0dp"
+            app:cornerRadius="25dp"
+            android:id="@+id/loginBtn"
+            android:paddingTop="12dp"
+            android:fontFamily="@font/lato_regular"
+            android:paddingBottom="12dp"
+            app:icon="@drawable/ic_forward_light"
+            app:backgroundTint="?attr/colorPrimaryDark"
+            app:srcCompat="@drawable/ic_forward_light"/>
+
+    </LinearLayout>
+
+</RelativeLayout>
