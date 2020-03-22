@@ -2,7 +2,7 @@ package com.arm.peliondevicemanagement
 
 import android.app.Application
 import android.content.res.Configuration
-import com.arm.peliondevicemanagement.components.CloudRepository
+import com.arm.peliondevicemanagement.services.CloudRepository
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.services.CloudAPIService
 
@@ -22,7 +22,10 @@ class AppController : Application() {
         LogHelper.debug(TAG, "onApplicationCreate()")
         appController = this
         cloudAPIService = CloudAPIService()
-        cloudRepository = CloudRepository(cloudAPIService!!)
+        cloudRepository =
+            CloudRepository(
+                cloudAPIService!!
+            )
     }
 
     override fun onConfigurationChanged(newConfig: Configuration?) {

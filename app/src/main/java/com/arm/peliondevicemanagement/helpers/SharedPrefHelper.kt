@@ -7,13 +7,21 @@ import com.arm.peliondevicemanagement.managers.SharedPrefManager
 object SharedPrefHelper {
 
     // Get APIs
-    internal fun getUserName(): String? =
+    internal fun getUserName(): String =
         SharedPrefManager.with(context = AppController.appController!!)!!
             .getString(SharedPrefConstants.STORE_USER_NAME, "")!!
+
+    internal fun getUserPassword(): String? =
+        SharedPrefManager.with(context = AppController.appController!!)!!
+            .getString(SharedPrefConstants.STORE_USER_PASSWORD, "")!!
 
     internal fun getUserAccessToken(): String? =
         SharedPrefManager.with(context = AppController.appController!!)!!
             .getString(SharedPrefConstants.STORE_USER_ACCESS_TOKEN, "")!!
+
+    internal fun getStoredProfile(): String? =
+        SharedPrefManager.with(context = AppController.appController!!)!!
+            .getString(SharedPrefConstants.STORE_USER_PROFILE, "")!!
 
     internal fun getStoredAccounts(): String? =
         SharedPrefManager.with(context = AppController.appController!!)!!
@@ -27,6 +35,10 @@ object SharedPrefHelper {
         SharedPrefManager.with(context = AppController.appController!!)!!
             .getString(SharedPrefConstants.STORE_SELECTED_ACCOUNT_NAME, "")!!
 
+    internal fun isMultiAccountSupported(): Boolean =
+        SharedPrefManager.with(context = AppController.appController!!)!!
+            .getBoolean(SharedPrefConstants.STORE_SUPPORTS_MULTI_ACCOUNTS, false)
+
     internal fun isDarkThemeEnabled(): Boolean =
         SharedPrefManager.with(context = AppController.appController!!)!!
             .getBoolean(SharedPrefConstants.STORE_DARK_THEME_STATUS, false)
@@ -37,28 +49,34 @@ object SharedPrefHelper {
 
 
     // POST APIs
-    internal fun storeUserName(userName: String) =
-        SharedPrefManager.with(context = AppController.appController!!)!!.edit()
-            .putString(SharedPrefConstants.STORE_USER_NAME, userName)
-            .apply()
-
     internal fun storeUserAccessToken(accessToken: String) =
         SharedPrefManager.with(context = AppController.appController!!)!!.edit()
             .putString(SharedPrefConstants.STORE_USER_ACCESS_TOKEN, accessToken)
             .apply()
 
-    internal fun storeUserCredentials(userName: String, accessToken: String) =
+    internal fun storeUserCredentials(userName: String,
+                                      userPassword: String) =
         SharedPrefManager.with(context = AppController.appController!!)!!.edit()
             .putString(SharedPrefConstants.STORE_USER_NAME, userName)
-            .putString(SharedPrefConstants.STORE_USER_ACCESS_TOKEN, accessToken)
+            .putString(SharedPrefConstants.STORE_USER_PASSWORD, userPassword)
             .apply()
 
-    internal fun storeUserAccounts(accounts: String) =
+    internal fun storeUserProfile(accessToken: String) =
+        SharedPrefManager.with(context = AppController.appController!!)!!.edit()
+            .putString(SharedPrefConstants.STORE_USER_PROFILE, accessToken)
+            .apply()
+
+    internal fun storeMultiAccountStatus(enabled: Boolean) =
+        SharedPrefManager.with(context = AppController.appController!!)!!.edit()
+            .putBoolean(SharedPrefConstants.STORE_SUPPORTS_MULTI_ACCOUNTS, enabled)
+            .apply()
+
+    internal fun storeUserAccounts(accounts: String?) =
         SharedPrefManager.with(context = AppController.appController!!)!!.edit()
             .putString(SharedPrefConstants.STORE_ACCOUNTS, accounts)
             .apply()
 
-    internal fun storeSelectedAccountID(accountID: String) =
+    internal fun storeSelectedAccountID(accountID: String?) =
         SharedPrefManager.with(context = AppController.appController!!)!!.edit()
             .putString(SharedPrefConstants.STORE_SELECTED_ACCOUNT_ID, accountID)
             .apply()
@@ -79,18 +97,30 @@ object SharedPrefHelper {
             .apply()
 
     // DELETE APIs
-    internal fun clearUserData(removeCredentials: Boolean, removeAccountId: Boolean) {
+    internal fun removeCredentials(accessTokenAlso: Boolean = false){
         val editor = SharedPrefManager.with(context = AppController.appController!!)!!.edit()
+        editor.remove(SharedPrefConstants.STORE_USER_NAME)
+        editor.remove(SharedPrefConstants.STORE_USER_PASSWORD)
 
-        editor.remove(SharedPrefConstants.STORE_USER_ACCESS_TOKEN)
-
-        if (removeAccountId)
-            editor.remove(SharedPrefConstants.STORE_SELECTED_ACCOUNT_ID)
-
-        if (removeCredentials) {
-            editor.remove(SharedPrefConstants.STORE_USER_NAME)
+        if(accessTokenAlso){
+            editor.remove(SharedPrefConstants.STORE_USER_ACCESS_TOKEN)
         }
+        editor.apply()
+    }
 
+    internal fun removePassword(){
+        val editor = SharedPrefManager.with(context = AppController.appController!!)!!.edit()
+        editor.remove(SharedPrefConstants.STORE_USER_PASSWORD)
+        editor.apply()
+    }
+
+    internal fun clearEverything() {
+        val editor = SharedPrefManager.with(context = AppController.appController!!)!!.edit()
+        editor.remove(SharedPrefConstants.STORE_USER_NAME)
+        editor.remove(SharedPrefConstants.STORE_USER_PASSWORD)
+        editor.remove(SharedPrefConstants.STORE_USER_ACCESS_TOKEN)
+        editor.remove(SharedPrefConstants.STORE_ACCOUNTS)
+        editor.remove(SharedPrefConstants.STORE_USER_PROFILE)
         editor.apply()
     }
 }

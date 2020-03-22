@@ -14,12 +14,12 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Signed In As"
+        android:text="@string/signed_in_as"
         android:textColor="@android:color/white"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:textSize="14sp"
-        android:layout_above="@id/tv_account_name"
+        android:layout_above="@id/tvUserEmail"
         android:textAppearance="@style/TextAppearance.AppCompat.Caption"/>
 
     <TextView
@@ -29,7 +29,7 @@
         android:ellipsize="end"
         android:textSize="16sp"
         android:singleLine="true"
-        android:id="@+id/tv_account_name"
+        android:id="@+id/tvUserEmail"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="30dp"
         android:layout_marginStart="16dp"

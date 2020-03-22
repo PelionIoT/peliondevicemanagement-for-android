@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:contentPadding="5dp"
+    app:strokeWidth="1dp"
+    app:cardElevation="0dp"
+    app:cardBackgroundColor="?attr/colorBackground"
+    app:strokeColor="@drawable/stroke_color">
+
+    <androidx.appcompat.widget.SearchView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:singleLine="true"
+        android:textSize="16sp"
+        android:focusable="false"
+        android:id="@+id/searchTextBox"
+        android:fontFamily="@font/lato_regular"
+        android:drawablePadding="20dp"
+        app:defaultQueryHint="Find Account"
+        app:iconifiedByDefault="false"
+        app:queryBackground="@android:color/transparent"
+        app:searchIcon="?attr/iconSearch"
+        />
+
+</com.google.android.material.card.MaterialCardView>

@@ -67,7 +67,7 @@ open class BaseActivity : AppCompatActivity() {
     }
 
     internal fun callNewLoginWithFinish() {
-        SharedPrefHelper.clearUserData(removeCredentials = true, removeAccountId = true)
+        //SharedPrefHelper.clearUserData(removeCredentials = true, removeAccountId = true)
         fireIntentWithFinish(
             intent = Intent(this@BaseActivity, HostActivity::class.java),
             isForward = false)

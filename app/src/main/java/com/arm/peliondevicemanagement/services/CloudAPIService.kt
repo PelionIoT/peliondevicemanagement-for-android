@@ -1,7 +1,10 @@
 package com.arm.peliondevicemanagement.services
 
-import com.arm.peliondevicemanagement.services.data.UserAccountResponse
+import com.arm.peliondevicemanagement.components.models.ProfileModel
+import com.arm.peliondevicemanagement.services.data.LoginResponse
 import com.arm.peliondevicemanagement.constants.APIConstants.API_LOGIN
+import com.arm.peliondevicemanagement.constants.APIConstants.API_IMPERSONATE
+import com.arm.peliondevicemanagement.constants.APIConstants.API_USER_ME
 import com.arm.peliondevicemanagement.constants.APIConstants.CONTENT_TYPE_JSON
 import com.arm.peliondevicemanagement.constants.APIConstants.DEFAULT_BASE_URL
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_AUTHORIZATION
@@ -57,16 +60,12 @@ interface CloudAPIService {
     }
 
     @POST(API_LOGIN)
-    suspend fun doAuth(@Body params: RequestBody): Response<UserAccountResponse>
+    suspend fun doAuth(@Body params: RequestBody): Response<LoginResponse>
 
-    @POST("")
-    suspend fun refreshToken() {
+    @POST(API_IMPERSONATE)
+    suspend fun doImpersonate(@Body params: RequestBody): Response<LoginResponse>
 
-    }
-
-    @GET("")
-    suspend fun getAccounts() {
-
-    }
+    @GET(API_USER_ME)
+    suspend fun getProfile(): Response<ProfileModel>
 
 }

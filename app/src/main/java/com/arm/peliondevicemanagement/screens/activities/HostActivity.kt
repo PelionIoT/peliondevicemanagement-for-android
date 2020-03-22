@@ -5,6 +5,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.SharedPreferencesCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
@@ -13,8 +14,10 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.databinding.ActivityHostBinding
+import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.screens.fragments.DashboardFragmentDirections
 import com.google.android.material.navigation.NavigationView
+import kotlinx.android.synthetic.main.layout_drawer_header.view.*
 
 class HostActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -115,9 +118,15 @@ class HostActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         } else {
             navigationMenu.clear()
             navigationView.inflateMenu(R.menu.menu_drawer)
-            navigationMenu.findItem(R.id.switch_account).isVisible = false
+            if(SharedPrefHelper.isMultiAccountSupported()){
+                navigationMenu.findItem(R.id.switch_account).isVisible = false
+            }
             navigationMenu.findItem(R.id.settings).isVisible = false
         }
+    }
+
+    fun updateDrawerText(text: String) {
+        viewBinder.drawerLayout.tvUserEmail.text = text
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -136,7 +145,8 @@ class HostActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 navigationController.navigate(R.id.settingsFragment)
             }
             R.id.signout -> {
-                displayToast("Signing Out")
+                SharedPrefHelper.storeMultiAccountStatus(false)
+                SharedPrefHelper.clearEverything()
                 navigationController.navigate(R.id.loginFragment)
             }
         }

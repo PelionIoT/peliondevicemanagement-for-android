@@ -15,8 +15,10 @@
         <!-- Component Colors -->
         <attr name="dividerColor" format="color"/>
 
+        <attr name="iconAccount" format="reference"/>
         <attr name="iconEmail" format="reference" />
         <attr name="iconLock" format="reference"/>
+        <attr name="iconSearch" format="reference"/>
 
     </declare-styleable>
 </resources>

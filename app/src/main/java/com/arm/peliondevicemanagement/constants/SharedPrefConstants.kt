@@ -7,10 +7,15 @@ object SharedPrefConstants {
 
     // Credentials
     const val STORE_USER_NAME = "userName"
+    const val STORE_USER_PASSWORD = "userPassword"
     const val STORE_USER_ACCESS_TOKEN = "userAccessToken"
+
+    // Profile
+    const val STORE_USER_PROFILE = "profile"
 
     // Accounts
     const val STORE_ACCOUNTS = "accounts"
+    const val STORE_SUPPORTS_MULTI_ACCOUNTS = "multiAccounts"
     const val STORE_SELECTED_ACCOUNT_ID = "selectedAccountId"
     const val STORE_SELECTED_ACCOUNT_NAME = "selectedAccountName"
 

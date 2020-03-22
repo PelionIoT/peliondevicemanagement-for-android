@@ -11,19 +11,29 @@ import android.view.ViewTreeObserver
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
-import com.arm.peliondevicemanagement.R
+import com.arm.peliondevicemanagement.components.models.AccountModel
+import com.arm.peliondevicemanagement.components.models.ProfileModel
 import com.arm.peliondevicemanagement.components.viewmodels.LoginViewModel
 import com.arm.peliondevicemanagement.databinding.FragmentLoginBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
+import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.screens.activities.HostActivity
+import com.google.gson.Gson
 import kotlinx.android.synthetic.main.layout_version.*
 
 class LoginFragment : Fragment() {
+
+    companion object {
+        private val TAG: String = LoginFragment::class.java.simpleName
+    }
 
     private var _viewBinder: FragmentLoginBinding? = null
     private val viewBinder get() = _viewBinder!!
 
     private lateinit var loginViewModel: LoginViewModel
+
+    private lateinit var userEmail: String
+    private lateinit var userPassword: String
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,14 +55,49 @@ class LoginFragment : Fragment() {
 
         loginViewModel = ViewModelProvider(this).get(LoginViewModel::class.java)
 
+        setupListeners()
+        setupProgressView()
+    }
+
+    private fun setupProgressView(){
+        viewBinder.progressLayout.progressBar
+            .indeterminateDrawable.setColorFilter(
+            resources.getColor(android.R.color.white),
+            android.graphics.PorterDuff.Mode.MULTIPLY)
+
+        viewBinder.progressLayout.progressBarText.setTextColor(
+            resources.getColor(android.R.color.white))
+    }
+
+    private fun setupListeners() {
         viewBinder.loginBtn.setOnClickListener {
-            //performLogin()
-            Navigation.findNavController(viewBinder.root).navigate(LoginFragmentDirections.actionLoginFragmentToAccountsFragment())
+            performLogin()
         }
 
         loginViewModel.userAccountLiveData.observe(viewLifecycleOwner, Observer { response ->
             if(response != null){
-                LogHelper.debug("performLogin()", response.toString())
+                if(!response.accounts.isNullOrEmpty()){
+                    processMultiAccountData(response.accounts)
+                    navigateToAccountsFragment()
+                } else {
+                    processSingleAccountData(response.accessToken)
+                }
+            } else {
+                (activity as HostActivity).displayToast("Invalid credentials")
+                clearPasswordTextBox()
+                showHideProgressbar(false)
+                showHideLoginView(true)
+            }
+        })
+
+        loginViewModel.userProfileLiveData.observe(viewLifecycleOwner, Observer { response ->
+            if(response != null){
+                processUserProfileData(response)
+                navigateToDashboardFragment()
+            } else {
+                (activity as HostActivity).displayToast("Unable to fetch profile data")
+                clearPasswordTextBox()
+                navigateToDashboardFragment()
             }
         })
     }
@@ -81,13 +126,33 @@ class LoginFragment : Fragment() {
     private fun changeLogoPosition(){
         viewBinder.llLogo.animate().translationY(0f)
         Handler().postDelayed({
-            viewBinder.loginView.visibility = View.VISIBLE
+            doReAuthIfPossible()
         }, 500)
     }
 
     private fun setVersionName(){
         tvVersion.setTextColor(resources.getColor(android.R.color.white))
         tvVersion.text = (activity as HostActivity).getAppVersion()
+    }
+
+    private fun clearPasswordTextBox() {
+        viewBinder.passwordInputTxt.text.clear()
+    }
+
+    private fun showHideProgressbar(visibility: Boolean, text: String = ""){
+        if(visibility) {
+            viewBinder.progressLayout.root.visibility = View.VISIBLE
+            if(text.isNotEmpty())
+                viewBinder.progressLayout.progressBarText.text = text
+        } else {
+            viewBinder.progressLayout.root.visibility = View.GONE
+        }
+    }
+
+    private fun showHideLoginView(visibility: Boolean) = if(visibility) {
+        viewBinder.loginView.visibility = View.VISIBLE
+    } else {
+        viewBinder.loginView.visibility = View.GONE
     }
 
     private fun isValidEmail(email: String): Boolean? =
@@ -126,12 +191,76 @@ class LoginFragment : Fragment() {
         return valid
     }
 
+    private fun doReAuthIfPossible() {
+        if(!SharedPrefHelper.getSelectedAccountID().isNullOrBlank()){
+            showHideLoginView(false)
+            showHideProgressbar(true, "Re-Authenticating")
+
+            LogHelper.debug(TAG, "onUserLoggedIn()->doReAuth()")
+            loginViewModel.doImpersonate(SharedPrefHelper.getSelectedAccountID()!!)
+        } else {
+            viewBinder.loginView.visibility = View.VISIBLE
+        }
+    }
+
     private fun performLogin() {
         if (!validateForm())
             return
 
-        loginViewModel.doLogin(viewBinder.emailInputTxt.text.toString(),
-            viewBinder.passwordInputTxt.text.toString())
+        showHideLoginView(false)
+        showHideProgressbar(true, "Authenticating")
+
+        userEmail = viewBinder.emailInputTxt.text.toString()
+        userPassword = viewBinder.passwordInputTxt.text.toString()
+
+        SharedPrefHelper.removeCredentials(true)
+        loginViewModel.doLogin(userEmail, userPassword)
+    }
+
+    private fun processMultiAccountData(accounts: List<AccountModel>) {
+        // Store listOfAccounts as JSON in SharedPrefs
+        val accountsJSON = Gson().toJson(accounts)
+        LogHelper.debug(TAG, "onUserAccounts()-> $accountsJSON")
+
+        //Store data
+        SharedPrefHelper.storeUserCredentials(userEmail, userPassword)
+        SharedPrefHelper.storeMultiAccountStatus(true)
+        SharedPrefHelper.storeUserAccounts(accountsJSON)
+    }
+
+    private fun processSingleAccountData(accessToken: String) {
+        // Do accessToken login
+        LogHelper.debug(TAG, "onUserAccessToken()-> $accessToken")
+
+        if(!SharedPrefHelper.getStoredAccounts().isNullOrBlank()){
+            SharedPrefHelper.storeMultiAccountStatus(true)
+        } else {
+            SharedPrefHelper.storeMultiAccountStatus(false)
+        }
+        SharedPrefHelper.storeUserAccessToken(accessToken)
+
+        if(SharedPrefHelper.getStoredProfile().isNullOrBlank()){
+            loginViewModel.getProfile()
+        } else {
+            navigateToDashboardFragment()
+        }
+    }
+
+    private fun processUserProfileData(profile: ProfileModel) {
+        // Store user-profile data as JSON in SharedPrefs
+        val profileJSON = Gson().toJson(profile)
+        LogHelper.debug(TAG, "onUserProfile()-> $profileJSON")
+        SharedPrefHelper.storeUserProfile(profileJSON)
+    }
+
+    private fun navigateToAccountsFragment() {
+        Navigation.findNavController(viewBinder.root)
+            .navigate(LoginFragmentDirections.actionLoginFragmentToAccountsFragment())
+    }
+
+    private fun navigateToDashboardFragment() {
+        Navigation.findNavController(viewBinder.root)
+            .navigate(LoginFragmentDirections.actionLoginFragmentToDashboardFragment())
     }
 
     override fun onDestroyView() {

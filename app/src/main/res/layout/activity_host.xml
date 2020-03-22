@@ -18,7 +18,8 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
             android:visibility="gone"
-            android:theme="@style/ThemeOverlay.MaterialComponents.Light" />
+            android:elevation="10dp"
+            />
 
         <fragment
             android:id="@+id/nav_host_fragment"
@@ -36,7 +37,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
-        app:headerLayout="@layout/layout_navigation_header"
+        app:headerLayout="@layout/layout_drawer_header"
         app:menu="@menu/menu_drawer" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

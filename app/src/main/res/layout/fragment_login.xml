@@ -71,7 +71,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/txtPasswordHeader"
-            android:layout_below="@id/txtEmailHeader"
             android:layout_marginTop="15dp"
             android:layout_marginStart="50dp"
             android:layout_marginEnd="50dp"
@@ -104,12 +103,10 @@
             style="@style/Widget.MaterialComponents.Button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
             android:layout_marginTop="30dp"
             android:layout_marginStart="130dp"
             android:layout_marginEnd="130dp"
             android:text="@string/signin_text"
-            android:layout_below="@id/txtPasswordHeader"
             android:textAllCaps="false"
             android:textSize="16sp"
             app:iconPadding="0dp"
@@ -123,5 +120,14 @@
             app:srcCompat="@drawable/ic_forward_light"/>
 
     </LinearLayout>
+
+    <include
+        layout="@layout/layout_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressLayout"
+        android:visibility="gone"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true" />
 
 </RelativeLayout>
