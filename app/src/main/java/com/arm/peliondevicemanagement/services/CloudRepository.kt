@@ -10,6 +10,7 @@ import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.services.CloudAPIService.Companion.createJSONRequestBody
 import com.arm.peliondevicemanagement.services.data.BaseRepository
 import com.arm.peliondevicemanagement.services.data.LoginResponse
+import com.arm.peliondevicemanagement.services.data.WorkflowsResponse
 
 class CloudRepository(private val cloudAPIService: CloudAPIService): BaseRepository() {
 
@@ -51,6 +52,20 @@ class CloudRepository(private val cloudAPIService: CloudAPIService): BaseReposit
         return doSafeAPIRequest(
         call = { cloudAPIService.getProfile()},
         errorMessage = "Unable to fetch user-profile"
+        )
+    }
+
+    suspend fun getAssignedWorkflows(): WorkflowsResponse? {
+        return doSafeAPIRequest(
+            call = { cloudAPIService.getAssignedWorkflows()},
+            errorMessage = "Unable to fetch workflows"
+        )
+    }
+
+    suspend fun getAllWorkflows(): WorkflowsResponse? {
+        return doSafeAPIRequest(
+            call = { cloudAPIService.getAllWorkflows()},
+            errorMessage = "Unable to fetch workflows"
         )
     }
 

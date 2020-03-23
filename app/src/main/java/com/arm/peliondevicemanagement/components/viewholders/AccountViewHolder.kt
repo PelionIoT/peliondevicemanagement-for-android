@@ -4,6 +4,7 @@ import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.listeners.RecyclerItemClickListener
 import com.arm.peliondevicemanagement.components.models.AccountModel
+import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import kotlinx.android.synthetic.main.layout_item_account.view.*
 
 class AccountViewHolder(itemView: View,
@@ -20,7 +21,8 @@ class AccountViewHolder(itemView: View,
     internal fun bind(model: AccountModel) {
         this.accountModel = model
         itemView.apply {
-            cardAccountItem.isChecked = model.isSelected
+            cardAccountItem.isChecked = SharedPrefHelper
+                .getSelectedAccountID() == model.accountID
             tvName.text = model.accountName
         }
     }

@@ -13,8 +13,10 @@
     <string name="switch_account">Switch Account</string>
     <string name="profile">Profile</string>
     <string name="settings">Settings</string>
-
     <string name="progress_text">Please wait</string>
+    <string name="not_found_text">Oops, there\'s some trouble!</string>
+
+    <string name="device_format"><xliff:g id="view">%1$s</xliff:g> Devices</string>
 
     <string name="hello_blank_fragment">Hello</string>
 

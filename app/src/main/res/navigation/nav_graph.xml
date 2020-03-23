@@ -39,6 +39,16 @@
             app:popExitAnim="@anim/left_out"
             app:popUpTo="@id/accountsFragment"
             app:popUpToInclusive="true"/>
+        <action
+            android:id="@+id/action_accountsFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:enterAnim="@anim/left_in"
+            app:exitAnim="@anim/left_out"
+            app:popEnterAnim="@anim/right_in"
+            app:popExitAnim="@anim/right_out"
+            app:popUpTo="@id/accountsFragment"
+            app:popUpToInclusive="true"
+            />
     </fragment>
 
     <fragment
@@ -72,6 +82,19 @@
         <action
             android:id="@+id/action_dashboardFragment_to_accountsFragment"
             app:destination="@id/accountsFragment"
+            app:enterAnim="@anim/left_in"
+            app:exitAnim="@anim/left_out"
+            app:popEnterAnim="@anim/right_in"
+            app:popExitAnim="@anim/right_out"
+            app:popUpTo="@id/dashboardFragment"
+            app:popUpToInclusive="true"/>
+        <action
+            android:id="@+id/action_dashboardFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:enterAnim="@anim/left_in"
+            app:exitAnim="@anim/left_out"
+            app:popEnterAnim="@anim/right_in"
+            app:popExitAnim="@anim/right_out"
             app:popUpTo="@id/dashboardFragment"
             app:popUpToInclusive="true"/>
     </fragment>

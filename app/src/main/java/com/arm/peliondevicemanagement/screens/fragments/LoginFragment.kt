@@ -47,8 +47,6 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        (activity as HostActivity).showHideToolbar(false)
-
         initLogoPosition()
         setVersionName()
         runSplash()
@@ -83,7 +81,7 @@ class LoginFragment : Fragment() {
                     processSingleAccountData(response.accessToken)
                 }
             } else {
-                (activity as HostActivity).displayToast("Invalid credentials")
+                (activity as HostActivity).showSnackbar(viewBinder.root, "Failed to authenticate")
                 clearPasswordTextBox()
                 showHideProgressbar(false)
                 showHideLoginView(true)
@@ -95,7 +93,7 @@ class LoginFragment : Fragment() {
                 processUserProfileData(response)
                 navigateToDashboardFragment()
             } else {
-                (activity as HostActivity).displayToast("Unable to fetch profile data")
+                (activity as HostActivity).showSnackbar(viewBinder.root, "Failed to fetch profile-data")
                 clearPasswordTextBox()
                 navigateToDashboardFragment()
             }
@@ -194,6 +192,7 @@ class LoginFragment : Fragment() {
     private fun doReAuthIfPossible() {
         if(!SharedPrefHelper.getSelectedAccountID().isNullOrBlank()){
             showHideLoginView(false)
+            viewBinder.emailInputTxt.setText(SharedPrefHelper.getUserName())
             showHideProgressbar(true, "Re-Authenticating")
 
             LogHelper.debug(TAG, "onUserLoggedIn()->doReAuth()")

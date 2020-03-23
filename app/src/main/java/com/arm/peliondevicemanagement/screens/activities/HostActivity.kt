@@ -15,6 +15,7 @@ import androidx.navigation.ui.NavigationUI
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.databinding.ActivityHostBinding
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
+import com.arm.peliondevicemanagement.screens.fragments.AccountsFragmentDirections
 import com.arm.peliondevicemanagement.screens.fragments.DashboardFragmentDirections
 import com.google.android.material.navigation.NavigationView
 import kotlinx.android.synthetic.main.layout_drawer_header.view.*
@@ -29,6 +30,8 @@ class HostActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     private lateinit var viewBinder: ActivityHostBinding
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var navigationMenu: Menu
+
+    private var isAccountGraph: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,19 +64,27 @@ class HostActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         navigationController.addOnDestinationChangedListener { _, destination, _ ->
             when(destination.id){
                 R.id.loginFragment -> {
+                    showHideToolbar(false)
                     enableDisableDrawer(false)
                 }
                 R.id.accountsFragment -> {
+                    isAccountGraph = true
+                    showHideToolbar(true)
                     updateToolbarTitle("Accounts")
+                    updateDrawerText(SharedPrefHelper.getUserName())
                     enableDisableDrawer(true)
                     showHideDrawerItems(false)
                 }
                 R.id.dashboardFragment -> {
-                    updateToolbarTitle("Dashboard")
+                    isAccountGraph = false
+                    showHideToolbar(true)
+                    updateToolbarTitle("Jobs")
+                    updateDrawerText(SharedPrefHelper.getUserName())
                     enableDisableDrawer(true)
                     showHideDrawerItems(true)
                 }
                 R.id.settingsFragment -> {
+                    showHideToolbar(true)
                     updateToolbarTitle("Settings")
                     enableDisableDrawer(false)
                 }
@@ -147,7 +158,15 @@ class HostActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             R.id.signout -> {
                 SharedPrefHelper.storeMultiAccountStatus(false)
                 SharedPrefHelper.clearEverything()
-                navigationController.navigate(R.id.loginFragment)
+                if(isAccountGraph){
+                    navigationController.navigate(
+                        AccountsFragmentDirections
+                            .actionAccountsFragmentToLoginFragment())
+                } else {
+                    navigationController.navigate(
+                        DashboardFragmentDirections
+                            .actionDashboardFragmentToLoginFragment())
+                }
             }
         }
         return true

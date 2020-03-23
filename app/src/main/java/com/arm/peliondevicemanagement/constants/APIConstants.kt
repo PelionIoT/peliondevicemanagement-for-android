@@ -24,7 +24,8 @@ object APIConstants {
     const val API_ACCOUNTS_ME = "/v3/accounts/me?include=policies"
 
     // Workflow Service Endpoints
-    const val API_WORKFLOWS = "/v3/users/me/pdm-workflows"
+    const val API_ALL_WORKFLOWS = "/v3/pdm-workflows"
+    const val API_ASSIGNED_WORKFLOWS = "/v3/users/me/pdm-workflows"
     const val API_WORKFLOW_SYNC = "/sync"
     const val API_WORKFLOW_FILES = "/v3/pdm-workflow-files"
     const val API_WORKFLOW_DEVICE_RUNS = "/v3/pdm-workflow-device-runs"
@@ -43,12 +44,10 @@ object APIConstants {
     const val KEY_USERNAME = "username"
     const val KEY_PASSWORD = "password"
     const val KEY_GRANT_TYPE = "grant_type"
-    const val KEY_ACCESS_TOKEN = "token"
     const val KEY_CAPTCHA_ID = "captcha_id"
     const val KEY_CAPTCHA = "captcha"
     const val KEY_OTP_TOKEN = "otp"
     const val KEY_ACCOUNT = "account"
-    const val KEY_ACCOUNTS = "accounts"
     const val KEY_ACCOUNT_ID = "account_id"
 
 }

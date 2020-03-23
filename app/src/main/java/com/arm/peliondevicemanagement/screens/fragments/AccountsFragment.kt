@@ -59,8 +59,6 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        (activity as HostActivity).showHideToolbar(true)
-        (activity as HostActivity).updateDrawerText(SharedPrefHelper.getUserName())
         setupData()
         init()
         setupListeners()
@@ -76,7 +74,6 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
             adapter = accountAdapter
         }
         resetSearchText()
-        viewBinder.searchBar.searchTextBox.setOnQueryTextListener(queryTextListener)
     }
 
     private fun setupData() {
@@ -90,6 +87,8 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
     }
 
     private fun setupListeners() {
+        viewBinder.searchBar.searchTextBox.setOnQueryTextListener(queryTextListener)
+
         loginViewModel.userAccountLiveData.observe(viewLifecycleOwner, Observer { response ->
             if(response != null){
                 LogHelper.debug(TAG, "onLoginSuccess(): $response")
@@ -97,7 +96,7 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
             } else {
                 showHideProgressbar(false)
                 showHideAccountList(true)
-                (activity as HostActivity).displayToast("Unable to authenticate,\nTry Again.")
+                (activity as HostActivity).showSnackbar(viewBinder.root ,"Failed to authenticate")
             }
         })
 
@@ -106,7 +105,7 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
                 processUserProfileData(response)
                 navigateToDashboardFragment()
             } else {
-                (activity as HostActivity).displayToast("Unable to fetch profile")
+                (activity as HostActivity).showSnackbar(viewBinder.root, "Failed to fetch profile-data")
                 navigateToDashboardFragment()
             }
         })

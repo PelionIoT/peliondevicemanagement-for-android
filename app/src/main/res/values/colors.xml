@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">@color/arm_dark_medium</color>
-    <color name="colorPrimaryDark">@color/arm_dark_medium</color>
+    <color name="colorPrimary">@color/arm_black</color>
+    <color name="colorPrimaryDark">@color/arm_black</color>
     <color name="colorAccent">@color/arm_blue</color>
 
     // Light Colors
@@ -44,7 +44,10 @@
     <color name="arm_light_blue">#00c1de</color>
     <color name="arm_yellow">#ffc700</color>
     <color name="arm_orange">#ff6b00</color>
+    <color name="arm_red">#e03030</color>
     <color name="arm_dark_black">#000000</color>
+    <color name="arm_jet_black">#222a30</color>
+    <color name="arm_quartz_white">#f7f7f7</color>
 
 
 </resources>

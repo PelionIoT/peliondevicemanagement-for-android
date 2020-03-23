@@ -2,8 +2,8 @@
 
     <!-- Light Theme. -->
     <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="colorPrimary">@color/colorPrimaryForLight</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDarkForLight</item>
+        <item name="colorPrimary">@color/arm_black</item>
+        <item name="colorPrimaryDark">@color/arm_black</item>
         <item name="colorAccent">@color/colorAccentForLight</item>
         <item name="android:windowBackground">@color/colorBackgroundForLight</item>
 
@@ -18,10 +18,15 @@
         <item name="android:editTextColor">?attr/primaryTextColor</item>
         <item name="android:textColorHint">?attr/secondaryTextColor</item>
 
+        <item name="primaryButtonColor">@color/colorPrimaryDarkForLight</item>
+
         <item name="iconAccount">@drawable/ic_account_dark</item>
         <item name="iconEmail">@drawable/ic_mail_dark</item>
         <item name="iconLock">@drawable/ic_lock_dark</item>
         <item name="iconSearch">@drawable/ic_search_dark</item>
+        <item name="iconWidget">@drawable/ic_widget_dark</item>
+        <item name="iconLocation">@drawable/ic_location_dark</item>
+        <item name="iconDevice">@drawable/ic_device_dark</item>
     </style>
 
     <!-- Launch Theme -->
@@ -36,7 +41,7 @@
     <!-- Dark Theme. -->
     <style name="AppThemeDark" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">@color/colorPrimaryForDark</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDarkForDark</item>
+        <item name="colorPrimaryDark">@color/arm_black</item>
         <item name="colorAccent">@color/colorAccentForDark</item>
         <item name="android:windowBackground">@color/colorBackgroundForDark</item>
 
@@ -47,6 +52,8 @@
 
         <item name="dividerColor">?attr/colorOnSurface</item>
 
+        <item name="primaryButtonColor">@color/colorPrimaryForDark</item>
+
         <item name="android:textColor">?attr/primaryTextColor</item>
         <item name="android:editTextColor">?attr/primaryTextColor</item>
         <item name="android:textColorHint">?attr/secondaryTextColor</item>
@@ -55,6 +62,15 @@
         <item name="iconEmail">@drawable/ic_mail_light</item>
         <item name="iconLock">@drawable/ic_lock_light</item>
         <item name="iconSearch">@drawable/ic_search_light</item>
+        <item name="iconWidget">@drawable/ic_widget_light</item>
+        <item name="iconLocation">@drawable/ic_location_light</item>
+        <item name="iconDevice">@drawable/ic_device_light</item>
+    </style>
+
+    <style name="AppTheme.Toolbar">
+        <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="android:textColorSecondary">@android:color/white</item>
+        <item name="actionMenuTextColor">@android:color/white</item>
     </style>
 
 </resources>

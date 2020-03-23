@@ -11,6 +11,5 @@ data class AccountModel(
     val alias: String,
     @SerializedName("display_name")
     val accountName: String,
-    val status: String,
-    var isSelected: Boolean = false
+    val status: String
 ): Parcelable

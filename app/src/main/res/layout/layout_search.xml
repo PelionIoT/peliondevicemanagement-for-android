@@ -20,7 +20,7 @@
         android:id="@+id/searchTextBox"
         android:fontFamily="@font/lato_regular"
         android:drawablePadding="20dp"
-        app:defaultQueryHint="Find Account"
+        app:defaultQueryHint="Search"
         app:iconifiedByDefault="false"
         app:queryBackground="@android:color/transparent"
         app:searchIcon="?attr/iconSearch"

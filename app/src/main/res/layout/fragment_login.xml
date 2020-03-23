@@ -116,7 +116,7 @@
             android:fontFamily="@font/lato_regular"
             android:paddingBottom="12dp"
             app:icon="@drawable/ic_forward_light"
-            app:backgroundTint="?attr/colorPrimaryDark"
+            app:backgroundTint="?attr/primaryButtonColor"
             app:srcCompat="@drawable/ic_forward_light"/>
 
     </LinearLayout>

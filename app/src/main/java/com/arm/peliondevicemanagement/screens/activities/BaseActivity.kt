@@ -3,11 +3,12 @@ package com.arm.peliondevicemanagement.screens.activities
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import com.arm.peliondevicemanagement.BuildConfig
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.helpers.LogHelper
-import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
+import com.google.android.material.snackbar.Snackbar
 
 open class BaseActivity : AppCompatActivity() {
 
@@ -23,9 +24,6 @@ open class BaseActivity : AppCompatActivity() {
         LogHelper.debug(tag = TAG, msg = "onCreate")
     }
 
-    internal fun isAccountNotSelected(): Boolean =
-        SharedPrefHelper.getSelectedAccountID().isNullOrBlank()
-
     internal fun getAppVersion(): String = getString(R.string.version_format, getAppVersionCode())
 
     private fun getAppVersionCode(): String {
@@ -38,7 +36,7 @@ open class BaseActivity : AppCompatActivity() {
         }
     }
 
-    internal fun displayToast(message: String){
+    internal fun showToast(message: String){
         // Cancel previous toast
         if(activeToast != null) {
             activeToast!!.cancel()
@@ -47,6 +45,10 @@ open class BaseActivity : AppCompatActivity() {
         // Display new one
         activeToast = Toast.makeText(baseContext, message, Toast.LENGTH_SHORT)
         activeToast!!.show()
+    }
+
+    internal fun showSnackbar(view: View, message: String) {
+        Snackbar.make(view, message, Snackbar.LENGTH_SHORT).show()
     }
 
     internal fun fireIntent(intent: Intent, isForward: Boolean) {
@@ -77,7 +79,7 @@ open class BaseActivity : AppCompatActivity() {
         finish()
     } else {
         initiatedCloseMs = System.currentTimeMillis()
-        displayToast("Press again to exit the app")
+        showToast("Press again to exit the app")
     }
 
     override fun onBackPressed() {

@@ -121,6 +121,7 @@ object SharedPrefHelper {
         editor.remove(SharedPrefConstants.STORE_USER_ACCESS_TOKEN)
         editor.remove(SharedPrefConstants.STORE_ACCOUNTS)
         editor.remove(SharedPrefConstants.STORE_USER_PROFILE)
+        editor.remove(SharedPrefConstants.STORE_SELECTED_ACCOUNT_ID)
         editor.apply()
     }
 }
