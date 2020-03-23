@@ -139,6 +139,7 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
         showHideProgressbar(true)
 
         SharedPrefHelper.storeSelectedAccountID(model.accountID)
+        SharedPrefHelper.storeSelectedAccountName(model.accountName)
         handleLoginORGoImpersonate(model.accountID)
     }
 

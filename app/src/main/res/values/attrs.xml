@@ -14,7 +14,9 @@
 
         <!-- Component Colors -->
         <attr name="dividerColor" format="color"/>
+        <attr name="primaryButtonColor" format="color" />
 
+        <!-- Icons -->
         <attr name="iconAccount" format="reference"/>
         <attr name="iconEmail" format="reference" />
         <attr name="iconLock" format="reference"/>
@@ -22,8 +24,10 @@
         <attr name="iconWidget" format="reference"/>
         <attr name="iconLocation" format="reference"/>
         <attr name="iconDevice" format="reference"/>
-
-        <attr name="primaryButtonColor" format="color" />
+        <attr name="iconClose" format="reference"/>
+        <attr name="iconSwitch" format="reference"/>
+        <attr name="iconSettings" format="reference"/>
+        <attr name="iconExit" format="reference"/>
 
     </declare-styleable>
 </resources>

@@ -27,16 +27,19 @@
     <item
         android:id="@+id/switch_account"
         android:title="@string/switch_account"
-        app:showAsAction="always" />
+        app:showAsAction="always"
+        android:icon="?attr/iconSwitch"/>
 
     <item
         android:id="@+id/settings"
         android:title="@string/settings"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="ifRoom"
+        android:icon="?attr/iconSettings"/>
 
     <item
         android:id="@+id/signout"
         android:title="@string/signout_text"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="ifRoom"
+        android:icon="?attr/iconExit"/>
 
 </menu>

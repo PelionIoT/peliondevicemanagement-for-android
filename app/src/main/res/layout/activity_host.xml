@@ -28,7 +28,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:defaultNavHost="true"
-            app:navGraph="@navigation/nav_graph" />
+            app:navGraph="@navigation/nav_graph"
+            tools:layout="@layout/fragment_login" />
 
     </LinearLayout>
 
@@ -38,7 +39,11 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
+        android:background="?attr/colorBackground"
         app:headerLayout="@layout/layout_drawer_header"
-        app:menu="@menu/menu_drawer" />
+        app:menu="@menu/menu_drawer"
+        app:itemIconTint="?attr/primaryIconColor"
+        app:itemTextColor="?attr/primaryTextColor"
+        />
 
 </androidx.drawerlayout.widget.DrawerLayout>

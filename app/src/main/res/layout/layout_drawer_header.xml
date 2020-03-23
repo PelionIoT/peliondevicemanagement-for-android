@@ -2,24 +2,38 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="100dp"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="bottom">
 
-    <View
+    <TextView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="?attr/colorAccent" />
+        android:layout_height="wrap_content"
+        android:drawableStart="?attr/iconClose"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="12dp"
+        android:paddingTop="15dp"
+        android:id="@+id/tvHomeHeader"
+        android:text="@string/home"
+        android:drawablePadding="15dp"
+        android:fontFamily="@font/lato_bold"
+        android:ellipsize="middle"
+        android:singleLine="true"
+        android:textSize="18sp"
+        />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/signed_in_as"
-        android:textColor="@android:color/white"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="20dp"
         android:layout_marginEnd="16dp"
+        android:layout_marginTop="10dp"
+        android:fontFamily="@font/lato_regular"
+        android:layout_below="@id/tvHomeHeader"
         android:textSize="14sp"
-        android:layout_above="@id/tvUserEmail"
+        android:id="@+id/tvUserEmailHeader"
         android:textAppearance="@style/TextAppearance.AppCompat.Caption"/>
 
     <TextView
@@ -30,11 +44,51 @@
         android:textSize="16sp"
         android:singleLine="true"
         android:id="@+id/tvUserEmail"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="30dp"
-        android:layout_marginStart="16dp"
+        android:fontFamily="@font/lato_regular"
+        android:layout_below="@id/tvUserEmailHeader"
+        android:layout_marginBottom="10dp"
+        android:layout_marginStart="20dp"
         android:layout_marginEnd="16dp"
-        android:textColor="@android:color/white"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvUserEmail"
+        android:id="@+id/accountHeader"
+        android:visibility="gone"
+        android:orientation="vertical"
+        android:background="?attr/colorAccent">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/account"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="13dp"
+            android:textSize="14sp"
+            android:fontFamily="@font/lato_regular"
+            android:textColor="@android:color/white"
+            android:id="@+id/tvUserAccountHeader"
+            android:textAppearance="@style/TextAppearance.AppCompat.Caption"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:ellipsize="end"
+            android:textSize="16sp"
+            android:singleLine="true"
+            android:textColor="@android:color/white"
+            android:id="@+id/tvUserAccountName"
+            android:layout_marginBottom="15dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="16dp"
+            android:fontFamily="@font/lato_regular"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"/>
+
+
+    </LinearLayout>
 
 </RelativeLayout>

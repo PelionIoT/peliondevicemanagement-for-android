@@ -5,7 +5,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.SharedPreferencesCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
@@ -110,7 +109,7 @@ class HostActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         }
     }
 
-    fun showHideToolbar(visibility: Boolean) = if(visibility) {
+    private fun showHideToolbar(visibility: Boolean) = if(visibility) {
         viewBinder.toolbar.visibility = View.VISIBLE
     } else {
         viewBinder.toolbar.visibility = View.GONE
@@ -136,8 +135,16 @@ class HostActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         }
     }
 
-    fun updateDrawerText(text: String) {
+    private fun updateDrawerText(text: String) {
         viewBinder.drawerLayout.tvUserEmail.text = text
+        if(!SharedPrefHelper.getSelectedAccountID().isNullOrBlank() &&
+                !SharedPrefHelper.getSelectedAccountName().isNullOrBlank()){
+            viewBinder.drawerLayout.tvUserAccountName.text =
+                SharedPrefHelper.getSelectedAccountName()
+            viewBinder.drawerLayout.accountHeader.visibility = View.VISIBLE
+        } else {
+            viewBinder.drawerLayout.accountHeader.visibility = View.GONE
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {

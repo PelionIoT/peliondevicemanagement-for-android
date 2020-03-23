@@ -9,6 +9,8 @@
     <string name="signin_text">Sign In</string>
     <string name="signout_text">Sign Out</string>
     <string name="signed_in_as">Signed In As</string>
+    <string name="home">Home</string>
+    <string name="account">Account</string>
 
     <string name="switch_account">Switch Account</string>
     <string name="profile">Profile</string>
