@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/cardAccountItem"
+    android:clickable="true"
+    android:focusable="true"
+    app:cardBackgroundColor="?attr/cardColor"
+    app:checkedIconTint="?attr/colorAccent"
+    app:rippleColor="?attr/colorAccent"
+    app:cardElevation="0dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableStart="?attr/iconPC"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:paddingBottom="10dp"
+            android:paddingTop="18dp"
+            android:textStyle="bold"
+            android:id="@+id/tvIPAddress"
+            android:text="@string/ip_format"
+            android:drawablePadding="25dp"
+            android:fontFamily="@font/lato_regular"
+            android:ellipsize="middle"
+            android:singleLine="true"
+            android:textSize="18sp"
+        />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:paddingBottom="5dp"
+            android:id="@+id/tvDate"
+            android:text="@string/date_format"
+            android:textColor="?attr/secondaryTextColor"
+            android:layout_marginStart="50dp"
+            android:drawablePadding="20dp"
+            android:fontFamily="@font/lato_regular"
+            android:ellipsize="middle"
+            android:singleLine="true"
+            android:textSize="18sp"
+            />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp"
+            android:text="@string/status_format"
+            android:layout_marginStart="50dp"
+            android:id="@+id/tvStatus"
+            android:textColor="?attr/secondaryTextColor"
+            android:drawablePadding="20dp"
+            android:fontFamily="@font/lato_regular"
+            android:ellipsize="middle"
+            android:singleLine="true"
+            android:textSize="18sp"
+            />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:paddingBottom="18dp"
+            android:paddingTop="5dp"
+            android:layout_marginStart="50dp"
+            android:id="@+id/tvUserAgent"
+            android:drawablePadding="20dp"
+            android:fontFamily="@font/lato_regular"
+            android:ellipsize="middle"
+            android:text="@string/user_agent_format"
+            android:textColor="?attr/secondaryTextColor"
+            android:singleLine="true"
+            android:textSize="18sp"
+            />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?attr/dividerColor"
+            android:alpha="0.12"
+        />
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

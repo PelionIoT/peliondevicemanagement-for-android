@@ -15,6 +15,7 @@
         <!-- Component Colors -->
         <attr name="dividerColor" format="color"/>
         <attr name="primaryButtonColor" format="color" />
+        <attr name="cardColor" format="color"/>
 
         <!-- Icons -->
         <attr name="iconAccount" format="reference"/>
@@ -28,6 +29,10 @@
         <attr name="iconSwitch" format="reference"/>
         <attr name="iconSettings" format="reference"/>
         <attr name="iconExit" format="reference"/>
+        <attr name="iconUserActivity" format="reference"/>
+        <attr name="iconHelp" format="reference" />
+        <attr name="iconPC" format="reference"/>
+        <attr name="iconForward" format="reference"/>
 
     </declare-styleable>
 </resources>

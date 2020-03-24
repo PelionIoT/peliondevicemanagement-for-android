@@ -1,5 +1,6 @@
 package com.arm.peliondevicemanagement.services
 
+import com.arm.peliondevicemanagement.components.models.LicenseModel
 import com.arm.peliondevicemanagement.components.models.ProfileModel
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_ACCOUNT
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_ACCOUNT_ID
@@ -66,6 +67,13 @@ class CloudRepository(private val cloudAPIService: CloudAPIService): BaseReposit
         return doSafeAPIRequest(
             call = { cloudAPIService.getAllWorkflows()},
             errorMessage = "Unable to fetch workflows"
+        )
+    }
+
+    suspend fun getLicenses(): List<LicenseModel>? {
+        return doSafeAPIRequest(
+            call = { cloudAPIService.getLicenses()},
+            errorMessage = "Unable to fetch licenses"
         )
     }
 

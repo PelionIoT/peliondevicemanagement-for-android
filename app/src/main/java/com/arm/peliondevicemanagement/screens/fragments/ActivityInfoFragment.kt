@@ -1,0 +1,79 @@
+package com.arm.peliondevicemanagement.screens.fragments
+
+import android.os.Bundle
+import androidx.fragment.app.Fragment
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+
+import com.arm.peliondevicemanagement.R
+import com.arm.peliondevicemanagement.components.adapters.LoginHistoryAdapter
+import com.arm.peliondevicemanagement.components.models.LoginHistoryModel
+import com.arm.peliondevicemanagement.components.models.ProfileModel
+import com.arm.peliondevicemanagement.databinding.FragmentActivityInfoBinding
+import com.arm.peliondevicemanagement.helpers.LogHelper
+import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+
+/**
+ * A simple [Fragment] subclass.
+ */
+class ActivityInfoFragment : Fragment() {
+
+    companion object {
+        private val TAG: String = ActivityInfoFragment::class.java.simpleName
+    }
+
+    private var _viewBinder: FragmentActivityInfoBinding? = null
+    private val viewBinder get() = _viewBinder!!
+
+    private var loginHistoryAdapter: LoginHistoryAdapter? = null
+    private var loginHistoryModelsList = arrayListOf<LoginHistoryModel>()
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        _viewBinder = FragmentActivityInfoBinding.inflate(inflater, container, false)
+        return viewBinder.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setupData()
+        init()
+    }
+
+    private fun setupData() {
+        if(!SharedPrefHelper.getStoredProfile().isNullOrBlank()) {
+            val profileJson = SharedPrefHelper.getStoredProfile()
+            val type = object: TypeToken<ProfileModel>() {}.type
+            val profile = Gson().fromJson<ProfileModel>(profileJson, type)
+            LogHelper.debug(TAG, "onStoredProfile(): $profile")
+            loginHistoryModelsList = ArrayList(profile.loginHistory)
+        } else {
+            viewBinder.notFoundView.errorText.text = activity!!.getString(R.string.no_login_history)
+            viewBinder.notFoundView.root.visibility = View.VISIBLE
+        }
+    }
+
+    private fun init() {
+        loginHistoryAdapter = LoginHistoryAdapter(loginHistoryModelsList)
+        viewBinder.rvLoginHistory.apply {
+            layoutManager = LinearLayoutManager(context,
+                RecyclerView.VERTICAL, false)
+            itemAnimator = DefaultItemAnimator()
+            adapter = loginHistoryAdapter
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _viewBinder = null
+    }
+
+}

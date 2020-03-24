@@ -7,7 +7,7 @@
     app:contentPadding="5dp"
     app:strokeWidth="1dp"
     app:cardElevation="0dp"
-    app:cardBackgroundColor="?attr/colorBackground"
+    app:cardBackgroundColor="?attr/cardColor"
     app:strokeColor="@drawable/stroke_color">
 
     <androidx.appcompat.widget.SearchView

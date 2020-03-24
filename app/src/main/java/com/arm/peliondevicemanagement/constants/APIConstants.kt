@@ -23,6 +23,10 @@ object APIConstants {
     const val API_USER_ME = "/v3/users/me"
     const val API_ACCOUNTS_ME = "/v3/accounts/me?include=policies"
 
+    // WigWag-Cloud-UI-Server APIs
+    const val API_CLOUD_UI_SERVER = "/wigwag/cloud-ui-server/v2"
+    const val API_LICENSES = "/licenses?type=android"
+
     // Workflow Service Endpoints
     const val API_ALL_WORKFLOWS = "/v3/pdm-workflows"
     const val API_ASSIGNED_WORKFLOWS = "/v3/users/me/pdm-workflows"

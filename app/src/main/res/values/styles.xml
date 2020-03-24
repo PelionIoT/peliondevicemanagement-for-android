@@ -22,7 +22,9 @@
 
         <item name="primaryButtonColor">@color/colorPrimaryDarkForLight</item>
 
-        <item name="iconAccount">@drawable/ic_account_dark</item>
+        <item name="cardColor">@color/colorBackgroundForLight</item>
+
+        <item name="iconAccount">@drawable/ic_accountbox_dark</item>
         <item name="iconEmail">@drawable/ic_mail_dark</item>
         <item name="iconLock">@drawable/ic_lock_dark</item>
         <item name="iconSearch">@drawable/ic_search_dark</item>
@@ -33,6 +35,10 @@
         <item name="iconSwitch">@drawable/ic_switch_dark</item>
         <item name="iconSettings">@drawable/ic_settings_dark</item>
         <item name="iconExit">@drawable/ic_exit_dark</item>
+        <item name="iconUserActivity">@drawable/ic_stats_dark</item>
+        <item name="iconHelp">@drawable/ic_help_dark</item>
+        <item name="iconPC">@drawable/ic_pc_dark</item>
+        <item name="iconForward">@drawable/ic_forward_dark</item>
     </style>
 
     <!-- Launch Theme -->
@@ -58,15 +64,17 @@
         <item name="primaryTextColor">@color/colorPrimaryForLight</item>
         <item name="secondaryTextColor">@color/colorPrimaryDarkForLight</item>
 
-        <item name="dividerColor">?attr/colorOnSurface</item>
+        <item name="dividerColor">@android:color/white</item>
 
         <item name="primaryButtonColor">@color/colorPrimaryForDark</item>
+
+        <item name="cardColor">@color/arm_black</item>
 
         <item name="android:textColor">?attr/primaryTextColor</item>
         <item name="android:editTextColor">?attr/primaryTextColor</item>
         <item name="android:textColorHint">?attr/secondaryTextColor</item>
 
-        <item name="iconAccount">@drawable/ic_account_light</item>
+        <item name="iconAccount">@drawable/ic_accountbox_light</item>
         <item name="iconEmail">@drawable/ic_mail_light</item>
         <item name="iconLock">@drawable/ic_lock_light</item>
         <item name="iconSearch">@drawable/ic_search_light</item>
@@ -77,6 +85,10 @@
         <item name="iconSwitch">@drawable/ic_switch_light</item>
         <item name="iconSettings">@drawable/ic_settings_light</item>
         <item name="iconExit">@drawable/ic_exit_light</item>
+        <item name="iconUserActivity">@drawable/ic_stats_light</item>
+        <item name="iconHelp">@drawable/ic_help_light</item>
+        <item name="iconPC">@drawable/ic_pc_light</item>
+        <item name="iconForward">@drawable/ic_forward_light</item>
     </style>
 
     <style name="AppTheme.Toolbar">

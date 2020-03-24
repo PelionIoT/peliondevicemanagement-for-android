@@ -7,7 +7,7 @@
     android:id="@+id/cardWorkflowItem"
     android:clickable="true"
     android:focusable="true"
-    app:cardBackgroundColor="?attr/colorBackground"
+    app:cardBackgroundColor="?attr/cardColor"
     app:checkedIconTint="?attr/colorAccent"
     app:rippleColor="?attr/colorAccent"
     app:cardElevation="0dp">

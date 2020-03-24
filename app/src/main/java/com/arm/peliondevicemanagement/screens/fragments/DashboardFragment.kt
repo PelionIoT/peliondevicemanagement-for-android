@@ -145,7 +145,7 @@ class DashboardFragment : Fragment(), RecyclerItemClickListener {
         showHideSearchBar(false)
         showHide404View(false)
         setSwipeRefreshStatus(true)
-        workflowViewModel.getAssignedWorkflows()
+        workflowViewModel.getAllWorkflows()
     }
 
     private fun setSwipeRefreshStatus(isRefreshing: Boolean) {
@@ -183,5 +183,6 @@ class DashboardFragment : Fragment(), RecyclerItemClickListener {
     override fun onDestroyView() {
         super.onDestroyView()
         _viewBinder = null
+        workflowViewModel.cancelAllRequests()
     }
 }

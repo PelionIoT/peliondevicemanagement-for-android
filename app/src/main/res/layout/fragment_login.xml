@@ -61,6 +61,8 @@
                 android:id="@+id/emailInputTxt"
                 android:layout_gravity="center"
                 android:singleLine="true"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
                 android:textColor="?attr/primaryTextColor"
                 android:textColorHint="?attr/secondaryTextColor"
                 android:background="@android:color/transparent"/>
@@ -93,6 +95,8 @@
                 android:id="@+id/passwordInputTxt"
                 android:singleLine="true"
                 android:layout_gravity="center"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
                 android:textColor="?attr/primaryTextColor"
                 android:textColorHint="?attr/secondaryTextColor"
                 android:background="@android:color/transparent"/>

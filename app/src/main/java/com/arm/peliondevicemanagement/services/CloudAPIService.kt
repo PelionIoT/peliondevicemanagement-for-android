@@ -1,5 +1,6 @@
 package com.arm.peliondevicemanagement.services
 
+import com.arm.peliondevicemanagement.components.models.LicenseModel
 import com.arm.peliondevicemanagement.components.models.ProfileModel
 import com.arm.peliondevicemanagement.constants.APIConstants.API_ACCOUNTS_ME
 import com.arm.peliondevicemanagement.constants.APIConstants.API_ALL_WORKFLOWS
@@ -8,6 +9,8 @@ import com.arm.peliondevicemanagement.constants.APIConstants.API_LOGIN
 import com.arm.peliondevicemanagement.constants.APIConstants.API_IMPERSONATE
 import com.arm.peliondevicemanagement.constants.APIConstants.API_USER_ME
 import com.arm.peliondevicemanagement.constants.APIConstants.API_ASSIGNED_WORKFLOWS
+import com.arm.peliondevicemanagement.constants.APIConstants.API_CLOUD_UI_SERVER
+import com.arm.peliondevicemanagement.constants.APIConstants.API_LICENSES
 import com.arm.peliondevicemanagement.constants.APIConstants.CONTENT_TYPE_JSON
 import com.arm.peliondevicemanagement.constants.APIConstants.DEFAULT_BASE_URL
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_AUTHORIZATION
@@ -80,5 +83,8 @@ interface CloudAPIService {
 
     @GET(API_ALL_WORKFLOWS)
     suspend fun getAllWorkflows(): Response<WorkflowsResponse>
+
+    @GET(API_CLOUD_UI_SERVER + API_LICENSES)
+    suspend fun getLicenses(): Response<List<LicenseModel>>
 
 }

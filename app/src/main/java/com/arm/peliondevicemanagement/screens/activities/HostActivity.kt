@@ -35,12 +35,21 @@ class HostActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewBinder = ActivityHostBinding.inflate(layoutInflater)
+        initTheme()
         setContentView(viewBinder.root)
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
         init()
+    }
+
+    private fun initTheme() {
+        if(SharedPrefHelper.isDarkThemeEnabled()){
+            setAppTheme(true)
+        } else {
+            setAppTheme(false)
+        }
     }
 
     private fun init() {
@@ -87,8 +96,34 @@ class HostActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                     updateToolbarTitle("Settings")
                     enableDisableDrawer(false)
                 }
+                R.id.activityInfoFragment -> {
+                    showHideToolbar(true)
+                    updateToolbarTitle("Login History")
+                    enableDisableDrawer(false)
+                }
+                R.id.helpAndSupportFragment -> {
+                    showHideToolbar(true)
+                    updateToolbarTitle("Help & Support")
+                    enableDisableDrawer(false)
+                }
+                R.id.webViewFragment -> {
+                    showHideToolbar(true)
+                    updateToolbarTitle("In-App Browsing")
+                    enableDisableDrawer(false)
+                }
+                R.id.licensesFragment -> {
+                    showHideToolbar(true)
+                    updateToolbarTitle("Libraries we use")
+                    enableDisableDrawer(false)
+                }
             }
         }
+    }
+
+    fun setAppTheme(dark: Boolean) = if(dark){
+        setTheme(R.style.AppThemeDark_Launcher)
+    } else {
+        setTheme(R.style.AppTheme_Launcher)
     }
 
     private fun setupToolbar() {

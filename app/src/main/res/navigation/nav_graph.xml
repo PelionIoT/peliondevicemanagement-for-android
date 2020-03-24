@@ -65,7 +65,22 @@
         android:id="@+id/settingsFragment"
         android:name="com.arm.peliondevicemanagement.screens.fragments.SettingsFragment"
         android:label="fragment_settings"
-        tools:layout="@layout/fragment_settings" />
+        tools:layout="@layout/fragment_settings" >
+        <action
+            android:id="@+id/action_settingsFragment_to_activityInfoFragment"
+            app:destination="@id/activityInfoFragment"
+            app:enterAnim="@anim/right_in"
+            app:exitAnim="@anim/right_out"
+            app:popEnterAnim="@anim/left_in"
+            app:popExitAnim="@anim/left_out"/>
+        <action
+            android:id="@+id/action_settingsFragment_to_helpAndSupportFragment"
+            app:destination="@id/helpAndSupportFragment"
+            app:enterAnim="@anim/right_in"
+            app:exitAnim="@anim/right_out"
+            app:popEnterAnim="@anim/left_in"
+            app:popExitAnim="@anim/left_out"/>
+    </fragment>
 
     <fragment
         android:id="@+id/dashboardFragment"
@@ -98,5 +113,48 @@
             app:popUpTo="@id/dashboardFragment"
             app:popUpToInclusive="true"/>
     </fragment>
+    <fragment
+        android:id="@+id/activityInfoFragment"
+        android:name="com.arm.peliondevicemanagement.screens.fragments.ActivityInfoFragment"
+        android:label="fragment_activity_info"
+        tools:layout="@layout/fragment_activity_info" />
+    <fragment
+        android:id="@+id/helpAndSupportFragment"
+        android:name="com.arm.peliondevicemanagement.screens.fragments.HelpAndSupportFragment"
+        android:label="fragment_help_and_support"
+        tools:layout="@layout/fragment_help_and_support" >
+        <action
+            android:id="@+id/action_helpAndSupportFragment_to_webViewFragment"
+            app:destination="@id/webViewFragment"
+            app:enterAnim="@anim/right_in"
+            app:exitAnim="@anim/right_out"
+            app:popEnterAnim="@anim/left_in"
+            app:popExitAnim="@anim/left_out"
+            />
+        <action
+            android:id="@+id/action_helpAndSupportFragment_to_licensesFragment"
+            app:destination="@id/licensesFragment"
+            app:enterAnim="@anim/right_in"
+            app:exitAnim="@anim/right_out"
+            app:popEnterAnim="@anim/left_in"
+            app:popExitAnim="@anim/left_out"/>
+    </fragment>
+    <fragment
+        android:id="@+id/webViewFragment"
+        android:name="com.arm.peliondevicemanagement.screens.fragments.WebViewFragment"
+        android:label="fragment_web_view"
+        tools:layout="@layout/fragment_web_view">
+
+        <argument
+            android:name="webURL"
+            app:argType="string"
+            android:defaultValue="nothing" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/licensesFragment"
+        android:name="com.arm.peliondevicemanagement.screens.fragments.LicensesFragment"
+        android:label="fragment_licenses"
+        tools:layout="@layout/fragment_licenses" />
 
 </navigation>

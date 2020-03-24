@@ -8,13 +8,13 @@
     <color name="colorPrimaryForLight">@color/arm_light_medium</color>
     <color name="colorPrimaryDarkForLight">@color/arm_light_low</color>
     <color name="colorAccentForLight">@color/arm_blue</color>
-    <color name="colorBackgroundForLight">@color/arm_light_high</color>
+    <color name="colorBackgroundForLight">@color/arm_quartz_white</color>
 
     // Dark Colors
     <color name="colorPrimaryForDark">@color/arm_dark_medium</color>
     <color name="colorPrimaryDarkForDark">@color/arm_dark_high</color>
     <color name="colorAccentForDark">@color/arm_yellow</color>
-    <color name="colorBackgroundForDark">@color/arm_dark_high</color>
+    <color name="colorBackgroundForDark">@color/arm_jet_black</color>
 
     // ARM's Color Derived Palette
 
