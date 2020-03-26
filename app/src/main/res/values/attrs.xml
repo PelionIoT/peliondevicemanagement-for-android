@@ -16,6 +16,7 @@
         <attr name="dividerColor" format="color"/>
         <attr name="primaryButtonColor" format="color" />
         <attr name="cardColor" format="color"/>
+        <attr name="chipColor" format="color"/>
 
         <!-- Icons -->
         <attr name="iconAccount" format="reference"/>
@@ -33,6 +34,9 @@
         <attr name="iconHelp" format="reference" />
         <attr name="iconPC" format="reference"/>
         <attr name="iconForward" format="reference"/>
+        <attr name="iconPlay" format="reference"/>
+        <attr name="iconArrowUp" format="reference"/>
+        <attr name="iconArrowDown" format="reference"/>
 
     </declare-styleable>
 </resources>

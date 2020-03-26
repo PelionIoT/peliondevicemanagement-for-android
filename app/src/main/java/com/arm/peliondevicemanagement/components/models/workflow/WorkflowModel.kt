@@ -17,7 +17,8 @@ data class WorkflowModel(
     @SerializedName("location")
     val workflowLocation: String,
     @SerializedName("aud")
-    val workflowDevices: Array<String>,
+    val workflowAUDs: Array<String>,
+    var workflowDevices: ArrayList<WorkflowDeviceModel>,
     @SerializedName("tasks")
     val workflowTasks: List<WorkflowTaskModel>,
     @SerializedName("created_at")
@@ -36,7 +37,7 @@ data class WorkflowModel(
         if (workflowDescription != other.workflowDescription) return false
         if (workflowStatus != other.workflowStatus) return false
         if (workflowLocation != other.workflowLocation) return false
-        if (!workflowDevices.contentEquals(other.workflowDevices)) return false
+        if (!workflowAUDs.contentEquals(other.workflowAUDs)) return false
         if (workflowTasks != other.workflowTasks) return false
         if (workflowCreatedAt != other.workflowCreatedAt) return false
         if (workflowExecutedAt != other.workflowExecutedAt) return false
@@ -50,7 +51,7 @@ data class WorkflowModel(
         result = 31 * result + workflowDescription.hashCode()
         result = 31 * result + workflowStatus.hashCode()
         result = 31 * result + workflowLocation.hashCode()
-        result = 31 * result + workflowDevices.contentHashCode()
+        result = 31 * result + workflowAUDs.contentHashCode()
         result = 31 * result + workflowTasks.hashCode()
         result = 31 * result + workflowCreatedAt.hashCode()
         result = 31 * result + workflowExecutedAt.hashCode()

@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="10dp"
+    android:background="?attr/colorBackground"
+    tools:context=".screens.fragments.JobFragment">
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/cardJobRunItem"
+        app:cardBackgroundColor="?attr/cardColor"
+        app:strokeColor="@drawable/stroke_color"
+        app:strokeWidth="1dp"
+        app:cardElevation="0dp">
+
+        <RelativeLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:id="@+id/iconView"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="14dp"
+                android:src="?attr/iconWidget"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="20dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="0dp"
+                android:paddingTop="10dp"
+                android:id="@+id/tvName"
+                tools:text="Name"
+                android:layout_toEndOf="@id/iconView"
+                android:fontFamily="@font/lato_regular"
+                android:ellipsize="middle"
+                android:singleLine="true"
+                android:textSize="18sp"
+                />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="20dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="1dp"
+                android:paddingTop="1dp"
+                android:id="@+id/tvDescription"
+                android:layout_below="@id/tvName"
+                tools:text="Description"
+                android:layout_toEndOf="@+id/iconView"
+                android:fontFamily="@font/lato_regular"
+                android:ellipsize="middle"
+                android:singleLine="true"
+                android:textSize="14sp"
+                />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?attr/dividerColor"
+                android:alpha="0.12"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="5dp"
+                android:id="@+id/divider"
+                android:layout_below="@+id/tvDescription"
+                />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="25dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="5dp"
+                android:paddingTop="5dp"
+                android:id="@+id/tvStatus"
+                android:text="@string/status_format"
+                android:layout_below="@id/divider"
+                android:fontFamily="@font/lato_regular"
+                android:ellipsize="middle"
+                android:singleLine="true"
+                android:textSize="14sp"
+                />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="25dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="5dp"
+                android:paddingTop="5dp"
+                android:id="@+id/tvLocation"
+                android:text="@string/location_format"
+                android:layout_below="@id/tvStatus"
+                android:fontFamily="@font/lato_regular"
+                android:ellipsize="middle"
+                android:singleLine="true"
+                android:textSize="14sp"
+                />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="25dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="15dp"
+                android:paddingTop="5dp"
+                android:id="@+id/tvCreatedAt"
+                android:text="@string/created_at_format"
+                android:layout_below="@id/tvLocation"
+                android:fontFamily="@font/lato_regular"
+                android:ellipsize="middle"
+                android:singleLine="true"
+                android:textSize="14sp"
+                />
+
+        </RelativeLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/cardJobDevicesItem"
+        android:layout_below="@id/cardJobRunItem"
+        android:animateLayoutChanges="true"
+        android:layout_marginTop="10dp"
+        app:cardBackgroundColor="?attr/cardColor"
+        app:strokeColor="@drawable/stroke_color"
+        app:strokeWidth="1dp"
+        app:cardElevation="0dp">
+
+        <RelativeLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:id="@+id/deviceIconView"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="14dp"
+                android:src="?attr/iconDevice"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="20dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="10dp"
+                android:id="@+id/tvDeviceHeader"
+                android:text="@string/devices"
+                android:layout_toEndOf="@id/deviceIconView"
+                android:fontFamily="@font/lato_regular"
+                android:ellipsize="middle"
+                android:singleLine="true"
+                android:textSize="18sp"
+                android:drawableEnd="?attr/iconArrowDown"
+                />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="20dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="5dp"
+                android:layout_marginBottom="10dp"
+                android:id="@+id/tvDeviceSubHeader"
+                android:layout_below="@+id/tvDeviceHeader"
+                android:text="@string/devices_completed_format"
+                android:layout_toEndOf="@id/deviceIconView"
+                android:fontFamily="@font/lato_regular"
+                android:ellipsize="middle"
+                android:singleLine="true"
+                android:textSize="14sp"
+                />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/rvDevices"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_below="@id/tvDeviceSubHeader"
+                android:paddingBottom="10dp"
+                android:clipToPadding="false"
+                android:visibility="gone"
+                />
+
+        </RelativeLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/fab_description"
+        android:text="@string/run_job"
+        app:icon="?attr/iconPlay"
+        app:backgroundTint="?attr/colorAccent"
+        app:iconTint="@android:color/white"
+        app:layout_anchorGravity="bottom"
+        app:elevation="10dp"
+        android:textAllCaps="false"
+        android:id="@+id/runJobButton"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="25dp"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"/>
+
+</RelativeLayout>

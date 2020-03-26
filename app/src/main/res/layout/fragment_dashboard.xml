@@ -24,7 +24,7 @@
             android:layout_marginBottom="10dp"
             />
 
-        <com.google.android.material.card.MaterialCardView
+        <!--<com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/searchBar"
@@ -38,10 +38,20 @@
                 android:id="@+id/rvWorkflows"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingBottom="10dp"
                 android:clipToPadding="false"
                 />
 
-        </com.google.android.material.card.MaterialCardView>
+        </com.google.android.material.card.MaterialCardView>-->
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvWorkflows"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="10dp"
+            android:clipToPadding="false"
+            android:layout_below="@id/searchBar"
+            />
 
         <include
             layout="@layout/layout_not_found"

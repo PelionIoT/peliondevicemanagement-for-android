@@ -112,12 +112,21 @@
             app:popExitAnim="@anim/right_out"
             app:popUpTo="@id/dashboardFragment"
             app:popUpToInclusive="true"/>
+        <action
+            android:id="@+id/action_dashboardFragment_to_jobFragment"
+            app:destination="@id/jobFragment"
+            app:enterAnim="@anim/right_in"
+            app:exitAnim="@anim/right_out"
+            app:popEnterAnim="@anim/left_in"
+            app:popExitAnim="@anim/left_out"/>
     </fragment>
+
     <fragment
         android:id="@+id/activityInfoFragment"
         android:name="com.arm.peliondevicemanagement.screens.fragments.ActivityInfoFragment"
         android:label="fragment_activity_info"
         tools:layout="@layout/fragment_activity_info" />
+
     <fragment
         android:id="@+id/helpAndSupportFragment"
         android:name="com.arm.peliondevicemanagement.screens.fragments.HelpAndSupportFragment"
@@ -139,6 +148,7 @@
             app:popEnterAnim="@anim/left_in"
             app:popExitAnim="@anim/left_out"/>
     </fragment>
+
     <fragment
         android:id="@+id/webViewFragment"
         android:name="com.arm.peliondevicemanagement.screens.fragments.WebViewFragment"
@@ -151,10 +161,40 @@
             android:defaultValue="nothing" />
 
     </fragment>
+
     <fragment
         android:id="@+id/licensesFragment"
         android:name="com.arm.peliondevicemanagement.screens.fragments.LicensesFragment"
         android:label="fragment_licenses"
         tools:layout="@layout/fragment_licenses" />
+
+    <fragment
+        android:id="@+id/jobFragment"
+        android:name="com.arm.peliondevicemanagement.screens.fragments.JobFragment"
+        android:label="fragment_job"
+        tools:layout="@layout/fragment_job">
+
+        <argument
+            android:name="workflow_object"
+            app:argType="com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel" />
+        <action
+            android:id="@+id/action_jobFragment_to_jobRunFragment"
+            app:destination="@id/jobRunFragment"
+            app:enterAnim="@anim/right_in"
+            app:exitAnim="@anim/right_out"
+            app:popEnterAnim="@anim/left_in"
+            app:popExitAnim="@anim/left_out"
+            />
+
+    </fragment>
+    <fragment
+        android:id="@+id/jobRunFragment"
+        android:name="com.arm.peliondevicemanagement.screens.fragments.JobRunFragment"
+        android:label="fragment_job_run"
+        tools:layout="@layout/fragment_job_run">
+        <argument
+            android:name="jobRunObject"
+            app:argType="com.arm.peliondevicemanagement.components.models.workflow.WorkflowDeviceRunModel" />
+    </fragment>
 
 </navigation>

@@ -1,7 +1,6 @@
 package com.arm.peliondevicemanagement.screens.fragments
 
 import android.os.Bundle
-import android.os.Message
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -9,16 +8,19 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.Navigation
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
 import com.arm.peliondevicemanagement.components.adapters.WorkflowAdapter
+import com.arm.peliondevicemanagement.components.models.workflow.WorkflowDeviceModel
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
 import com.arm.peliondevicemanagement.components.viewmodels.WorkflowViewModel
+import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_COMPLETED
+import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_PENDING
 import com.arm.peliondevicemanagement.databinding.FragmentDashboardBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
-import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.listeners.RecyclerItemClickListener
 import com.arm.peliondevicemanagement.screens.activities.HostActivity
 
@@ -93,8 +95,8 @@ class DashboardFragment : Fragment(), RecyclerItemClickListener {
                     workflowAdapter!!.notifyDataSetChanged()
                     showHideSearchBar(true)
                 } else {
-                    showSnackbar("No jobs assigned")
-                    showHide404View(true, "No jobs assigned")
+                    showSnackbar("No jobs assigned yet")
+                    showHide404View(true, "No jobs assigned yet")
                 }
             } else {
                 setSwipeRefreshStatus(false)
@@ -124,10 +126,6 @@ class DashboardFragment : Fragment(), RecyclerItemClickListener {
                 showHide404View(true)
             }
         })
-    }
-
-    private fun setupData() {
-
     }
 
     private fun showSnackbar(message: String){
@@ -178,6 +176,13 @@ class DashboardFragment : Fragment(), RecyclerItemClickListener {
         LogHelper.debug(TAG, "onItemClick()-> " +
                 "workflowName: ${model.workflowName}, " +
                 "workflowID: ${model.workflowID}")
+        navigateToJobFragment(model)
+    }
+
+    private fun navigateToJobFragment(workflowModel: WorkflowModel) {
+        Navigation.findNavController(viewBinder.root)
+            .navigate(DashboardFragmentDirections
+                .actionDashboardFragmentToJobFragment(workflowModel))
     }
 
     override fun onDestroyView() {

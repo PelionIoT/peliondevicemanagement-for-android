@@ -91,6 +91,16 @@ class HostActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                     enableDisableDrawer(true)
                     showHideDrawerItems(true)
                 }
+                R.id.jobFragment -> {
+                    showHideToolbar(true)
+                    updateToolbarTitle("Job")
+                    enableDisableDrawer(false)
+                }
+                R.id.jobRunFragment -> {
+                    showHideToolbar(true)
+                    updateToolbarTitle("Job Run")
+                    enableDisableDrawer(false)
+                }
                 R.id.settingsFragment -> {
                     showHideToolbar(true)
                     updateToolbarTitle("Settings")

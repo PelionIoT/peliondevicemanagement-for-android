@@ -4,9 +4,7 @@ import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.listeners.RecyclerItemClickListener
-import com.arm.peliondevicemanagement.components.models.AccountModel
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
-import kotlinx.android.synthetic.main.layout_item_account.view.*
 import kotlinx.android.synthetic.main.layout_item_account.view.tvName
 import kotlinx.android.synthetic.main.layout_item_workflow.view.*
 
@@ -25,10 +23,10 @@ class WorkflowViewHolder(itemView: View,
         this.workflowModel = model
         itemView.apply {
             tvName.text = model.workflowName
-            if(model.workflowDevices.size == 1){
-                chipDeviceCount.text = model.workflowDevices.size.toString() + " Device"
+            if(model.workflowAUDs.size == 1){
+                chipDeviceCount.text = model.workflowAUDs.size.toString() + " Device"
             } else {
-                chipDeviceCount.text = model.workflowDevices.size.toString() + " Devices"
+                chipDeviceCount.text = model.workflowAUDs.size.toString() + " Devices"
             }
             chipLocation.text = model.workflowLocation
             if(model.workflowStatus == "PENDING"){

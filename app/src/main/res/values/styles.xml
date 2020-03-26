@@ -21,14 +21,14 @@
         <item name="android:textColorHint">?attr/secondaryTextColor</item>
 
         <item name="primaryButtonColor">@color/colorPrimaryDarkForLight</item>
-
         <item name="cardColor">@color/colorBackgroundForLight</item>
+        <item name="chipColor">@color/arm_light_gray</item>
 
-        <item name="iconAccount">@drawable/ic_accountbox_dark</item>
+        <item name="iconAccount">@drawable/ic_account_dark</item>
         <item name="iconEmail">@drawable/ic_mail_dark</item>
         <item name="iconLock">@drawable/ic_lock_dark</item>
         <item name="iconSearch">@drawable/ic_search_dark</item>
-        <item name="iconWidget">@drawable/ic_widget_dark</item>
+        <item name="iconWidget">@drawable/ic_job_dark</item>
         <item name="iconLocation">@drawable/ic_location_dark</item>
         <item name="iconDevice">@drawable/ic_device_dark</item>
         <item name="iconClose">@drawable/ic_close_dark</item>
@@ -39,6 +39,9 @@
         <item name="iconHelp">@drawable/ic_help_dark</item>
         <item name="iconPC">@drawable/ic_pc_dark</item>
         <item name="iconForward">@drawable/ic_forward_dark</item>
+        <item name="iconPlay">@drawable/ic_play_dark</item>
+        <item name="iconArrowUp">@drawable/ic_arrow_up_dark</item>
+        <item name="iconArrowDown">@drawable/ic_arrow_down_dark</item>
     </style>
 
     <!-- Launch Theme -->
@@ -65,20 +68,19 @@
         <item name="secondaryTextColor">@color/colorPrimaryDarkForLight</item>
 
         <item name="dividerColor">@android:color/white</item>
-
         <item name="primaryButtonColor">@color/colorPrimaryForDark</item>
-
         <item name="cardColor">@color/arm_black</item>
+        <item name="chipColor">@color/arm_gray_alt</item>
 
         <item name="android:textColor">?attr/primaryTextColor</item>
         <item name="android:editTextColor">?attr/primaryTextColor</item>
         <item name="android:textColorHint">?attr/secondaryTextColor</item>
 
-        <item name="iconAccount">@drawable/ic_accountbox_light</item>
+        <item name="iconAccount">@drawable/ic_account_light</item>
         <item name="iconEmail">@drawable/ic_mail_light</item>
         <item name="iconLock">@drawable/ic_lock_light</item>
         <item name="iconSearch">@drawable/ic_search_light</item>
-        <item name="iconWidget">@drawable/ic_widget_light</item>
+        <item name="iconWidget">@drawable/ic_job_light</item>
         <item name="iconLocation">@drawable/ic_location_light</item>
         <item name="iconDevice">@drawable/ic_device_light</item>
         <item name="iconClose">@drawable/ic_close_light</item>
@@ -89,6 +91,9 @@
         <item name="iconHelp">@drawable/ic_help_light</item>
         <item name="iconPC">@drawable/ic_pc_light</item>
         <item name="iconForward">@drawable/ic_forward_light</item>
+        <item name="iconPlay">@drawable/ic_play_light</item>
+        <item name="iconArrowUp">@drawable/ic_arrow_up_light</item>
+        <item name="iconArrowDown">@drawable/ic_arrow_down_light</item>
     </style>
 
     <style name="AppTheme.Toolbar">
@@ -96,5 +101,14 @@
         <item name="android:textColorSecondary">@android:color/white</item>
         <item name="actionMenuTextColor">@android:color/white</item>
     </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
 </resources>
