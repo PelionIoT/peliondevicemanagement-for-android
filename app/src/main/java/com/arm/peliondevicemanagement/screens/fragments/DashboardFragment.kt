@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2018, Arm Limited and affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.arm.peliondevicemanagement.screens.fragments
 
 import android.os.Bundle
@@ -14,14 +31,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
 import com.arm.peliondevicemanagement.components.adapters.WorkflowAdapter
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowDeviceModel
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
 import com.arm.peliondevicemanagement.components.viewmodels.WorkflowViewModel
-import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_COMPLETED
-import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_PENDING
 import com.arm.peliondevicemanagement.databinding.FragmentDashboardBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
-import com.arm.peliondevicemanagement.listeners.RecyclerItemClickListener
+import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
 import com.arm.peliondevicemanagement.screens.activities.HostActivity
 
 class DashboardFragment : Fragment(), RecyclerItemClickListener {
