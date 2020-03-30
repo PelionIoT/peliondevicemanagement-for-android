@@ -174,7 +174,6 @@
                 android:paddingStart="20dp"
                 android:paddingEnd="16dp"
                 android:paddingBottom="5dp"
-                android:layout_marginBottom="10dp"
                 android:id="@+id/tvDeviceSubHeader"
                 android:layout_below="@+id/tvDeviceHeader"
                 android:text="@string/devices_completed_format"
@@ -185,16 +184,29 @@
                 android:textSize="14sp"
                 />
 
+            <ProgressBar
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tvDeviceSubHeader"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:indeterminate="true"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                android:id="@+id/progressBar"
+                />
+
             <androidx.recyclerview.widget.RecyclerView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/rvDevices"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
+                android:layout_marginTop="10dp"
                 android:layout_marginBottom="5dp"
                 android:layout_below="@id/tvDeviceSubHeader"
                 android:paddingBottom="8dp"
                 android:clipToPadding="false"
+                android:visibility="invisible"
                 />
 
         </RelativeLayout>

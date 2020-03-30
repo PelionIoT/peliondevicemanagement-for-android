@@ -36,6 +36,10 @@ object SharedPrefHelper {
         SharedPrefManager.with(context = AppController.appController!!)!!
             .getString(SharedPrefConstants.STORE_USER_ACCESS_TOKEN, "")!!
 
+    internal fun getSDAToken(): String? =
+        SharedPrefManager.with(context = AppController.appController!!)!!
+            .getString(SharedPrefConstants.STORE_SDA_TOKEN, "")!!
+
     internal fun getStoredProfile(): String? =
         SharedPrefManager.with(context = AppController.appController!!)!!
             .getString(SharedPrefConstants.STORE_USER_PROFILE, "")!!
@@ -69,6 +73,11 @@ object SharedPrefHelper {
     internal fun storeUserAccessToken(accessToken: String) =
         SharedPrefManager.with(context = AppController.appController!!)!!.edit()
             .putString(SharedPrefConstants.STORE_USER_ACCESS_TOKEN, accessToken)
+            .apply()
+
+    internal fun storeSDAToken(accessToken: String) =
+        SharedPrefManager.with(context = AppController.appController!!)!!.edit()
+            .putString(SharedPrefConstants.STORE_SDA_TOKEN, accessToken)
             .apply()
 
     internal fun storeUserCredentials(userName: String,

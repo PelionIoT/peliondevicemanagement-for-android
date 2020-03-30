@@ -17,8 +17,12 @@
 
 package com.arm.peliondevicemanagement.utils
 
+import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.graphics.drawable.Drawable
+import android.os.Build
+import com.arm.pelionmobiletransportsdk.TransportManager
+import com.arm.pelionmobiletransportsdk.ble.scanner.BleManager
 import java.io.InputStream
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat
@@ -62,6 +66,28 @@ object PlatformUtils {
         val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH)
         val date = inputFormat.parse(inputString)
         return TimeAgo.getTimeAgo(date!!.time)
+    }
+
+    fun getBleInstance(context: Context, serviceUUID: String = ""): BleManager {
+        val scanSettings = ScanSettings.Builder()
+            .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+            .setReportDelay(0)
+
+        // Only works when using M or above
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            scanSettings.setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE)
+            scanSettings.setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
+        }
+
+        val bleBuilder = TransportManager.getBleBuilder(context)
+            .addScanPeriod(TransportManager.DEFAULT_SCAN_PERIOD)
+            .addSettingsScan(scanSettings.build())
+
+        if(serviceUUID.isNotEmpty()){
+            bleBuilder.addFilterServiceUuid(serviceUUID)
+        }
+
+        return bleBuilder.build()
     }
 
 }

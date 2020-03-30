@@ -15,19 +15,12 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.constants
+package com.arm.peliondevicemanagement.transport.sda
 
-object AppConstants {
+object CommandConstants {
 
-    const val ABOUT_JSON_FILE = "about.json"
-
-    // Device states
-    const val DEVICE_STATE_PENDING = "Pending"
-    const val DEVICE_STATE_CONNECTING = "Connecting"
-    const val DEVICE_STATE_CONNECTED = "Connected"
-    const val DEVICE_STATE_RUNNING = "Running"
-    const val DEVICE_STATE_COMPLETED = "Completed"
-    const val DEVICE_STATE_DISCONNECTED = "Disconnected"
-    const val DEVICE_STATE_FAILED = "Failed"
+    const val READ = "read-data"
+    const val CONFIGURE = "configure"
+    const val UPDATE = "update"
 
 }
