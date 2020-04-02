@@ -21,7 +21,8 @@ import android.app.Application
 import android.content.res.Configuration
 import com.arm.peliondevicemanagement.services.CloudRepository
 import com.arm.peliondevicemanagement.helpers.LogHelper
-import com.arm.peliondevicemanagement.services.CloudAPIService
+import com.arm.peliondevicemanagement.services.api.CloudAPIService
+import com.arm.peliondevicemanagement.services.cache.WorkflowDB
 
 class AppController : Application() {
 
@@ -30,19 +31,20 @@ class AppController : Application() {
         internal var appController: AppController? = null
         private var cloudRepository: CloudRepository? = null
         private var cloudAPIService: CloudAPIService? = null
+        private var workflowDB: WorkflowDB? = null
 
-        internal fun getCloudRepoManager(): CloudRepository = cloudRepository!!
+        internal fun getCloudRepository(): CloudRepository = cloudRepository!!
+        internal fun getWorkflowDB(): WorkflowDB = workflowDB!!
     }
 
     override fun onCreate() {
         super.onCreate()
         LogHelper.debug(TAG, "onApplicationCreate()")
+
         appController = this
         cloudAPIService = CloudAPIService()
-        cloudRepository =
-            CloudRepository(
-                cloudAPIService!!
-            )
+        cloudRepository = CloudRepository(cloudAPIService!!)
+        workflowDB = WorkflowDB.getInstance(this)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration?) {

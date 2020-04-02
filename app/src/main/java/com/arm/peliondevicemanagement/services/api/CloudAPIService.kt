@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.services
+package com.arm.peliondevicemanagement.services.api
 
 import com.arm.peliondevicemanagement.components.models.LicenseModel
 import com.arm.peliondevicemanagement.components.models.ProfileModel
@@ -47,6 +47,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Query
 import java.util.concurrent.TimeUnit
 
 interface CloudAPIService {
@@ -100,10 +101,16 @@ interface CloudAPIService {
     suspend fun getAccountProfile()
 
     @GET(API_ASSIGNED_WORKFLOWS)
-    suspend fun getAssignedWorkflows(): Response<WorkflowsResponse>
+    suspend fun getAssignedWorkflows(
+        @Query("limit") itemsPerPage: Int,
+        @Query("after") after: String? = null
+    ): Response<WorkflowsResponse>
 
     @GET(API_ALL_WORKFLOWS)
-    suspend fun getAllWorkflows(): Response<WorkflowsResponse>
+    suspend fun getAllWorkflows(
+        @Query("limit") itemsPerPage: Int,
+        @Query("after") after: String? = null
+    ): Response<WorkflowsResponse>
 
     @GET(API_CLOUD_UI_SERVER + API_LICENSES)
     suspend fun getLicenses(): Response<List<LicenseModel>>

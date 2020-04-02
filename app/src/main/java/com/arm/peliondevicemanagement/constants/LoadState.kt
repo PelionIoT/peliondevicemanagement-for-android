@@ -17,22 +17,8 @@
 
 package com.arm.peliondevicemanagement.constants
 
-object AppConstants {
-
-    const val ABOUT_JSON_FILE = "about.json"
-
-    const val WORKFLOW_DATABASE_NAME = "Workflow.db"
-    const val DATABASE_PAGE_SIZE = 20
-    const val NETWORK_PAGE_SIZE = 50
-
-    // Device states
-    const val DEVICE_STATE_PENDING = "Pending"
-    const val DEVICE_STATE_CONNECTING = "Connecting"
-    const val DEVICE_STATE_CONNECTED = "Connected"
-    const val DEVICE_STATE_VERIFY = "Verify"
-    const val DEVICE_STATE_RUNNING = "Running"
-    const val DEVICE_STATE_COMPLETED = "Completed"
-    const val DEVICE_STATE_DISCONNECTED = "Disconnected"
-    const val DEVICE_STATE_FAILED = "Failed"
-
+enum class LoadState {
+    LOADING,
+    EMPTY,
+    LOADED
 }

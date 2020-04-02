@@ -15,17 +15,22 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.components.models.workflow
+package com.arm.peliondevicemanagement.helpers.converters
 
-import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
+import androidx.room.TypeConverter
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+class StringArrayConverter {
 
-@Parcelize
-data class WorkflowDeviceRunModel(
-    val jobID: String,
-    val jobName: String,
-    var jobStatus: String,
-    val jobTasks: List<WorkflowTaskModel>,
-    var jobDevices: List<WorkflowDeviceModel>,
-    val jobSDAToken: String
-): Parcelable
+    @TypeConverter
+    fun fromString(value: String): Array<String> {
+        val type = object: TypeToken<Array<String>>() {}.type
+        return Gson().fromJson(value, type)
+    }
+
+    @TypeConverter
+    fun fromArrayList(list: Array<String>): String {
+        val type = object: TypeToken<Array<String>>() {}.type
+        return Gson().toJson(list, type)
+    }
+}

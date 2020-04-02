@@ -20,15 +20,16 @@ package com.arm.peliondevicemanagement.components.viewmodels
 import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.arm.mbed.sda.proxysdk.SecuredDeviceAccess
 import com.arm.mbed.sda.proxysdk.protocol.OperationResponse
+import com.arm.peliondevicemanagement.components.models.workflow.DeviceResponseModel
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_COMPLETED
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_CONNECTED
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_CONNECTING
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_DISCONNECTED
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_FAILED
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_RUNNING
+import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_VERIFY
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.transport.ble.ArmBleDevice
@@ -57,7 +58,7 @@ class SDAViewModel : ViewModel() {
     }
 
     val deviceStateLiveData = MutableLiveData<String>()
-    val opResponseLiveData = MutableLiveData<OperationResponse>()
+    val responseLiveData = MutableLiveData<DeviceResponseModel>()
 
     fun connectToDevice(context: Context, deviceMAC: String) {
         scope.launch {
@@ -97,7 +98,17 @@ class SDAViewModel : ViewModel() {
         }
     }
 
+    fun fetchDeviceEndpoint() {
+        scope.launch {
+            deviceStateLiveData.postValue(DEVICE_STATE_VERIFY)
+            val deviceEndpoint = device!!.readEndpoint()
+            responseLiveData.postValue(
+                DeviceResponseModel("endpoint:$deviceEndpoint", null))
+        }
+    }
+
     fun sendMessageToDevice(deviceCommand: DeviceCommand) {
+        var deviceResponse: DeviceResponseModel
         scope.launch {
             try {
                 deviceStateLiveData.postValue(DEVICE_STATE_RUNNING)
@@ -109,10 +120,12 @@ class SDAViewModel : ViewModel() {
                 } else {
                     deviceStateLiveData.postValue(DEVICE_STATE_FAILED)
                 }
-                opResponseLiveData.postValue(opResponse)
+                deviceResponse = DeviceResponseModel("sda", opResponse)
+                responseLiveData.postValue(deviceResponse)
             } catch (e: Throwable){
                 LogHelper.debug(TAG, "Exception occurred: ${e.message}")
-                opResponseLiveData.postValue(null)
+                deviceResponse = DeviceResponseModel("sda", null)
+                responseLiveData.postValue(deviceResponse)
             }
         }
     }

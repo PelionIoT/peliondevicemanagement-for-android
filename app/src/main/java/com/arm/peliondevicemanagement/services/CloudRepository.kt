@@ -24,8 +24,8 @@ import com.arm.peliondevicemanagement.constants.APIConstants.KEY_ACCOUNT_ID
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_GRANT_TYPE
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_PASSWORD
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_USERNAME
-import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
-import com.arm.peliondevicemanagement.services.CloudAPIService.Companion.createJSONRequestBody
+import com.arm.peliondevicemanagement.services.api.CloudAPIService
+import com.arm.peliondevicemanagement.services.api.CloudAPIService.Companion.createJSONRequestBody
 import com.arm.peliondevicemanagement.services.data.BaseRepository
 import com.arm.peliondevicemanagement.services.data.LoginResponse
 import com.arm.peliondevicemanagement.services.data.WorkflowsResponse
@@ -73,18 +73,32 @@ class CloudRepository(private val cloudAPIService: CloudAPIService): BaseReposit
         )
     }
 
-    suspend fun getAssignedWorkflows(): WorkflowsResponse? {
-        return doSafeAPIRequest(
-            call = { cloudAPIService.getAssignedWorkflows()},
-            errorMessage = "Unable to fetch workflows"
-        )
+    suspend fun getAssignedWorkflows(itemsPerPage: Int, after: String? = null): WorkflowsResponse? {
+        return if(after != null){
+            doSafeAPIRequest(
+                call = { cloudAPIService.getAssignedWorkflows(itemsPerPage, after)},
+                errorMessage = "Unable to fetch workflows"
+            )
+        } else {
+            doSafeAPIRequest(
+                call = { cloudAPIService.getAssignedWorkflows(itemsPerPage)},
+                errorMessage = "Unable to fetch workflows"
+            )
+        }
     }
 
-    suspend fun getAllWorkflows(): WorkflowsResponse? {
-        return doSafeAPIRequest(
-            call = { cloudAPIService.getAllWorkflows()},
-            errorMessage = "Unable to fetch workflows"
-        )
+    suspend fun getAllWorkflows(itemsPerPage: Int, after: String? = null): WorkflowsResponse? {
+        return if(after != null){
+            doSafeAPIRequest(
+                call = { cloudAPIService.getAllWorkflows(itemsPerPage, after)},
+                errorMessage = "Unable to fetch workflows"
+            )
+        } else {
+            doSafeAPIRequest(
+                call = { cloudAPIService.getAllWorkflows(itemsPerPage)},
+                errorMessage = "Unable to fetch workflows"
+            )
+        }
     }
 
     suspend fun getLicenses(): List<LicenseModel>? {

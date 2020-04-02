@@ -23,5 +23,5 @@ import kotlinx.android.parcel.Parcelize
 @Parcelize
 data class WorkflowDeviceModel(
     val deviceName: String,
-    val deviceState: String
+    var deviceState: String
 ): Parcelable

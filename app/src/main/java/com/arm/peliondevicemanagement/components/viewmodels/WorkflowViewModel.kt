@@ -17,15 +17,22 @@
 
 package com.arm.peliondevicemanagement.components.viewmodels
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.paging.LivePagedListBuilder
+import androidx.paging.PagedList
 import com.arm.peliondevicemanagement.AppController
-import com.arm.peliondevicemanagement.components.models.ProfileModel
+import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
+import com.arm.peliondevicemanagement.constants.AppConstants.DATABASE_PAGE_SIZE
+import com.arm.peliondevicemanagement.constants.LoadState
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.services.CloudRepository
-import com.arm.peliondevicemanagement.services.data.LoginResponse
-import com.arm.peliondevicemanagement.services.data.WorkflowsResponse
+import com.arm.peliondevicemanagement.services.LocalRepository
+import com.arm.peliondevicemanagement.services.cache.LocalCache
+import com.arm.peliondevicemanagement.services.cache.WorkflowDB
 import kotlinx.coroutines.*
+import java.util.concurrent.Executors
 import kotlin.coroutines.CoroutineContext
 
 class WorkflowViewModel : ViewModel() {
@@ -39,33 +46,64 @@ class WorkflowViewModel : ViewModel() {
         get() = parentJob + Dispatchers.IO
 
     private val scope = CoroutineScope(coroutineContext)
-    private val repository: CloudRepository = AppController.getCloudRepoManager()
 
-    val assignedWorkflowsLiveData = MutableLiveData<WorkflowsResponse>()
-    val allWorkflowsLiveData = MutableLiveData<WorkflowsResponse>()
+    private val cloudRepository: CloudRepository = AppController.getCloudRepository()
+    private var localRepository: LocalRepository
+    private val workflowDB: WorkflowDB = AppController.getWorkflowDB()
+    private var localCache: LocalCache
 
-    fun getAssignedWorkflows() {
-        scope.launch {
-            try {
-                val workflowsResponse = repository.getAssignedWorkflows()
-                assignedWorkflowsLiveData.postValue(workflowsResponse)
-            } catch (e: Throwable){
-                LogHelper.debug(TAG, "Exception occurred: ${e.message}")
-                assignedWorkflowsLiveData.postValue(null)
-            }
-        }
+    private var workflowLiveData: LiveData<PagedList<WorkflowModel>>
+    private val refreshStateLiveData = MutableLiveData<LoadState>()
+
+    init {
+        localCache = LocalCache(workflowDB.workflowsDao(), Executors.newSingleThreadExecutor())
+        localRepository = LocalRepository(scope, cloudRepository, localCache)
+        workflowLiveData = getWorkflowsLiveData()
     }
 
-    fun getAllWorkflows() {
-        scope.launch {
-            try {
-                val workflowsResponse = repository.getAllWorkflows()
-                allWorkflowsLiveData.postValue(workflowsResponse)
-            } catch (e: Throwable){
-                LogHelper.debug(TAG, "Exception occurred: ${e.message}")
-                allWorkflowsLiveData.postValue(null)
-            }
-        }
+    fun getWorkflows(): LiveData<PagedList<WorkflowModel>> = workflowLiveData
+
+    fun getRefreshState(): LiveData<LoadState> = refreshStateLiveData
+
+    fun refresh() {
+        workflowLiveData.value?.dataSource?.invalidate()
+    }
+
+    private fun getWorkflowsLiveData(): LiveData<PagedList<WorkflowModel>> {
+        val pageConfig = PagedList.Config.Builder()
+            .setPageSize(DATABASE_PAGE_SIZE)
+            .setInitialLoadSizeHint(DATABASE_PAGE_SIZE)
+            .setEnablePlaceholders(false)
+            .build()
+
+        // Fetch data from the local-cache and return a factory
+        val dataSourceFactory = localRepository.fetchWorkflowsFactory()
+
+        // Get the paged list
+        return LivePagedListBuilder(dataSourceFactory, pageConfig)
+            .setBoundaryCallback(object: PagedList.BoundaryCallback<WorkflowModel>() {
+                override fun onZeroItemsLoaded() {
+                    super.onZeroItemsLoaded()
+                    // Handle empty initial load here
+                    LogHelper.debug(TAG, "BoundaryCallback()->onZeroItemsLoaded")
+                    refreshStateLiveData.postValue(LoadState.EMPTY)
+                }
+
+                override fun onItemAtEndLoaded(itemAtEnd: WorkflowModel) {
+                    super.onItemAtEndLoaded(itemAtEnd)
+                    // Here you can listen to last item on list
+                    LogHelper.debug(TAG, "BoundaryCallback()->onItemAtEndLoaded")
+                    refreshStateLiveData.postValue(LoadState.LOADED)
+                }
+
+                override fun onItemAtFrontLoaded(itemAtFront: WorkflowModel) {
+                    super.onItemAtFrontLoaded(itemAtFront)
+                    // Here you can listen to first item on list
+                    LogHelper.debug(TAG, "BoundaryCallback()->onItemAtFrontLoaded")
+                    refreshStateLiveData.postValue(LoadState.LOADED)
+                }
+            })
+            .build()
     }
 
     fun cancelAllRequests() = coroutineContext.cancel()

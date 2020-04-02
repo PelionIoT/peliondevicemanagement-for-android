@@ -30,6 +30,8 @@ import com.arm.pelionmobiletransportsdk.ble.callbacks.BleGattWriteCallback
 import com.arm.pelionmobiletransportsdk.ble.callbacks.BleMtuChangedCallback
 import com.arm.pelionmobiletransportsdk.ble.scanner.BleManager
 import com.arm.peliondevicemanagement.utils.ByteFactory
+import com.arm.pelionmobiletransportsdk.ble.callbacks.BleGattReadCallback
+import com.arm.pelionmobiletransportsdk.ble.commons.GattAttributes
 import kotlinx.coroutines.*
 import java.util.*
 import kotlin.coroutines.Continuation
@@ -44,6 +46,10 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
         private val TAG = ArmBleDevice::class.java.simpleName
 
         const val MTU_SIZE: Int = 244
+
+        // Device Information Service
+        private const val DEVICE_INFO_SERVICE: String = "0000180a-0000-1000-8000-00805f9b34fb"
+        private const val SN_CHARACTERISTIC: String = ""
 
         // Service & Characteristic IDs for Secure-Device-Access
         private const val SDA_SERVICE: String = "6e400001-b5a3-f393-e0a9-e50e24dcca9e"
@@ -136,10 +142,8 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
             } else {
                 Log.d(TAG, "->stopNotify() Notifications can't be disabled.")
             }
-            //mBleManager!!.disconnectGatt()
             mBleManager!!.closeGatt()
             processController = null
-            //dataOutQueue.clear()
             totalPacketsToWrite = 0
             currentPosition = 0
             Log.d(TAG, "->onDisconnect()")
@@ -166,6 +170,20 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
                     it.resume(true)
                 }
             })
+        }
+    }
+
+    suspend fun readEndpoint(): String = withContext(Dispatchers.IO) {
+        if(!isConnected()) return@withContext "null"
+        return@withContext suspendCoroutine<String> {
+            mBleManager!!.read(DEVICE_INFO_SERVICE,
+                SN_CHARACTERISTIC,
+                object: BleGattReadCallback {
+                    override fun onRead(data: String?, characteristic: BluetoothGattCharacteristic) {
+                        Log.d(TAG, "->onReadEndpoint() $data")
+                        it.resume(data!!)
+                    }
+                })
         }
     }
 

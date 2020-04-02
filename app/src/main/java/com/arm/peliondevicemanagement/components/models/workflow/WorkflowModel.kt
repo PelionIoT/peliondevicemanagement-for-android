@@ -18,30 +18,30 @@
 package com.arm.peliondevicemanagement.components.models.workflow
 
 import android.os.Parcelable
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import androidx.room.TypeConverters
+import com.arm.peliondevicemanagement.helpers.converters.ArrayListConverter
+import com.arm.peliondevicemanagement.helpers.converters.ListConverter
+import com.arm.peliondevicemanagement.helpers.converters.StringArrayConverter
 import com.google.gson.annotations.SerializedName
 import kotlinx.android.parcel.Parcelize
 
-@Parcelize
+@Parcelize @Entity(tableName = "workflows")
+@TypeConverters(
+    StringArrayConverter::class,
+    ArrayListConverter::class, ListConverter::class)
 data class WorkflowModel(
-    @SerializedName("id")
-    val workflowID: String,
-    @SerializedName("name")
-    val workflowName: String,
-    @SerializedName("description")
-    val workflowDescription: String,
-    @SerializedName("status")
-    val workflowStatus: String,
-    @SerializedName("location")
-    val workflowLocation: String,
-    @SerializedName("aud")
-    val workflowAUDs: Array<String>,
-    var workflowDevices: ArrayList<WorkflowDeviceModel>,
-    @SerializedName("tasks")
-    val workflowTasks: List<WorkflowTaskModel>,
-    @SerializedName("created_at")
-    val workflowCreatedAt: String,
-    @SerializedName("execution_time")
-    val workflowExecutedAt: String
+    @PrimaryKey @field:SerializedName("id") val workflowID: String,
+    @field:SerializedName("name") val workflowName: String,
+    @field:SerializedName("description") val workflowDescription: String?,
+    @field:SerializedName("status") var workflowStatus: String,
+    @field:SerializedName("location") val workflowLocation: String,
+    @field:SerializedName("aud") val workflowAUDs: Array<String>,
+    @field:SerializedName("device") var workflowDevices: ArrayList<WorkflowDeviceModel>?,
+    @field:SerializedName("tasks") val workflowTasks: List<WorkflowTaskModel>,
+    @field:SerializedName("created_at") val workflowCreatedAt: String,
+    @field:SerializedName("execution_time") val workflowExecutedAt: String
 ): Parcelable {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

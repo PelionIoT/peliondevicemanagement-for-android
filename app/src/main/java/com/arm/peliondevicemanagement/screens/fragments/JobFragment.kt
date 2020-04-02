@@ -79,28 +79,16 @@ class JobFragment : Fragment() {
     }
 
     private fun setupData() {
-        if(workflowModel.workflowDevices.isNullOrEmpty()){
-            workflowModel.workflowDevices = arrayListOf()
-            workflowModel.workflowAUDs.forEach { aud_device ->
-                workflowModel.workflowDevices
-                    .add(WorkflowDeviceModel(
-                        aud_device.substring(3, aud_device.length),
-                        DEVICE_STATE_PENDING))
+        totalDevicesCompleted = 0
+        workflowModel.workflowDevices?.forEach { device ->
+            if(device.deviceState == DEVICE_STATE_COMPLETED){
+                totalDevicesCompleted++
             }
-            LogHelper.debug(TAG, "completedDevices: 0, " +
-                    "pendingDevices: ${workflowModel.workflowDevices.size}")
-        } else {
-            totalDevicesCompleted = 0
-            workflowModel.workflowDevices.forEach { device ->
-                if(device.deviceState == DEVICE_STATE_COMPLETED){
-                    totalDevicesCompleted++
-                }
-            }
-            LogHelper.debug(TAG, "completedDevices: $totalDevicesCompleted, " +
-                    "pendingDevices: ${workflowModel.workflowDevices.size - totalDevicesCompleted}")
         }
+        LogHelper.debug(TAG, "completedDevices: $totalDevicesCompleted, " +
+                "pendingDevices: ${workflowModel.workflowDevices!!.size - totalDevicesCompleted}")
 
-        workflowDeviceAdapter = WorkflowDeviceAdapter(workflowModel.workflowDevices)
+        workflowDeviceAdapter = WorkflowDeviceAdapter(workflowModel.workflowDevices!!)
     }
 
     private fun setupViews() {
@@ -120,7 +108,7 @@ class JobFragment : Fragment() {
             expandCollapseDevicesRecView()
         }
 
-        val totalCompletedText = "$totalDevicesCompleted/${workflowModel.workflowDevices.size}"
+        val totalCompletedText = "$totalDevicesCompleted/${workflowModel.workflowDevices!!.size}"
 
         viewBinder.tvDeviceSubHeader.text = context!!
             .getString(R.string.devices_completed_format,
@@ -158,18 +146,20 @@ class JobFragment : Fragment() {
     }
 
     private fun navigateToJobRunFragment() {
-        val jobRunBundle = WorkflowDeviceRunModel(
-            workflowModel.workflowID,
-            workflowModel.workflowName,
-            workflowModel.workflowStatus,
-            workflowModel.workflowTasks,
-            workflowModel.workflowDevices,
-            "Not available"
-        )
+        val jobRunBundle = workflowModel.workflowDevices?.let {
+            WorkflowDeviceRunModel(
+                workflowModel.workflowID,
+                workflowModel.workflowName,
+                workflowModel.workflowStatus,
+                workflowModel.workflowTasks,
+                it,
+                "Not available"
+            )
+        }
 
         Navigation.findNavController(viewBinder.root)
             .navigate(JobFragmentDirections
-                .actionJobFragmentToJobRunFragment(jobRunBundle))
+                .actionJobFragmentToJobRunFragment(jobRunBundle!!))
     }
 
     override fun onDestroyView() {

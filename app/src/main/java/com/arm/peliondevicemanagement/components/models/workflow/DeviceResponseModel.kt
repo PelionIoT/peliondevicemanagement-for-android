@@ -17,15 +17,9 @@
 
 package com.arm.peliondevicemanagement.components.models.workflow
 
-import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
+import com.arm.mbed.sda.proxysdk.protocol.OperationResponse
 
-@Parcelize
-data class WorkflowDeviceRunModel(
-    val jobID: String,
-    val jobName: String,
-    var jobStatus: String,
-    val jobTasks: List<WorkflowTaskModel>,
-    var jobDevices: List<WorkflowDeviceModel>,
-    val jobSDAToken: String
-): Parcelable
+data class DeviceResponseModel(
+    val response: String,
+    val operationResponse: OperationResponse?
+)

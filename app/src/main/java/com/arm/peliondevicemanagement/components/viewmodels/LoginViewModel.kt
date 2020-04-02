@@ -38,7 +38,7 @@ class LoginViewModel : ViewModel() {
         get() = parentJob + Dispatchers.IO
 
     private val scope = CoroutineScope(coroutineContext)
-    private val repository: CloudRepository = AppController.getCloudRepoManager()
+    private val cloudRepository: CloudRepository = AppController.getCloudRepository()
 
     val userAccountLiveData = MutableLiveData<LoginResponse>()
     val userProfileLiveData = MutableLiveData<ProfileModel>()
@@ -46,7 +46,7 @@ class LoginViewModel : ViewModel() {
     fun doLogin(username: String, password: String, accountID: String = "") {
         scope.launch {
             try {
-                val userAccountResponse = repository.doAuth(username, password, accountID)
+                val userAccountResponse = cloudRepository.doAuth(username, password, accountID)
                 userAccountLiveData.postValue(userAccountResponse)
             } catch (e: Throwable){
                 LogHelper.debug(TAG, "Exception occurred: ${e.message}")
@@ -58,7 +58,7 @@ class LoginViewModel : ViewModel() {
     fun doImpersonate(accountID: String) {
         scope.launch {
             try {
-                val userAccountResponse = repository.doImpersonate(accountID)
+                val userAccountResponse = cloudRepository.doImpersonate(accountID)
                 userAccountLiveData.postValue(userAccountResponse)
             } catch (e: Throwable) {
                 LogHelper.debug(TAG, "Exception occurred: ${e.message}")
@@ -70,7 +70,7 @@ class LoginViewModel : ViewModel() {
     fun getProfile() {
         scope.launch {
             try {
-                val userProfileResponse = repository.getProfile()
+                val userProfileResponse = cloudRepository.getProfile()
                 userProfileLiveData.postValue(userProfileResponse)
             } catch (e: Throwable) {
                 LogHelper.debug(TAG, "Exception occurred: ${e.message}")

@@ -23,7 +23,6 @@ import com.arm.peliondevicemanagement.AppController
 import com.arm.peliondevicemanagement.components.models.LicenseModel
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.services.CloudRepository
-import com.arm.peliondevicemanagement.services.data.WorkflowsResponse
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
@@ -38,7 +37,7 @@ class LicensesViewModel : ViewModel() {
         get() = parentJob + Dispatchers.IO
 
     private val scope = CoroutineScope(coroutineContext)
-    private val repository: CloudRepository = AppController.getCloudRepoManager()
+    private val repository: CloudRepository = AppController.getCloudRepository()
 
     val licensesLiveData = MutableLiveData<List<LicenseModel>>()
 
