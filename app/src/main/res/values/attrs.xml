@@ -54,6 +54,9 @@
         <attr name="iconPlay" format="reference"/>
         <attr name="iconArrowUp" format="reference"/>
         <attr name="iconArrowDown" format="reference"/>
+        <attr name="iconShieldGreen" format="reference"/>
+        <attr name="iconShieldYellow" format="reference"/>
+        <attr name="iconShieldRed" format="reference"/>
 
     </declare-styleable>
 </resources>

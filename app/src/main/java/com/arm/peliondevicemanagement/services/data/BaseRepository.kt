@@ -18,6 +18,8 @@
 package com.arm.peliondevicemanagement.services.data
 
 import com.arm.peliondevicemanagement.helpers.LogHelper
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import retrofit2.Response
 import java.io.IOException
 
@@ -38,9 +40,21 @@ open class BaseRepository{
     }
 
     private suspend fun <T: Any> returnSafeAPIResponse(call: suspend ()-> Response<T>, errorMessage: String) : Result<T>{
+        // Call network-request
         val response = call.invoke()
+
+        // Print to console
+        /*LogHelper.debug("returnSafeAPIResponse()", "success: ${response.isSuccessful},\n" +
+                "code: ${response.code()}, message: ${response.message()},\n" +
+                "body: ${response.body()},\nerrorBody: $errorResponse")*/
+
         if(response.isSuccessful) return Result.Success(response.body()!!)
 
-        return Result.Error(IOException("ERROR- $errorMessage"))
+        // Parse error-response
+        val gson = Gson()
+        val type = object : TypeToken<ErrorResponse>() {}.type
+        val errorResponse: ErrorResponse? = gson.fromJson(response.errorBody()!!.charStream(), type)
+
+        return Result.Error(IOException("ERROR- $errorResponse"))
     }
 }

@@ -18,21 +18,23 @@
 package com.arm.peliondevicemanagement.helpers.converters
 
 import androidx.room.TypeConverter
+import com.arm.mbed.sda.proxysdk.http.CreateAccessTokenResponse
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowDeviceModel
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowTaskModel
+import com.arm.peliondevicemanagement.services.data.SDATokenResponse
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-class ListConverter {
+class SDATokenResponseConverter {
 
     @TypeConverter
-    fun fromString(value: String): List<WorkflowTaskModel> {
-        val type = object: TypeToken<List<WorkflowTaskModel>>() {}.type
+    fun fromString(value: String?): SDATokenResponse? {
+        val type = object: TypeToken<SDATokenResponse?>() {}.type
         return Gson().fromJson(value, type)
     }
 
     @TypeConverter
-    fun fromArrayList(list: List<WorkflowTaskModel>): String {
-        val type = object: TypeToken<List<WorkflowTaskModel>>() {}.type
-        return Gson().toJson(list, type)
+    fun fromTokenResponse(tokenResponse: SDATokenResponse?): String {
+        val type = object: TypeToken<SDATokenResponse?>() {}.type
+        return Gson().toJson(tokenResponse, type)
     }
 }

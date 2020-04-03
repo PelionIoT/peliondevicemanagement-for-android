@@ -15,15 +15,22 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.services.data
+package com.arm.peliondevicemanagement.services.cache
 
-import com.google.gson.annotations.SerializedName
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import com.arm.peliondevicemanagement.components.models.ProfileModel
 
-data class ErrorResponse(
-    @SerializedName("code")
-    val errorCode: Int,
-    @SerializedName("type")
-    val errorType: String,
-    @SerializedName("message")
-    val errorMessage: String
-)
+@Dao
+interface ProfileDao {
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertProfile(profile: ProfileModel)
+
+    @Query("SELECT * FROM profiles WHERE userID=:userID")
+    fun fetchProfile(userID: String): ProfileModel
+
+
+}

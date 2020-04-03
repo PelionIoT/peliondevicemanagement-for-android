@@ -19,6 +19,7 @@ package com.arm.peliondevicemanagement.services
 
 import com.arm.peliondevicemanagement.components.models.LicenseModel
 import com.arm.peliondevicemanagement.components.models.ProfileModel
+import com.arm.peliondevicemanagement.constants.APIConstants.CONTENT_TYPE_JSON
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_ACCOUNT
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_ACCOUNT_ID
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_GRANT_TYPE
@@ -28,7 +29,9 @@ import com.arm.peliondevicemanagement.services.api.CloudAPIService
 import com.arm.peliondevicemanagement.services.api.CloudAPIService.Companion.createJSONRequestBody
 import com.arm.peliondevicemanagement.services.data.BaseRepository
 import com.arm.peliondevicemanagement.services.data.LoginResponse
+import com.arm.peliondevicemanagement.services.data.SDATokenResponse
 import com.arm.peliondevicemanagement.services.data.WorkflowsResponse
+import okhttp3.RequestBody.Companion.toRequestBody
 
 class CloudRepository(private val cloudAPIService: CloudAPIService): BaseRepository() {
 
@@ -63,6 +66,13 @@ class CloudRepository(private val cloudAPIService: CloudAPIService): BaseReposit
                 KEY_ACCOUNT_ID to accountID
             ))},
             errorMessage = "Unable to refresh token"
+        )
+    }
+
+    suspend fun getSDAToken(request: String): SDATokenResponse? {
+        return doSafeAPIRequest(
+            call = { cloudAPIService.getSDAToken(request.toRequestBody(CONTENT_TYPE_JSON))},
+            errorMessage = "Unable to fetch SDA token"
         )
     }
 

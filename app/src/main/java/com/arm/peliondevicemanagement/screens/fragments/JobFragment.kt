@@ -18,10 +18,10 @@
 package com.arm.peliondevicemanagement.screens.fragments
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -30,13 +30,12 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionManager
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.adapters.WorkflowDeviceAdapter
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowDeviceModel
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowDeviceRunModel
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_COMPLETED
-import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_PENDING
 import com.arm.peliondevicemanagement.databinding.FragmentJobBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
+import com.arm.peliondevicemanagement.utils.PlatformUtils
 import com.arm.peliondevicemanagement.utils.PlatformUtils.fetchAttributeDrawable
 import com.arm.peliondevicemanagement.utils.PlatformUtils.parseJSONTimeIntoTimeAgo
 import com.arm.peliondevicemanagement.utils.PlatformUtils.parseJSONTimeString
@@ -119,6 +118,14 @@ class JobFragment : Fragment() {
                 RecyclerView.VERTICAL, false)
             itemAnimator = DefaultItemAnimator()
             adapter = workflowDeviceAdapter
+        }
+
+        if(workflowModel.sdaToken != null){
+            val dateTime = parseJSONTimeString(workflowModel.sdaToken!!.expiresIn)
+            viewBinder.tvValidTill.text = context!!.getString(R.string.active_format, dateTime)
+        } else {
+            viewBinder.tvValidTill.text = context!!.getString(R.string.na)
+            viewBinder.refreshTokenButton.visibility = View.VISIBLE
         }
 
         viewBinder.runJobButton.setOnClickListener {

@@ -24,7 +24,7 @@ import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowDeviceModel
 import com.arm.peliondevicemanagement.components.viewholders.DeviceViewHolder
 
-class WorkflowDeviceAdapter(private val workflowDeviceList: ArrayList<WorkflowDeviceModel>):
+class WorkflowDeviceAdapter(private val workflowDeviceList: List<WorkflowDeviceModel>):
     RecyclerView.Adapter<DeviceViewHolder>() {
 
     companion object {

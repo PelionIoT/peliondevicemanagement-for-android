@@ -1,2 +1,9 @@
 rootProject.name='Pelion Device Management'
 include ':app'
+
+include 'ace-auth'
+project(':ace-auth').projectDir = new File('sda_proxy/ace-auth')
+include 'crypto-utils-spongy'
+project(':crypto-utils-spongy').projectDir = new File('sda_proxy/crypto-utils-spongy')
+include 'proxy'
+project(':proxy').projectDir = new File('sda_proxy/proxy')

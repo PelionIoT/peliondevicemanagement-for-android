@@ -28,6 +28,7 @@ import com.arm.peliondevicemanagement.constants.APIConstants.API_USER_ME
 import com.arm.peliondevicemanagement.constants.APIConstants.API_ASSIGNED_WORKFLOWS
 import com.arm.peliondevicemanagement.constants.APIConstants.API_CLOUD_UI_SERVER
 import com.arm.peliondevicemanagement.constants.APIConstants.API_LICENSES
+import com.arm.peliondevicemanagement.constants.APIConstants.API_SDA_TOKEN
 import com.arm.peliondevicemanagement.constants.APIConstants.CONTENT_TYPE_JSON
 import com.arm.peliondevicemanagement.constants.APIConstants.DEFAULT_BASE_URL
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_AUTHORIZATION
@@ -35,6 +36,7 @@ import com.arm.peliondevicemanagement.constants.APIConstants.KEY_BEARER
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_CONTENT_TYPE
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_CONTENT_TYPE_JSON
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
+import com.arm.peliondevicemanagement.services.data.SDATokenResponse
 import com.arm.peliondevicemanagement.services.data.WorkflowsResponse
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -93,6 +95,9 @@ interface CloudAPIService {
 
     @POST(API_IMPERSONATE)
     suspend fun doImpersonate(@Body params: RequestBody): Response<LoginResponse>
+
+    @POST(API_SDA_TOKEN)
+    suspend fun getSDAToken(@Body params: RequestBody): Response<SDATokenResponse>
 
     @GET(API_USER_ME)
     suspend fun getProfile(): Response<ProfileModel>

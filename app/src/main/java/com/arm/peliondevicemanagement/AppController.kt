@@ -19,6 +19,7 @@ package com.arm.peliondevicemanagement
 
 import android.app.Application
 import android.content.res.Configuration
+import com.arm.mbed.sda.proxysdk.SecuredDeviceAccess
 import com.arm.peliondevicemanagement.services.CloudRepository
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.services.api.CloudAPIService
@@ -45,9 +46,10 @@ class AppController : Application() {
         cloudAPIService = CloudAPIService()
         cloudRepository = CloudRepository(cloudAPIService!!)
         workflowDB = WorkflowDB.getInstance(this)
+        SecuredDeviceAccess.setKeyStorePath(this.filesDir.toString())
     }
 
-    override fun onConfigurationChanged(newConfig: Configuration?) {
+    override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         LogHelper.debug(TAG, "onConfigurationChanged()")
     }

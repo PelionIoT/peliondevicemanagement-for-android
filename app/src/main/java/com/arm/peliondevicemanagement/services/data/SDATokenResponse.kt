@@ -17,13 +17,12 @@
 
 package com.arm.peliondevicemanagement.services.data
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import kotlinx.android.parcel.Parcelize
 
-data class ErrorResponse(
-    @SerializedName("code")
-    val errorCode: Int,
-    @SerializedName("type")
-    val errorType: String,
-    @SerializedName("message")
-    val errorMessage: String
-)
+@Parcelize
+data class SDATokenResponse(
+    @SerializedName("access_token") val accessToken: String,
+    @SerializedName("granted_until") val expiresIn: String
+): Parcelable

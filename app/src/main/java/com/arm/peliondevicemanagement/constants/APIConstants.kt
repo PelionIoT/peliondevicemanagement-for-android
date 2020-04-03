@@ -37,6 +37,7 @@ object APIConstants {
     const val API_LOGIN = "/auth/login"
     const val API_IMPERSONATE = "/auth/impersonate"
     const val API_CAPTCHA = "/auth/captcha"
+    const val API_SDA_TOKEN = "/ace-auth/token"
     const val API_USER_ME = "/v3/users/me"
     const val API_ACCOUNTS_ME = "/v3/accounts/me?include=policies"
 

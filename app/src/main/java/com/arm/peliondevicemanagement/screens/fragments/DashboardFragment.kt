@@ -79,6 +79,7 @@ class DashboardFragment : Fragment(), RecyclerItemClickListener {
         setupListeners()
         showHideSearchBar(false)
         showHide404View(false)
+        setSwipeRefreshStatus(true)
     }
 
     private fun init() {

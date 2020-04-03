@@ -20,11 +20,18 @@ package com.arm.peliondevicemanagement.services.store
 import androidx.paging.PageKeyedDataSource
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowDeviceModel
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
+import com.arm.peliondevicemanagement.components.models.workflow.WorkflowTaskModel
 import com.arm.peliondevicemanagement.constants.AppConstants
+import com.arm.peliondevicemanagement.constants.AppConstants.COMMAND_CONFIGURE
 import com.arm.peliondevicemanagement.constants.AppConstants.NETWORK_PAGE_SIZE
+import com.arm.peliondevicemanagement.constants.AppConstants.COMMAND_READ
+import com.arm.peliondevicemanagement.constants.AppConstants.READ_TASK
+import com.arm.peliondevicemanagement.constants.AppConstants.WRITE_TASK
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.services.CloudRepository
 import com.arm.peliondevicemanagement.services.cache.LocalCache
+import com.arm.peliondevicemanagement.services.data.SDATokenResponse
+import com.arm.peliondevicemanagement.utils.PlatformUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -36,6 +43,7 @@ class WorkflowDataSource(
 
     companion object {
         private val TAG: String = WorkflowDataSource::class.java.simpleName
+        private var check: Boolean = true
     }
 
     override fun loadInitial(
@@ -135,6 +143,16 @@ class WorkflowDataSource(
                                     AppConstants.DEVICE_STATE_PENDING
                                 )
                             )
+
+                            // Fetch permission-scope
+                            val permissionScope = getPermissionScopeFromTasks(workflow.workflowTasks)
+
+                            // Fetch an SDA_token
+                            val sdaTokenResponse = fetchSDAToken(permissionScope)
+                            if(sdaTokenResponse != null){
+                                workflow.sdaToken = sdaTokenResponse
+                                //LogHelper.debug(TAG, "SDA_Token: ${workflow.sdaToken}")
+                            }
                         }
                     }
                     // Store in DB
@@ -151,6 +169,40 @@ class WorkflowDataSource(
             LogHelper.debug(TAG, "Exception occurred: ${e.message}")
             saveFinished()
         }
+    }
+
+    // FIXME
+    private suspend fun fetchSDAToken(scope: String): SDATokenResponse? {
+        val audience = "ep:016eead293eb926ca57ba92703c00000"
+        val audienceList = arrayListOf<String>()
+        audienceList.add(audience)
+
+        return PlatformUtils.fetchSDAToken(
+            cloudRepository,
+            scope,
+            audienceList
+        )
+    }
+
+    private fun getPermissionScopeFromTasks(tasks: List<WorkflowTaskModel>): String {
+        val scope: String
+        val scopeBuffer = StringBuffer()
+
+        tasks.forEach { task ->
+            if(task.taskName == READ_TASK){
+                scopeBuffer.append(COMMAND_READ)
+            }
+            if(task.taskName == WRITE_TASK){
+                if(scopeBuffer.isNotEmpty()){
+                    scopeBuffer.append(" $COMMAND_CONFIGURE")
+                } else {
+                    scopeBuffer.append(COMMAND_CONFIGURE)
+                }
+            }
+        }
+
+        scope = scopeBuffer.toString()
+        return scope
     }
 
 }

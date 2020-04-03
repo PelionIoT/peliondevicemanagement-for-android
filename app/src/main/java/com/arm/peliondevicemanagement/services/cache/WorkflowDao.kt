@@ -17,11 +17,10 @@
 
 package com.arm.peliondevicemanagement.services.cache
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
+import com.arm.peliondevicemanagement.components.models.workflow.WorkflowDeviceModel
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
+import retrofit2.http.DELETE
 
 @Dao
 interface WorkflowDao {
@@ -32,7 +31,28 @@ interface WorkflowDao {
     @Query("SELECT * FROM workflows ORDER BY workflowCreatedAt ASC LIMIT 10")
     fun fetchWorkflows(): List<WorkflowModel>
 
-    @Query("SELECT * FROM workflows WHERE workflowCreatedAt > (SELECT workflowCreatedAt FROM workflows WHERE workflowID LIKE :afterID) ORDER BY workflowCreatedAt ASC LIMIT 10")
+    @Query("SELECT * FROM workflows WHERE workflowCreatedAt > " +
+            "(SELECT workflowCreatedAt FROM workflows WHERE workflowID LIKE :afterID) " +
+            "ORDER BY workflowCreatedAt ASC LIMIT 10")
     fun fetchWorkflows(afterID: String): List<WorkflowModel>
+
+    @Query("SELECT * FROM workflows WHERE workflowID=:workflowID")
+    fun fetchWorkflow(workflowID: String): WorkflowModel
+
+    @Update
+    fun updateWorkflow(workflow: WorkflowModel)
+
+    @Query("UPDATE workflows SET workflowStatus=:status WHERE workflowID=:workflowID")
+    fun updateWorkflowStatus(workflowID: String, status: String)
+
+    // FixME
+    /*@Query("UPDATE workflows SET workflowDevices=:devices WHERE workflowID=:workflowID")
+    fun updateWorkflowDevices(workflowID: String, devices: List<WorkflowDeviceModel>)*/
+
+    /*@DELETE
+    fun deleteWorkflow(workflowID: String)*/
+
+    @Query("DELETE FROM workflows")
+    fun deleteAllWorkflows()
 
 }

@@ -25,6 +25,14 @@ object AppConstants {
     const val DATABASE_PAGE_SIZE = 20
     const val NETWORK_PAGE_SIZE = 50
 
+    // Workflow constants
+    const val READ_TASK = "Read file"
+    const val WRITE_TASK = "Write file"
+
+    // SDA constants
+    const val COMMAND_READ = "read-data"
+    const val COMMAND_CONFIGURE = "configure"
+
     // Device states
     const val DEVICE_STATE_PENDING = "Pending"
     const val DEVICE_STATE_CONNECTING = "Connecting"
