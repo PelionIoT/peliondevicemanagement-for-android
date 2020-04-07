@@ -17,10 +17,12 @@
 
 package com.arm.peliondevicemanagement.components.viewmodels
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.arm.peliondevicemanagement.AppController
-import com.arm.peliondevicemanagement.components.models.ProfileModel
+import com.arm.peliondevicemanagement.components.models.user.AccountProfileModel
+import com.arm.peliondevicemanagement.components.models.user.UserProfile
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.services.CloudRepository
 import com.arm.peliondevicemanagement.services.data.LoginResponse
@@ -40,9 +42,16 @@ class LoginViewModel : ViewModel() {
     private val scope = CoroutineScope(coroutineContext)
     private val cloudRepository: CloudRepository = AppController.getCloudRepository()
 
-    val userAccountLiveData = MutableLiveData<LoginResponse>()
-    val userProfileLiveData = MutableLiveData<ProfileModel>()
+    private val userAccountLiveData = MutableLiveData<LoginResponse>()
+    private val userProfileLiveData = MutableLiveData<UserProfile>()
+    private val userAccountProfileLiveData = MutableLiveData<AccountProfileModel>()
 
+    // LiveData APIs
+    fun getLoginActionLiveData(): LiveData<LoginResponse> = userAccountLiveData
+    fun getUserProfileLiveData(): LiveData<UserProfile> = userProfileLiveData
+    fun getAccountProfileLiveData(): LiveData<AccountProfileModel> = userAccountProfileLiveData
+
+    // GET & POST APIs
     fun doLogin(username: String, password: String, accountID: String = "") {
         scope.launch {
             try {
@@ -67,14 +76,26 @@ class LoginViewModel : ViewModel() {
         }
     }
 
-    fun getProfile() {
+    fun fetchUserProfile() {
         scope.launch {
             try {
-                val userProfileResponse = cloudRepository.getProfile()
+                val userProfileResponse = cloudRepository.getUserProfile()
                 userProfileLiveData.postValue(userProfileResponse)
             } catch (e: Throwable) {
                 LogHelper.debug(TAG, "Exception occurred: ${e.message}")
                 userProfileLiveData.postValue(null)
+            }
+        }
+    }
+
+    fun fetchAccountProfile() {
+        scope.launch {
+            try {
+                val userAccountProfileResponse = cloudRepository.getAccountProfile()
+                userAccountProfileLiveData.postValue(userAccountProfileResponse)
+            } catch (e: Throwable) {
+                LogHelper.debug(TAG, "Exception occurred: ${e.message}")
+                userAccountProfileLiveData.postValue(null)
             }
         }
     }

@@ -17,8 +17,9 @@
 
 package com.arm.peliondevicemanagement.services
 
+import com.arm.peliondevicemanagement.components.models.user.AccountProfileModel
 import com.arm.peliondevicemanagement.components.models.LicenseModel
-import com.arm.peliondevicemanagement.components.models.ProfileModel
+import com.arm.peliondevicemanagement.components.models.user.UserProfile
 import com.arm.peliondevicemanagement.constants.APIConstants.CONTENT_TYPE_JSON
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_ACCOUNT
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_ACCOUNT_ID
@@ -77,10 +78,17 @@ class CloudRepository(private val cloudAPIService: CloudAPIService): BaseReposit
         )
     }
 
-    suspend fun getProfile(): ProfileModel? {
+    suspend fun getUserProfile(): UserProfile? {
         return doSafeAPIRequest(
-        call = { cloudAPIService.getProfile()},
+        call = { cloudAPIService.getUserProfile()},
         errorMessage = "Unable to fetch user-profile"
+        )
+    }
+
+    suspend fun getAccountProfile(): AccountProfileModel? {
+        return doSafeAPIRequest(
+            call = { cloudAPIService.getAccountProfile()},
+            errorMessage = "Unable to fetch account-profile"
         )
     }
 

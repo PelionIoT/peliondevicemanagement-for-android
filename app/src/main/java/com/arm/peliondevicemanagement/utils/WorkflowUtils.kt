@@ -19,16 +19,37 @@ package com.arm.peliondevicemanagement.utils
 
 import com.arm.mbed.sda.proxysdk.SdkUtil
 import com.arm.mbed.sda.proxysdk.http.CreateAccessTokenRequest
+import com.arm.peliondevicemanagement.AppController
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowTaskModel
 import com.arm.peliondevicemanagement.constants.AppConstants
+import com.arm.peliondevicemanagement.constants.AppConstants.WORKFLOW_TASK_NAME_FILE
 import com.arm.peliondevicemanagement.helpers.LogHelper
+import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.services.CloudRepository
+import com.arm.peliondevicemanagement.services.cache.LocalCache
 import com.arm.peliondevicemanagement.services.data.SDATokenResponse
+import com.arm.peliondevicemanagement.services.store.WorkflowDataSource
 import java.util.*
+import java.util.concurrent.Executors
 
 object WorkflowUtils {
 
     private val TAG: String = WorkflowUtils::class.java.simpleName
+
+    // FixME [ Delete on the basis of user from DB also ]
+    fun deleteWorkflowsCache() {
+        // Delete workflow-asset files
+        val userID = SharedPrefHelper.getSelectedUserID()!!
+        val accountID = SharedPrefHelper.getSelectedAccountID()!!
+        WorkflowFileUtils.deleteWorkflowAssets(userID)
+
+        // Delete entries from workflow-database
+        val workflowDao = AppController.getWorkflowDB().workflowsDao()
+        val localCache = LocalCache(workflowDao, Executors.newSingleThreadExecutor())
+        localCache.deleteAllWorkflows(accountID){
+            LogHelper.debug(TAG, "deleteWorkflowsFromDB() Workflows deleted successfully")
+        }
+    }
 
     private fun createSDATokenRequest(popPemKey: String, scope: String, audience: List<String>): String {
         val request = CreateAccessTokenRequest()
@@ -105,6 +126,52 @@ object WorkflowUtils {
 
         scope = scopeBuffer.toString()
         return scope
+    }
+
+    suspend fun downloadTaskAssets(cloudRepository: CloudRepository, workflowID: String, workflowTasks: List<WorkflowTaskModel>) {
+        val userID = SharedPrefHelper.getSelectedUserID()
+        val accountID = SharedPrefHelper.getSelectedAccountID()
+        val filePath = "$userID/$accountID/$workflowID"
+
+        LogHelper.debug(TAG, "Scanning workflow task-assets")
+        val fileQueue = arrayListOf<String>()
+        workflowTasks.forEach { task ->
+            if(task.taskName == AppConstants.WRITE_TASK){
+                task.inputParameters.forEach { inputParam ->
+                    if(inputParam.paramType == AppConstants.WORKFLOW_TASK_TYPE_FILE &&
+                        inputParam.paramName == WORKFLOW_TASK_NAME_FILE){
+                        fileQueue.add(inputParam.paramValue)
+                    }
+                }
+            }
+        }
+
+        if(!fileQueue.isNullOrEmpty()){
+            fileQueue.forEach { fileID ->
+                LogHelper.debug(TAG, "Downloading file: $fileID")
+                val fileResponse = cloudRepository.getWorkflowTaskAssetFile(fileID)
+                if(fileResponse != null){
+                    val inputStream = fileResponse.byteStream()
+                    LogHelper.debug(TAG, "Saving to $filePath")
+                    val isSuccessful = WorkflowFileUtils.downloadWorkflowAssetFile(
+                        filePath,
+                        fileID,
+                        inputStream,
+                        fileResponse.contentLength()
+                    )
+                    if(isSuccessful){
+                        LogHelper.debug(TAG, "Download successful: $fileID")
+                    } else {
+                        LogHelper.debug(TAG,"Download failed: $fileID")
+                    }
+                } else {
+                    LogHelper.debug(TAG,"Download failed: $fileID")
+                }
+            }
+        } else {
+            LogHelper.debug(TAG, "No downloadable assets found.")
+        }
+
     }
 
 }

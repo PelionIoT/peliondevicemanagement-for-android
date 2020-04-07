@@ -18,22 +18,20 @@
 package com.arm.peliondevicemanagement.helpers.converters
 
 import androidx.room.TypeConverter
-import com.arm.peliondevicemanagement.components.models.LoginHistoryModel
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowDeviceModel
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowTaskModel
+import com.arm.peliondevicemanagement.components.models.user.UserLoginHistory
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 class WLoginHistoryListConverter {
 
     @TypeConverter
-    fun fromString(value: String): List<LoginHistoryModel> {
-        val type = object: TypeToken<List<LoginHistoryModel>>() {}.type
+    fun fromString(value: String): List<UserLoginHistory> {
+        val type = object: TypeToken<List<UserLoginHistory>>() {}.type
         return Gson().fromJson(value, type)
     }
 
     @TypeConverter
-    fun fromList(list: List<LoginHistoryModel>): String {
-        val type = object: TypeToken<List<LoginHistoryModel>>() {}.type
+    fun fromList(list: List<UserLoginHistory>): String {
+        val type = object: TypeToken<List<UserLoginHistory>>() {}.type
         return Gson().toJson(list, type)
     }
 }

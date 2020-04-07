@@ -112,7 +112,7 @@ class SDAViewModel : ViewModel() {
         scope.launch {
             try {
                 deviceStateLiveData.postValue(DEVICE_STATE_RUNNING)
-                val sdaToken = SharedPrefHelper.getSDAToken()
+                /*val sdaToken = SharedPrefHelper.getSDAToken()
                 val opResponse = SecuredDeviceAccess.sendMessage(sdaToken,
                     deviceCommand.command, deviceCommand.commandParams, device)
                 if(opResponse != null){
@@ -121,7 +121,7 @@ class SDAViewModel : ViewModel() {
                     deviceStateLiveData.postValue(DEVICE_STATE_FAILED)
                 }
                 deviceResponse = DeviceResponseModel("sda", opResponse)
-                responseLiveData.postValue(deviceResponse)
+                responseLiveData.postValue(deviceResponse)*/
             } catch (e: Throwable){
                 LogHelper.debug(TAG, "Exception occurred: ${e.message}")
                 deviceResponse = DeviceResponseModel("sda", null)

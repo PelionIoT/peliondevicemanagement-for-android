@@ -36,13 +36,17 @@ object SharedPrefHelper {
         SharedPrefManager.with(context = AppController.appController!!)!!
             .getString(SharedPrefConstants.STORE_USER_ACCESS_TOKEN, "")!!
 
-    internal fun getSDAToken(): String? =
+    internal fun getSelectedUserID(): String? =
         SharedPrefManager.with(context = AppController.appController!!)!!
-            .getString(SharedPrefConstants.STORE_SDA_TOKEN, "")!!
+            .getString(SharedPrefConstants.STORE_SELECTED_USER_ID, "")!!
 
-    internal fun getStoredProfile(): String? =
+    internal fun getStoredUserProfile(): String? =
         SharedPrefManager.with(context = AppController.appController!!)!!
             .getString(SharedPrefConstants.STORE_USER_PROFILE, "")!!
+
+    internal fun getStoredAccountProfile(): String? =
+        SharedPrefManager.with(context = AppController.appController!!)!!
+            .getString(SharedPrefConstants.STORE_USER_ACCOUNT_PROFILE, "")!!
 
     internal fun getStoredAccounts(): String? =
         SharedPrefManager.with(context = AppController.appController!!)!!
@@ -64,20 +68,10 @@ object SharedPrefHelper {
         SharedPrefManager.with(context = AppController.appController!!)!!
             .getBoolean(SharedPrefConstants.STORE_DARK_THEME_STATUS, false)
 
-    internal fun isWorkflowServiceEnabled(): Boolean =
-        SharedPrefManager.with(context = AppController.appController!!)!!
-            .getBoolean(SharedPrefConstants.STORE_WORKFLOW_SERVICE_STATUS, false)
-
-
     // POST APIs
     internal fun storeUserAccessToken(accessToken: String) =
         SharedPrefManager.with(context = AppController.appController!!)!!.edit()
             .putString(SharedPrefConstants.STORE_USER_ACCESS_TOKEN, accessToken)
-            .apply()
-
-    internal fun storeSDAToken(accessToken: String) =
-        SharedPrefManager.with(context = AppController.appController!!)!!.edit()
-            .putString(SharedPrefConstants.STORE_SDA_TOKEN, accessToken)
             .apply()
 
     internal fun storeUserCredentials(userName: String,
@@ -87,9 +81,19 @@ object SharedPrefHelper {
             .putString(SharedPrefConstants.STORE_USER_PASSWORD, userPassword)
             .apply()
 
+    internal fun storeSelectedUserID(userID: String?) =
+        SharedPrefManager.with(context = AppController.appController!!)!!.edit()
+            .putString(SharedPrefConstants.STORE_SELECTED_USER_ID, userID)
+            .apply()
+
     internal fun storeUserProfile(accessToken: String) =
         SharedPrefManager.with(context = AppController.appController!!)!!.edit()
             .putString(SharedPrefConstants.STORE_USER_PROFILE, accessToken)
+            .apply()
+
+    internal fun storeUserAccountProfile(accessToken: String) =
+        SharedPrefManager.with(context = AppController.appController!!)!!.edit()
+            .putString(SharedPrefConstants.STORE_USER_ACCOUNT_PROFILE, accessToken)
             .apply()
 
     internal fun storeMultiAccountStatus(enabled: Boolean) =
@@ -117,11 +121,6 @@ object SharedPrefHelper {
             .putBoolean(SharedPrefConstants.STORE_DARK_THEME_STATUS, enabled)
             .apply()
 
-    internal fun setWorkflowServiceStatus(userName: String) =
-        SharedPrefManager.with(context = AppController.appController!!)!!.edit()
-            .putString(SharedPrefConstants.STORE_WORKFLOW_SERVICE_STATUS, userName)
-            .apply()
-
     // DELETE APIs
     internal fun removeCredentials(accessTokenAlso: Boolean = false){
         val editor = SharedPrefManager.with(context = AppController.appController!!)!!.edit()
@@ -140,13 +139,21 @@ object SharedPrefHelper {
         editor.apply()
     }
 
+    internal fun removeAccessToken(){
+        val editor = SharedPrefManager.with(context = AppController.appController!!)!!.edit()
+        editor.remove(SharedPrefConstants.STORE_USER_ACCESS_TOKEN)
+        editor.apply()
+    }
+
     internal fun clearEverything() {
         val editor = SharedPrefManager.with(context = AppController.appController!!)!!.edit()
         editor.remove(SharedPrefConstants.STORE_USER_NAME)
         editor.remove(SharedPrefConstants.STORE_USER_PASSWORD)
         editor.remove(SharedPrefConstants.STORE_USER_ACCESS_TOKEN)
+        editor.remove(SharedPrefConstants.STORE_SELECTED_USER_ID)
         editor.remove(SharedPrefConstants.STORE_ACCOUNTS)
         editor.remove(SharedPrefConstants.STORE_USER_PROFILE)
+        editor.remove(SharedPrefConstants.STORE_USER_ACCOUNT_PROFILE)
         editor.remove(SharedPrefConstants.STORE_SELECTED_ACCOUNT_ID)
         editor.remove(SharedPrefConstants.STORE_SELECTED_ACCOUNT_NAME)
         editor.apply()

@@ -118,6 +118,7 @@ class DashboardFragment : Fragment(), RecyclerItemClickListener {
                     updateSyncView(false)
                 }
                 LoadState.DOWNLOADING -> {
+                    setSwipeRefreshStatus(false)
                     updateSyncView(true, "Downloading Assets")
                 }
                 LoadState.DOWNLOADED -> {
@@ -140,7 +141,6 @@ class DashboardFragment : Fragment(), RecyclerItemClickListener {
 
         showHideSearchBar(false)
         showHide404View(false)
-        //updateSyncView(true)
         workflowViewModel.refresh()
     }
 

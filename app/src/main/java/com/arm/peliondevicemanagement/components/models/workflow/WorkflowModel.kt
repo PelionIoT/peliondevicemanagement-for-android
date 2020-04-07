@@ -47,6 +47,7 @@ data class WorkflowModel(
     @field:SerializedName("created_at") val workflowCreatedAt: String,
     @field:SerializedName("execution_time") val workflowExecutedAt: String,
     @field:SerializedName("assignee") val assigneeID: String?,
+    @field:SerializedName("accountID") var accountID: String?,
     @field:SerializedName("sda_token") var sdaToken: SDATokenResponse?
 ): Parcelable {
     override fun equals(other: Any?): Boolean {

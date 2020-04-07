@@ -35,10 +35,11 @@ import com.arm.peliondevicemanagement.databinding.FragmentAccountsBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.screens.activities.HostActivity
-import com.arm.peliondevicemanagement.components.models.AccountModel
-import com.arm.peliondevicemanagement.components.models.ProfileModel
+import com.arm.peliondevicemanagement.components.models.user.Account
+import com.arm.peliondevicemanagement.components.models.user.UserProfile
 import com.arm.peliondevicemanagement.components.viewmodels.LoginViewModel
 import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
+import com.arm.peliondevicemanagement.components.models.user.AccountProfileModel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
@@ -54,7 +55,7 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
     private lateinit var loginViewModel: LoginViewModel
 
     private var accountAdapter: AccountAdapter? = null
-    private var accountModelsList = arrayListOf<AccountModel>()
+    private var accountModelsList = arrayListOf<Account>()
 
     private val queryTextListener = object : SearchView.OnQueryTextListener {
         override fun onQueryTextSubmit(query: String?): Boolean = false
@@ -96,8 +97,8 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
     private fun setupData() {
         if(!SharedPrefHelper.getStoredAccounts().isNullOrBlank()) {
             val accountsJson = SharedPrefHelper.getStoredAccounts()
-            val type = object: TypeToken<List<AccountModel>>() {}.type
-            val accounts = Gson().fromJson<ArrayList<AccountModel>>(accountsJson, type)
+            val type = object: TypeToken<List<Account>>() {}.type
+            val accounts = Gson().fromJson<ArrayList<Account>>(accountsJson, type)
             LogHelper.debug(TAG, "onStoredAccounts(): $accounts")
             accountModelsList = accounts
         }
@@ -106,7 +107,7 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
     private fun setupListeners() {
         viewBinder.searchBar.searchTextBox.setOnQueryTextListener(queryTextListener)
 
-        loginViewModel.userAccountLiveData.observe(viewLifecycleOwner, Observer { response ->
+        loginViewModel.getLoginActionLiveData().observe(viewLifecycleOwner, Observer { response ->
             if(response != null){
                 LogHelper.debug(TAG, "onLoginSuccess(): $response")
                 processSingleAccountData(response.accessToken)
@@ -117,13 +118,24 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
             }
         })
 
-        loginViewModel.userProfileLiveData.observe(viewLifecycleOwner, Observer { response ->
+        loginViewModel.getUserProfileLiveData().observe(viewLifecycleOwner, Observer { response ->
             if(response != null){
                 processUserProfileData(response)
+            } else {
+                showHideProgressbar(false)
+                showHideAccountList(true)
+                (activity as HostActivity).showSnackbar(viewBinder.root, "Failed to authenticate")
+            }
+        })
+
+        loginViewModel.getAccountProfileLiveData().observe(viewLifecycleOwner, Observer { response ->
+            if(response != null){
+                processUserAccountProfileData(response)
                 navigateToDashboardFragment()
             } else {
-                (activity as HostActivity).showSnackbar(viewBinder.root, "Failed to fetch profile-data")
-                navigateToDashboardFragment()
+                showHideProgressbar(false)
+                showHideAccountList(true)
+                (activity as HostActivity).showSnackbar(viewBinder.root, "Failed to authenticate")
             }
         })
     }
@@ -147,7 +159,7 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
     }
 
     override fun onItemClick(data: Any) {
-        val model = data as AccountModel
+        val model = data as Account
         LogHelper.debug(TAG, "onItemClick()-> " +
                 "accountName: ${model.accountName}, " +
                 "accountID: ${model.accountID}")
@@ -178,25 +190,32 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
     }
 
     private fun processSingleAccountData(accessToken: String) {
-        // Do accessToken login
+        // Save access-token
         LogHelper.debug(TAG, "onUserAccessToken()-> $accessToken")
-
         SharedPrefHelper.storeMultiAccountStatus(true)
         SharedPrefHelper.storeUserAccessToken(accessToken)
-
-        if(!SharedPrefHelper.getUserPassword().isNullOrBlank()) {
-            SharedPrefHelper.removePassword()
-            loginViewModel.getProfile()
-        } else {
-            navigateToDashboardFragment()
-        }
+        // Now fetch user-profile
+        loginViewModel.fetchUserProfile()
     }
 
-    private fun processUserProfileData(profile: ProfileModel) {
+    private fun processUserProfileData(userProfile: UserProfile) {
         // Store user-profile data as JSON in SharedPrefs
-        val profileJSON = Gson().toJson(profile)
+        val profileJSON = Gson().toJson(userProfile)
         LogHelper.debug(TAG, "onUserProfile()-> $profileJSON")
         SharedPrefHelper.storeUserProfile(profileJSON)
+        SharedPrefHelper.storeSelectedUserID(userProfile.userID)
+        // Now fetch selected account's profile
+        loginViewModel.fetchAccountProfile()
+    }
+
+    private fun processUserAccountProfileData(accountProfile: AccountProfileModel) {
+        // Store user account-profile data as JSON in SharedPrefs
+        val accountProfileJSON = Gson().toJson(accountProfile)
+        LogHelper.debug(TAG, "onAccountProfile()-> $accountProfileJSON")
+        SharedPrefHelper.storeUserAccountProfile(accountProfileJSON)
+        if(!SharedPrefHelper.getUserPassword().isNullOrBlank()) {
+            SharedPrefHelper.removePassword()
+        }
     }
 
     private fun navigateToDashboardFragment() {

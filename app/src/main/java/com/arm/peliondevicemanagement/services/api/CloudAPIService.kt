@@ -17,8 +17,9 @@
 
 package com.arm.peliondevicemanagement.services.api
 
+import com.arm.peliondevicemanagement.components.models.user.AccountProfileModel
 import com.arm.peliondevicemanagement.components.models.LicenseModel
-import com.arm.peliondevicemanagement.components.models.ProfileModel
+import com.arm.peliondevicemanagement.components.models.user.UserProfile
 import com.arm.peliondevicemanagement.constants.APIConstants.API_ACCOUNTS_ME
 import com.arm.peliondevicemanagement.constants.APIConstants.API_ALL_WORKFLOWS
 import com.arm.peliondevicemanagement.services.data.LoginResponse
@@ -99,10 +100,10 @@ interface CloudAPIService {
     suspend fun getSDAToken(@Body params: RequestBody): Response<SDATokenResponse>
 
     @GET(API_USER_ME)
-    suspend fun getProfile(): Response<ProfileModel>
+    suspend fun getUserProfile(): Response<UserProfile>
 
     @GET(API_ACCOUNTS_ME)
-    suspend fun getAccountProfile()
+    suspend fun getAccountProfile(): Response<AccountProfileModel>
 
     @GET(API_ASSIGNED_WORKFLOWS)
     suspend fun getAssignedWorkflows(

@@ -21,11 +21,11 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.R
-import com.arm.peliondevicemanagement.components.models.LoginHistoryModel
+import com.arm.peliondevicemanagement.components.models.user.UserLoginHistory
 import com.arm.peliondevicemanagement.components.viewholders.LoginHistoryViewHolder
 import java.util.*
 
-class LoginHistoryAdapter(private val loginHistoryList: ArrayList<LoginHistoryModel>):
+class LoginHistoryAdapter(private val loginHistoryList: ArrayList<UserLoginHistory>):
     RecyclerView.Adapter<LoginHistoryViewHolder>() {
 
     companion object {

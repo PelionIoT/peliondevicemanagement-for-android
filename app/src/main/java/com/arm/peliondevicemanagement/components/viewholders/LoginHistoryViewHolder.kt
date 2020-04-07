@@ -20,17 +20,14 @@ package com.arm.peliondevicemanagement.components.viewholders
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.R
-import com.arm.peliondevicemanagement.components.models.AccountModel
-import com.arm.peliondevicemanagement.components.models.LoginHistoryModel
-import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
-import kotlinx.android.synthetic.main.layout_item_account.view.*
+import com.arm.peliondevicemanagement.components.models.user.UserLoginHistory
 import kotlinx.android.synthetic.main.layout_item_loginhistory.view.*
 
 class LoginHistoryViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
 
-    private lateinit var loginHistoryModel: LoginHistoryModel
+    private lateinit var loginHistoryModel: UserLoginHistory
 
-    internal fun bind(model: LoginHistoryModel) {
+    internal fun bind(model: UserLoginHistory) {
         this.loginHistoryModel = model
 
         val loginStatus: String = if(model.status)

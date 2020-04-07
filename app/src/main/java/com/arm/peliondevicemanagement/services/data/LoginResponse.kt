@@ -17,11 +17,11 @@
 
 package com.arm.peliondevicemanagement.services.data
 
-import com.arm.peliondevicemanagement.components.models.AccountModel
+import com.arm.peliondevicemanagement.components.models.user.Account
 import com.google.gson.annotations.SerializedName
 
 data class LoginResponse(
-    val accounts: List<AccountModel>,
+    val accounts: List<Account>,
     @SerializedName("account_id")
     val accountID: String,
     @SerializedName("user_id")

@@ -30,16 +30,18 @@ interface WorkflowDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertWorkflows(workflows: List<WorkflowModel>)
 
+    // FixME
     @Query("SELECT * FROM workflows ORDER BY workflowCreatedAt ASC")
     fun fetchWorkflows(): List<WorkflowModel>
 
-    @Query("SELECT * FROM workflows ORDER BY workflowCreatedAt ASC LIMIT :limit")
-    fun fetchWorkflows(limit: Int): List<WorkflowModel>
+    // FixME [ Add assignee field after testing ]
+    @Query("SELECT * FROM workflows WHERE accountID=:accountID ORDER BY workflowCreatedAt ASC LIMIT :limit")
+    fun fetchWorkflows(accountID: String, limit: Int): List<WorkflowModel>
 
-    @Query("SELECT * FROM workflows WHERE workflowCreatedAt > " +
-            "(SELECT workflowCreatedAt FROM workflows WHERE workflowID LIKE :afterID) " +
+    @Query("SELECT * FROM workflows WHERE accountID=:accountID AND (workflowCreatedAt > " +
+            "(SELECT workflowCreatedAt FROM workflows WHERE workflowID LIKE :afterID)) " +
             "ORDER BY workflowCreatedAt ASC LIMIT :limit")
-    fun fetchWorkflows(limit: Int, afterID: String): List<WorkflowModel>
+    fun fetchWorkflows(accountID: String, limit: Int, afterID: String): List<WorkflowModel>
 
     @Query("SELECT * FROM workflows WHERE workflowID=:workflowID")
     fun fetchWorkflow(workflowID: String): WorkflowModel
@@ -61,7 +63,7 @@ interface WorkflowDao {
     /*@DELETE
     fun deleteWorkflow(workflowID: String)*/
 
-    @Query("DELETE FROM workflows")
-    fun deleteAllWorkflows()
+    @Query("DELETE FROM workflows WHERE accountID=:accountID")
+    fun deleteAllWorkflows(accountID: String)
 
 }

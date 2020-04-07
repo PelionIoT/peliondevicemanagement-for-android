@@ -27,9 +27,9 @@ import java.io.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-object FileUtils {
+object WorkflowFileUtils {
 
-    private val TAG: String = FileUtils::class.java.simpleName
+    private val TAG: String = WorkflowFileUtils::class.java.simpleName
 
     private fun getWorkflowAssetsDirectory(context: Context): String {
         val directoryPath = context.filesDir.absolutePath +
@@ -41,30 +41,11 @@ object FileUtils {
         return directoryPath
     }
 
-    fun writeWorkflowAssetFile(context: Context,
-                               subDirectoryName: String,
-                               fileName: String,
-                               fileContent: String){
-        val subDirPath = getWorkflowAssetsDirectory(context) +
-                File.separator + subDirectoryName
-
-        val subDir = File(subDirPath)
-        if(!subDir.exists()){
-            subDir.mkdirs()
-        }
-
-        val file = File(subDirPath, fileName)
-        val fileOutStream = FileOutputStream(file)
-        fileOutStream.write(fileContent.toByteArray())
-        fileOutStream.close()
-        LogHelper.debug(TAG, "writeWorkflowAssetFile() File written: $fileName")
-    }
-
-    fun readWorkflowAssetFile(context: Context,
-                              subDirectoryName: String,
+    fun readWorkflowAssetFile(locationPath: String,
                               fileName: String): String? {
+        val context = AppController.appController!!.applicationContext
         val subDirPath = getWorkflowAssetsDirectory(context) +
-                File.separator + subDirectoryName
+                File.separator + locationPath
 
         val subDir = File(subDirPath)
         if(!subDir.exists()){
@@ -76,6 +57,8 @@ object FileUtils {
         if(!file.exists()){
             return null
         }
+
+        LogHelper.debug(TAG, "Reading file from $locationPath")
 
         val fileInputStream = FileInputStream(file)
         fileInputStream.bufferedReader().useLines { lines ->
@@ -113,13 +96,21 @@ object FileUtils {
         return isDeleted
     }
 
-    fun deleteWorkflowAssetsDirectory(context: Context): Boolean {
-        val dirPath = getWorkflowAssetsDirectory(context)
+    fun deleteWorkflowAssets(locationPath: String? = null): Boolean {
+        val context = AppController.appController!!.applicationContext
+        val dirPath = if(locationPath != null){
+            getWorkflowAssetsDirectory(context) + File.separator + locationPath
+        } else {
+            getWorkflowAssetsDirectory(context)
+        }
+        LogHelper.debug(TAG, "Deleting files from $locationPath")
         val dir = File(dirPath)
         return if(!dir.exists()){
+            LogHelper.debug(TAG, "Directory does not exists")
             false
         } else {
             dir.deleteRecursively()
+            LogHelper.debug(TAG, "Files deleted successfully")
             true
         }
     }

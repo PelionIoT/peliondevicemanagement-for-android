@@ -50,6 +50,7 @@
                 android:layout_toStartOf="@id/syncProgressView"
                 android:fontFamily="@font/lato_regular"
                 android:textSize="16sp"
+                android:textColor="@android:color/black"
                 />
 
             <TextView
@@ -64,6 +65,7 @@
                 tools:text="Downloading assets"
                 android:visibility="gone"
                 tools:visibility="visible"
+                android:textColor="@android:color/black"
                 />
 
             <ProgressBar

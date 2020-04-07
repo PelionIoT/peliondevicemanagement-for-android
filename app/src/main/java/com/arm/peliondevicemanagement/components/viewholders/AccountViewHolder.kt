@@ -20,14 +20,14 @@ package com.arm.peliondevicemanagement.components.viewholders
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
-import com.arm.peliondevicemanagement.components.models.AccountModel
+import com.arm.peliondevicemanagement.components.models.user.Account
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import kotlinx.android.synthetic.main.layout_item_account.view.*
 
 class AccountViewHolder(itemView: View,
                         private val itemClickListener: RecyclerItemClickListener): RecyclerView.ViewHolder(itemView) {
 
-    private lateinit var accountModel: AccountModel
+    private lateinit var accountModel: Account
 
     init {
         itemView.setOnClickListener {
@@ -35,7 +35,7 @@ class AccountViewHolder(itemView: View,
         }
     }
 
-    internal fun bind(model: AccountModel) {
+    internal fun bind(model: Account) {
         this.accountModel = model
         itemView.apply {
             cardAccountItem.isChecked = SharedPrefHelper

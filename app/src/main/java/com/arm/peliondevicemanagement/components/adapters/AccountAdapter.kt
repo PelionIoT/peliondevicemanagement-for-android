@@ -25,10 +25,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.viewholders.AccountViewHolder
 import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
-import com.arm.peliondevicemanagement.components.models.AccountModel
+import com.arm.peliondevicemanagement.components.models.user.Account
 import java.util.*
 
-class AccountAdapter(private val accountsList: ArrayList<AccountModel>,
+class AccountAdapter(private val accountsList: ArrayList<Account>,
                      private val itemClickListener: RecyclerItemClickListener):
     RecyclerView.Adapter<AccountViewHolder>(),
     RecyclerItemClickListener,
@@ -38,7 +38,7 @@ class AccountAdapter(private val accountsList: ArrayList<AccountModel>,
         private val TAG: String = AccountAdapter::class.java.simpleName
     }
 
-    private var accountsListFiltered: ArrayList<AccountModel> = accountsList
+    private var accountsListFiltered: ArrayList<Account> = accountsList
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AccountViewHolder {
         return AccountViewHolder(itemView = LayoutInflater.from(parent.context)
@@ -60,7 +60,7 @@ class AccountAdapter(private val accountsList: ArrayList<AccountModel>,
             accountsListFiltered = when {
                 searchedText.isBlank() -> accountsList
                 else -> {
-                    val filteredList = arrayListOf<AccountModel>()
+                    val filteredList = arrayListOf<Account>()
                     accountsList
                         .filterTo(filteredList)
                         {
@@ -75,13 +75,13 @@ class AccountAdapter(private val accountsList: ArrayList<AccountModel>,
         }
 
         override fun publishResults(charSequence: CharSequence, filterResults: FilterResults) {
-            accountsListFiltered = filterResults.values as ArrayList<AccountModel>
+            accountsListFiltered = filterResults.values as ArrayList<Account>
             notifyDataSetChanged()
         }
     }
 
     override fun onItemClick(data: Any) {
-        val model = data as AccountModel
+        val model = data as Account
         itemClickListener.onItemClick(model)
     }
 

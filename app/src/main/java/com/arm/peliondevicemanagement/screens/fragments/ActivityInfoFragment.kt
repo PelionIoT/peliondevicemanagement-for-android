@@ -28,8 +28,8 @@ import androidx.recyclerview.widget.RecyclerView
 
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.adapters.LoginHistoryAdapter
-import com.arm.peliondevicemanagement.components.models.LoginHistoryModel
-import com.arm.peliondevicemanagement.components.models.ProfileModel
+import com.arm.peliondevicemanagement.components.models.user.UserLoginHistory
+import com.arm.peliondevicemanagement.components.models.user.UserProfile
 import com.arm.peliondevicemanagement.databinding.FragmentActivityInfoBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
@@ -49,7 +49,7 @@ class ActivityInfoFragment : Fragment() {
     private val viewBinder get() = _viewBinder!!
 
     private var loginHistoryAdapter: LoginHistoryAdapter? = null
-    private var loginHistoryModelsList = arrayListOf<LoginHistoryModel>()
+    private var loginHistoryModelsList = arrayListOf<UserLoginHistory>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -66,10 +66,10 @@ class ActivityInfoFragment : Fragment() {
     }
 
     private fun setupData() {
-        if(!SharedPrefHelper.getStoredProfile().isNullOrBlank()) {
-            val profileJson = SharedPrefHelper.getStoredProfile()
-            val type = object: TypeToken<ProfileModel>() {}.type
-            val profile = Gson().fromJson<ProfileModel>(profileJson, type)
+        if(!SharedPrefHelper.getStoredUserProfile().isNullOrBlank()) {
+            val profileJson = SharedPrefHelper.getStoredUserProfile()
+            val type = object: TypeToken<UserProfile>() {}.type
+            val profile = Gson().fromJson<UserProfile>(profileJson, type)
             LogHelper.debug(TAG, "onStoredProfile(): $profile")
             loginHistoryModelsList = ArrayList(profile.loginHistory)
         } else {

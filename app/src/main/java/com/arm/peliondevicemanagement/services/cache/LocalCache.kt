@@ -19,6 +19,7 @@ package com.arm.peliondevicemanagement.services.cache
 
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
 import com.arm.peliondevicemanagement.helpers.LogHelper
+import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.services.data.SDATokenResponse
 import java.util.concurrent.Executor
 
@@ -49,12 +50,22 @@ class LocalCache(
 
     fun fetchWorkflows(limit: Int? = null, after: String? = null): List<WorkflowModel> {
         LogHelper.debug(TAG, "fetchWorkflows()")
+        //val assigneeID = SharedPrefHelper.getSelectedUserID()!!
+        val accountID = SharedPrefHelper.getSelectedAccountID()!!
         return if(limit != null && after != null){
-            workflowDao.fetchWorkflows(limit, after)
+            workflowDao.fetchWorkflows(accountID, limit, after)
         } else if(limit != null && after == null) {
-            workflowDao.fetchWorkflows(limit)
+            workflowDao.fetchWorkflows(accountID, limit)
         } else {
             workflowDao.fetchWorkflows()
+        }
+    }
+
+    fun deleteAllWorkflows(accountID: String, deleteComplete: () -> Unit) {
+        ioExecutor.execute {
+            LogHelper.debug(TAG, "Deleting workflows of account: $accountID")
+            workflowDao.deleteAllWorkflows(accountID)
+            deleteComplete()
         }
     }
 }

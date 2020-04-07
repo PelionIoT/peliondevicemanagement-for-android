@@ -21,18 +21,17 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.arm.peliondevicemanagement.components.models.ProfileModel
+import com.arm.peliondevicemanagement.components.models.user.UserProfile
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
 import com.arm.peliondevicemanagement.constants.AppConstants.WORKFLOW_DATABASE_NAME
 
 @Database(
-    entities = [WorkflowModel::class, ProfileModel::class],
+    entities = [WorkflowModel::class],
     version = 1,
     exportSchema = false
 )
 abstract class WorkflowDB : RoomDatabase() {
 
-    abstract fun profileDao(): ProfileDao
     abstract fun workflowsDao(): WorkflowDao
 
     companion object {

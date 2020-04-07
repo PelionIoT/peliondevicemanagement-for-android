@@ -15,25 +15,14 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.components.models
+package com.arm.peliondevicemanagement.components.models.user
 
 import android.os.Parcelable
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-import androidx.room.TypeConverters
-import com.arm.peliondevicemanagement.helpers.converters.WLoginHistoryListConverter
-import com.arm.peliondevicemanagement.helpers.converters.WTasksListConverter
 import com.google.gson.annotations.SerializedName
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-@Entity(tableName = "profiles")
-@TypeConverters(WLoginHistoryListConverter::class)
-data class ProfileModel(
-    @PrimaryKey @SerializedName("id") val userID: String,
-    @SerializedName("full_name") val userName: String,
-    @SerializedName("email") val userEmail: String,
-    @SerializedName("account_id") val accountID: String,
-    @SerializedName("last_login_time") val userLastLoginTime: Long,
-    @SerializedName("login_history") val loginHistory: List<LoginHistoryModel>
+data class AccountPolicy(
+    @SerializedName("feature") val featureName: String,
+    @SerializedName("allow") val isAllowed: Boolean
 ): Parcelable

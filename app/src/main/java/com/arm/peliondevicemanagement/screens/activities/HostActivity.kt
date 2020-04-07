@@ -30,9 +30,11 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.databinding.ActivityHostBinding
+import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.screens.fragments.AccountsFragmentDirections
 import com.arm.peliondevicemanagement.screens.fragments.DashboardFragmentDirections
+import com.arm.peliondevicemanagement.utils.WorkflowUtils
 import com.google.android.material.navigation.NavigationView
 import kotlinx.android.synthetic.main.layout_drawer_header.view.*
 
@@ -48,6 +50,10 @@ class HostActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     private lateinit var navigationMenu: Menu
 
     private var isAccountGraph: Boolean = false
+
+    companion object {
+        private val TAG: String = HostActivity::class.java.simpleName
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -225,8 +231,10 @@ class HostActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 navigationController.navigate(R.id.settingsFragment)
             }
             R.id.signout -> {
+                WorkflowUtils.deleteWorkflowsCache()
                 SharedPrefHelper.storeMultiAccountStatus(false)
                 SharedPrefHelper.clearEverything()
+                LogHelper.debug(TAG, "Sign-out complete")
                 if(isAccountGraph){
                     navigationController.navigate(
                         AccountsFragmentDirections

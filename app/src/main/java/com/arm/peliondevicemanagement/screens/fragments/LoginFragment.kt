@@ -28,13 +28,15 @@ import android.view.ViewTreeObserver
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
-import com.arm.peliondevicemanagement.components.models.AccountModel
-import com.arm.peliondevicemanagement.components.models.ProfileModel
+import com.arm.peliondevicemanagement.components.models.user.Account
+import com.arm.peliondevicemanagement.components.models.user.AccountProfileModel
+import com.arm.peliondevicemanagement.components.models.user.UserProfile
 import com.arm.peliondevicemanagement.components.viewmodels.LoginViewModel
 import com.arm.peliondevicemanagement.databinding.FragmentLoginBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.screens.activities.HostActivity
+import com.arm.peliondevicemanagement.utils.WorkflowFileUtils
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.layout_version.*
 
@@ -89,7 +91,7 @@ class LoginFragment : Fragment() {
             performLogin()
         }
 
-        loginViewModel.userAccountLiveData.observe(viewLifecycleOwner, Observer { response ->
+        loginViewModel.getLoginActionLiveData().observe(viewLifecycleOwner, Observer { response ->
             if(response != null){
                 if(!response.accounts.isNullOrEmpty()){
                     processMultiAccountData(response.accounts)
@@ -105,14 +107,30 @@ class LoginFragment : Fragment() {
             }
         })
 
-        loginViewModel.userProfileLiveData.observe(viewLifecycleOwner, Observer { response ->
+        loginViewModel.getUserProfileLiveData().observe(viewLifecycleOwner, Observer { response ->
             if(response != null){
                 processUserProfileData(response)
+            } else {
+                SharedPrefHelper.removePassword()
+                SharedPrefHelper.removeAccessToken()
+                (activity as HostActivity).showSnackbar(viewBinder.root, "Failed to authenticate")
+                clearPasswordTextBox()
+                showHideProgressbar(false)
+                showHideLoginView(true)
+            }
+        })
+
+        loginViewModel.getAccountProfileLiveData().observe(viewLifecycleOwner, Observer { response ->
+            if(response != null){
+                processUserAccountProfileData(response)
                 navigateToDashboardFragment()
             } else {
-                (activity as HostActivity).showSnackbar(viewBinder.root, "Failed to fetch profile-data")
+                SharedPrefHelper.removePassword()
+                SharedPrefHelper.removeAccessToken()
+                (activity as HostActivity).showSnackbar(viewBinder.root, "Failed to authenticate")
                 clearPasswordTextBox()
-                navigateToDashboardFragment()
+                showHideProgressbar(false)
+                showHideLoginView(true)
             }
         })
     }
@@ -207,6 +225,7 @@ class LoginFragment : Fragment() {
     }
 
     private fun doReAuthIfPossible() {
+        // In-case of single account, re-auth will not work for now
         if(!SharedPrefHelper.getSelectedAccountID().isNullOrBlank()){
             showHideLoginView(false)
             viewBinder.emailInputTxt.setText(SharedPrefHelper.getUserName())
@@ -233,7 +252,7 @@ class LoginFragment : Fragment() {
         loginViewModel.doLogin(userEmail, userPassword)
     }
 
-    private fun processMultiAccountData(accounts: List<AccountModel>) {
+    private fun processMultiAccountData(accounts: List<Account>) {
         // Store listOfAccounts as JSON in SharedPrefs
         val accountsJSON = Gson().toJson(accounts)
         LogHelper.debug(TAG, "onUserAccounts()-> $accountsJSON")
@@ -245,28 +264,34 @@ class LoginFragment : Fragment() {
     }
 
     private fun processSingleAccountData(accessToken: String) {
-        // Do accessToken login
+        // Save access-token
         LogHelper.debug(TAG, "onUserAccessToken()-> $accessToken")
-
+        SharedPrefHelper.storeUserAccessToken(accessToken)
+        // Store account-type status
         if(!SharedPrefHelper.getStoredAccounts().isNullOrBlank()){
             SharedPrefHelper.storeMultiAccountStatus(true)
         } else {
             SharedPrefHelper.storeMultiAccountStatus(false)
         }
-        SharedPrefHelper.storeUserAccessToken(accessToken)
-
-        if(SharedPrefHelper.getStoredProfile().isNullOrBlank()){
-            loginViewModel.getProfile()
-        } else {
-            navigateToDashboardFragment()
-        }
+        // Fetch user-profile
+        loginViewModel.fetchUserProfile()
     }
 
-    private fun processUserProfileData(profile: ProfileModel) {
+    private fun processUserProfileData(userProfile: UserProfile) {
         // Store user-profile data as JSON in SharedPrefs
-        val profileJSON = Gson().toJson(profile)
+        val profileJSON = Gson().toJson(userProfile)
         LogHelper.debug(TAG, "onUserProfile()-> $profileJSON")
         SharedPrefHelper.storeUserProfile(profileJSON)
+        SharedPrefHelper.storeSelectedUserID(userProfile.userID)
+        // Now fetch selected account's profile
+        loginViewModel.fetchAccountProfile()
+    }
+
+    private fun processUserAccountProfileData(accountProfile: AccountProfileModel) {
+        // Store user account-profile data as JSON in SharedPrefs
+        val accountProfileJSON = Gson().toJson(accountProfile)
+        LogHelper.debug(TAG, "onAccountProfile()-> $accountProfileJSON")
+        SharedPrefHelper.storeUserAccountProfile(accountProfileJSON)
     }
 
     private fun navigateToAccountsFragment() {

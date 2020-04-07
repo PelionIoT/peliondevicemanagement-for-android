@@ -15,22 +15,18 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.services.cache
+package com.arm.peliondevicemanagement.components.models.user
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
-import com.arm.peliondevicemanagement.components.models.ProfileModel
+import android.os.Parcelable
+import com.google.gson.annotations.SerializedName
+import kotlinx.android.parcel.Parcelize
 
-@Dao
-interface ProfileDao {
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertProfile(profile: ProfileModel)
-
-    @Query("SELECT * FROM profiles WHERE userID=:userID")
-    fun fetchProfile(userID: String): ProfileModel
-
-
-}
+@Parcelize
+data class Account(
+    @SerializedName("id")
+    val accountID: String,
+    val alias: String,
+    @SerializedName("display_name")
+    val accountName: String,
+    val status: String
+): Parcelable

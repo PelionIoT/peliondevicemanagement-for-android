@@ -33,13 +33,12 @@ import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.services.CloudRepository
 import com.arm.peliondevicemanagement.services.cache.LocalCache
 import com.arm.peliondevicemanagement.services.data.SDATokenResponse
-import com.arm.peliondevicemanagement.utils.FileUtils
+import com.arm.peliondevicemanagement.utils.WorkflowFileUtils
+import com.arm.peliondevicemanagement.utils.WorkflowUtils.downloadTaskAssets
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.fetchSDAToken
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.getPermissionScopeFromTasks
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.util.*
-import kotlin.collections.ArrayList
 
 class WorkflowDataSource(
     private val scope: CoroutineScope,
@@ -142,6 +141,9 @@ class WorkflowDataSource(
                 response.workflows.let {
                     // Construct workflow devices-list
                     it.forEach { workflow ->
+                        // Store accountID
+                        workflow.accountID = SharedPrefHelper.getSelectedAccountID()
+                        // Parse AUDs into devices
                         workflow.workflowDevices = arrayListOf()
                         workflow.workflowAUDs.forEach { aud ->
                             workflow.workflowDevices!!.add(
@@ -150,16 +152,15 @@ class WorkflowDataSource(
                                     AppConstants.DEVICE_STATE_PENDING
                                 )
                             )
-
-                            // Fetch SDA_token
-                            val sdaTokenResponse = fetchAndSaveSDAToken(workflow)
-                            if(sdaTokenResponse != null){
-                                workflow.sdaToken = sdaTokenResponse
-                            }
-
-                            // Download Task Assets
-                            downloadTaskAssets(workflow.workflowID, workflow.workflowTasks)
                         }
+                        // Fetch SDA_token
+                        val sdaTokenResponse = fetchAndSaveSDAToken(workflow)
+                        if(sdaTokenResponse != null){
+                            workflow.sdaToken = sdaTokenResponse
+                        }
+                        // Download Task Assets
+                        downloadTaskAssets(cloudRepository,
+                            workflow.workflowID, workflow.workflowTasks)
                     }
                     // Store in DB
                     localCache.insertWorkflows(it) {
@@ -189,48 +190,4 @@ class WorkflowDataSource(
 
         return fetchSDAToken(cloudRepository, permissionScope, audienceList)
     }
-
-    private suspend fun downloadTaskAssets(workflowID: String, workflowTasks: List<WorkflowTaskModel>) {
-        val accountID = SharedPrefHelper.getSelectedAccountID()
-        LogHelper.debug(TAG, "Scanning workflow task-assets")
-        val fileQueue = arrayListOf<String>()
-        workflowTasks.forEach { task ->
-            if(task.taskName == AppConstants.WRITE_TASK){
-                task.inputParameters.forEach { inputParam ->
-                    if(inputParam.paramType == WORKFLOW_TASK_TYPE_FILE &&
-                            inputParam.paramName == WORKFLOW_TASK_NAME_FILE){
-                        fileQueue.add(inputParam.paramValue)
-                    }
-                }
-            }
-        }
-
-        if(!fileQueue.isNullOrEmpty()){
-            fileQueue.forEach { fileID ->
-                LogHelper.debug(TAG, "Downloading file: $fileID")
-                val fileResponse = cloudRepository.getWorkflowTaskAssetFile(fileID)
-                if(fileResponse != null){
-                    val inputStream = fileResponse.byteStream()
-                    LogHelper.debug(TAG, "Saving to $accountID/$workflowID/$fileID")
-                    val isSuccessful = FileUtils.downloadWorkflowAssetFile(
-                        "$accountID/$workflowID",
-                        "$fileID.txt",
-                        inputStream,
-                        fileResponse.contentLength()
-                    )
-                    if(isSuccessful){
-                        LogHelper.debug(TAG, "Download successful: $fileID")
-                    } else {
-                        LogHelper.debug(TAG,"Download failed: $fileID")
-                    }
-                } else {
-                    LogHelper.debug(TAG,"Download failed: $fileID")
-                }
-            }
-        } else {
-            LogHelper.debug(TAG, "No downloadable assets found.")
-        }
-
-    }
-
 }

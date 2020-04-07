@@ -15,18 +15,19 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.components.models
+package com.arm.peliondevicemanagement.components.models.user
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class AccountModel(
-    @SerializedName("id")
-    val accountID: String,
-    val alias: String,
-    @SerializedName("display_name")
-    val accountName: String,
-    val status: String
+data class UserLoginHistory(
+    val date: String,
+    @SerializedName("success")
+    val status: Boolean,
+    @SerializedName("ip_address")
+    val ipAddress: String,
+    @SerializedName("user_agent")
+    val userAgent: String
 ): Parcelable
