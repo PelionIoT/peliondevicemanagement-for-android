@@ -21,14 +21,11 @@ import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Build
-import com.arm.mbed.sda.proxysdk.SdkUtil
-import com.arm.mbed.sda.proxysdk.http.CreateAccessTokenRequest
+import com.arm.peliondevicemanagement.constants.AppConstants.WORKFLOW_ASSETS_DIRECTORY
 import com.arm.peliondevicemanagement.helpers.LogHelper
-import com.arm.peliondevicemanagement.services.CloudRepository
-import com.arm.peliondevicemanagement.services.data.SDATokenResponse
 import com.arm.pelionmobiletransportsdk.TransportManager
 import com.arm.pelionmobiletransportsdk.ble.scanner.BleManager
-import java.io.InputStream
+import java.io.*
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat
 import java.util.*
@@ -69,6 +66,11 @@ object PlatformUtils {
         return outputFormat.format(date!!)
     }
 
+    fun parseDateTimeString(inputString: Date, format: String = "dd-MM-yyyy"): String {
+        val outputFormat = SimpleDateFormat(format, Locale.ENGLISH)
+        return outputFormat.format(inputString)
+    }
+
     fun parseJSONTimeIntoTimeAgo(inputString: String): String {
         val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH)
         val date = inputFormat.parse(inputString)
@@ -95,37 +97,6 @@ object PlatformUtils {
         }
 
         return bleBuilder.build()
-    }
-
-    private fun createSDATokenRequest(popPemKey: String, scope: String, audience: List<String>): String {
-        val request = CreateAccessTokenRequest()
-        request.grantType = "client_credentials"
-        request.cnf = popPemKey
-        request.scope = scope
-        request.audience = audience
-
-        //LogHelper.debug(TAG, "createSDATokenRequest() -> $request")
-        return request.toString()
-    }
-
-    private fun validateSDAToken(accessToken: String, popPemKey: String) {
-        SdkUtil.validateTokenSanity(accessToken, popPemKey)
-    }
-
-    suspend fun fetchSDAToken(
-        cloudRepository: CloudRepository,
-        scope: String,
-        audienceList: List<String>): SDATokenResponse? {
-        return try {
-            val popPemPubKey = SdkUtil.getPopPemPubKey()
-            val request = createSDATokenRequest(popPemPubKey, scope, audienceList)
-            val tokenResponse = cloudRepository.getSDAToken(request)
-            validateSDAToken(tokenResponse?.accessToken!!, popPemPubKey)
-            tokenResponse
-        } catch (e: Throwable){
-            LogHelper.debug(TAG, "Exception occurred: ${e.message}")
-            null
-        }
     }
 
 }

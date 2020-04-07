@@ -24,13 +24,14 @@ import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import com.arm.peliondevicemanagement.AppController
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
-import com.arm.peliondevicemanagement.constants.AppConstants.DATABASE_PAGE_SIZE
 import com.arm.peliondevicemanagement.constants.LoadState
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.services.CloudRepository
 import com.arm.peliondevicemanagement.services.LocalRepository
 import com.arm.peliondevicemanagement.services.cache.LocalCache
 import com.arm.peliondevicemanagement.services.cache.WorkflowDB
+import com.arm.peliondevicemanagement.services.data.SDATokenResponse
+import com.arm.peliondevicemanagement.utils.WorkflowUtils.fetchSDAToken
 import kotlinx.coroutines.*
 import java.util.concurrent.Executors
 import kotlin.coroutines.CoroutineContext
@@ -54,6 +55,30 @@ class WorkflowViewModel : ViewModel() {
 
     private var workflowLiveData: LiveData<PagedList<WorkflowModel>>
     private val refreshStateLiveData = MutableLiveData<LoadState>()
+    private val refreshedSDATokenLiveData = MutableLiveData<SDATokenResponse>()
+
+    private val boundaryCallback = object: PagedList.BoundaryCallback<WorkflowModel>() {
+        override fun onZeroItemsLoaded() {
+            super.onZeroItemsLoaded()
+            // Handle empty initial load here
+            LogHelper.debug(TAG, "BoundaryCallback()->onZeroItemsLoaded")
+            refreshStateLiveData.postValue(LoadState.EMPTY)
+        }
+
+        override fun onItemAtEndLoaded(itemAtEnd: WorkflowModel) {
+            super.onItemAtEndLoaded(itemAtEnd)
+            // Here you can listen to last item on list
+            LogHelper.debug(TAG, "BoundaryCallback()->onItemAtEndLoaded")
+            refreshStateLiveData.postValue(LoadState.LOADED)
+        }
+
+        override fun onItemAtFrontLoaded(itemAtFront: WorkflowModel) {
+            super.onItemAtFrontLoaded(itemAtFront)
+            // Here you can listen to first item on list
+            LogHelper.debug(TAG, "BoundaryCallback()->onItemAtFrontLoaded")
+            refreshStateLiveData.postValue(LoadState.LOADED)
+        }
+    }
 
     init {
         localCache = LocalCache(workflowDB.workflowsDao(), Executors.newSingleThreadExecutor())
@@ -69,40 +94,41 @@ class WorkflowViewModel : ViewModel() {
         workflowLiveData.value?.dataSource?.invalidate()
     }
 
+    fun refreshSDAToken(permissionScope: String, audienceList: List<String>) {
+        scope.launch {
+            val tokenResponse = fetchSDAToken(
+                cloudRepository,
+                permissionScope,
+                audienceList)
+            if(tokenResponse != null){
+                refreshedSDATokenLiveData.postValue(tokenResponse)
+            } else {
+                refreshedSDATokenLiveData.postValue(null)
+            }
+        }
+    }
+
+    fun updateLocalSDAToken(workflowID: String, sdaToken: SDATokenResponse?) {
+        localCache.updateSDAToken(workflowID, sdaToken) {
+            LogHelper.debug(TAG, "SDA-Token updated.")
+        }
+    }
+
+    fun getRefreshedSDAToken(): LiveData<SDATokenResponse> = refreshedSDATokenLiveData
+
     private fun getWorkflowsLiveData(): LiveData<PagedList<WorkflowModel>> {
         val pageConfig = PagedList.Config.Builder()
-            .setPageSize(DATABASE_PAGE_SIZE)
-            .setInitialLoadSizeHint(DATABASE_PAGE_SIZE)
+            .setPageSize(5)
+            .setInitialLoadSizeHint(10)
             .setEnablePlaceholders(false)
             .build()
 
         // Fetch data from the local-cache and return a factory
-        val dataSourceFactory = localRepository.fetchWorkflowsFactory()
+        val dataSourceFactory = localRepository.fetchWorkflowsFactory(refreshStateLiveData)
 
         // Get the paged list
         return LivePagedListBuilder(dataSourceFactory, pageConfig)
-            .setBoundaryCallback(object: PagedList.BoundaryCallback<WorkflowModel>() {
-                override fun onZeroItemsLoaded() {
-                    super.onZeroItemsLoaded()
-                    // Handle empty initial load here
-                    LogHelper.debug(TAG, "BoundaryCallback()->onZeroItemsLoaded")
-                    refreshStateLiveData.postValue(LoadState.EMPTY)
-                }
-
-                override fun onItemAtEndLoaded(itemAtEnd: WorkflowModel) {
-                    super.onItemAtEndLoaded(itemAtEnd)
-                    // Here you can listen to last item on list
-                    LogHelper.debug(TAG, "BoundaryCallback()->onItemAtEndLoaded")
-                    refreshStateLiveData.postValue(LoadState.LOADED)
-                }
-
-                override fun onItemAtFrontLoaded(itemAtFront: WorkflowModel) {
-                    super.onItemAtFrontLoaded(itemAtFront)
-                    // Here you can listen to first item on list
-                    LogHelper.debug(TAG, "BoundaryCallback()->onItemAtFrontLoaded")
-                    refreshStateLiveData.postValue(LoadState.LOADED)
-                }
-            })
+            .setBoundaryCallback(boundaryCallback)
             .build()
     }
 

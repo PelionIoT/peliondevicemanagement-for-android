@@ -29,6 +29,7 @@ import com.arm.peliondevicemanagement.constants.APIConstants.API_ASSIGNED_WORKFL
 import com.arm.peliondevicemanagement.constants.APIConstants.API_CLOUD_UI_SERVER
 import com.arm.peliondevicemanagement.constants.APIConstants.API_LICENSES
 import com.arm.peliondevicemanagement.constants.APIConstants.API_SDA_TOKEN
+import com.arm.peliondevicemanagement.constants.APIConstants.API_WORKFLOW_FILES
 import com.arm.peliondevicemanagement.constants.APIConstants.CONTENT_TYPE_JSON
 import com.arm.peliondevicemanagement.constants.APIConstants.DEFAULT_BASE_URL
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_AUTHORIZATION
@@ -42,14 +43,12 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.ResponseBody
 import org.json.JSONObject
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Query
+import retrofit2.http.*
 import java.util.concurrent.TimeUnit
 
 interface CloudAPIService {
@@ -116,6 +115,12 @@ interface CloudAPIService {
         @Query("limit") itemsPerPage: Int,
         @Query("after") after: String? = null
     ): Response<WorkflowsResponse>
+
+    @Streaming
+    @GET("$API_WORKFLOW_FILES/{file_id}")
+    suspend fun getWorkflowTaskAssetFile(
+        @Path("file_id") fileID: String
+    ): Response<ResponseBody>
 
     @GET(API_CLOUD_UI_SERVER + API_LICENSES)
     suspend fun getLicenses(): Response<List<LicenseModel>>

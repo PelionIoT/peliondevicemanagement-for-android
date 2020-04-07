@@ -20,5 +20,8 @@ package com.arm.peliondevicemanagement.constants
 enum class LoadState {
     LOADING,
     EMPTY,
-    LOADED
+    LOADED,
+    DOWNLOADED,
+    DOWNLOADING,
+    FAILED
 }

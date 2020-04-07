@@ -20,6 +20,8 @@ package com.arm.peliondevicemanagement.services.cache
 import androidx.room.*
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowDeviceModel
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
+import com.arm.peliondevicemanagement.helpers.converters.SDATokenResponseConverter
+import com.arm.peliondevicemanagement.services.data.SDATokenResponse
 import retrofit2.http.DELETE
 
 @Dao
@@ -28,13 +30,16 @@ interface WorkflowDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertWorkflows(workflows: List<WorkflowModel>)
 
-    @Query("SELECT * FROM workflows ORDER BY workflowCreatedAt ASC LIMIT 10")
+    @Query("SELECT * FROM workflows ORDER BY workflowCreatedAt ASC")
     fun fetchWorkflows(): List<WorkflowModel>
+
+    @Query("SELECT * FROM workflows ORDER BY workflowCreatedAt ASC LIMIT :limit")
+    fun fetchWorkflows(limit: Int): List<WorkflowModel>
 
     @Query("SELECT * FROM workflows WHERE workflowCreatedAt > " +
             "(SELECT workflowCreatedAt FROM workflows WHERE workflowID LIKE :afterID) " +
-            "ORDER BY workflowCreatedAt ASC LIMIT 10")
-    fun fetchWorkflows(afterID: String): List<WorkflowModel>
+            "ORDER BY workflowCreatedAt ASC LIMIT :limit")
+    fun fetchWorkflows(limit: Int, afterID: String): List<WorkflowModel>
 
     @Query("SELECT * FROM workflows WHERE workflowID=:workflowID")
     fun fetchWorkflow(workflowID: String): WorkflowModel
@@ -44,6 +49,10 @@ interface WorkflowDao {
 
     @Query("UPDATE workflows SET workflowStatus=:status WHERE workflowID=:workflowID")
     fun updateWorkflowStatus(workflowID: String, status: String)
+
+    @TypeConverters(SDATokenResponseConverter::class)
+    @Query("UPDATE workflows SET sdaToken=:sdaToken WHERE workflowID=:workflowID")
+    fun updateWorkflowSDAToken(workflowID: String, sdaToken: SDATokenResponse?)
 
     // FixME
     /*@Query("UPDATE workflows SET workflowDevices=:devices WHERE workflowID=:workflowID")

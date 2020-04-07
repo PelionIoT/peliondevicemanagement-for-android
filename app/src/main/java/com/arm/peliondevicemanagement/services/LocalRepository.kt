@@ -17,8 +17,10 @@
 
 package com.arm.peliondevicemanagement.services
 
+import androidx.lifecycle.MutableLiveData
 import androidx.paging.DataSource
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
+import com.arm.peliondevicemanagement.constants.LoadState
 import com.arm.peliondevicemanagement.services.cache.LocalCache
 import com.arm.peliondevicemanagement.services.store.WorkflowDataSource
 import kotlinx.coroutines.CoroutineScope
@@ -29,10 +31,10 @@ class LocalRepository(
     private val localCache: LocalCache
 ) {
 
-    fun fetchWorkflowsFactory(): DataSource.Factory<String, WorkflowModel> {
+    fun fetchWorkflowsFactory(stateLiveData: MutableLiveData<LoadState>): DataSource.Factory<String, WorkflowModel> {
         return object : DataSource.Factory<String, WorkflowModel>() {
             override fun create(): DataSource<String, WorkflowModel> {
-                return WorkflowDataSource(scope, cloudRepository, localCache)
+                return WorkflowDataSource(scope, cloudRepository, localCache, stateLiveData)
             }
         }
     }

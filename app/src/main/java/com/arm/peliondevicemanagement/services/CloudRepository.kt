@@ -32,6 +32,7 @@ import com.arm.peliondevicemanagement.services.data.LoginResponse
 import com.arm.peliondevicemanagement.services.data.SDATokenResponse
 import com.arm.peliondevicemanagement.services.data.WorkflowsResponse
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.ResponseBody
 
 class CloudRepository(private val cloudAPIService: CloudAPIService): BaseRepository() {
 
@@ -109,6 +110,13 @@ class CloudRepository(private val cloudAPIService: CloudAPIService): BaseReposit
                 errorMessage = "Unable to fetch workflows"
             )
         }
+    }
+
+    suspend fun getWorkflowTaskAssetFile(fileID: String): ResponseBody? {
+        return doSafeAPIRequest(
+            call = { cloudAPIService.getWorkflowTaskAssetFile(fileID)},
+            errorMessage = "Unable to fetch workflow file"
+        )
     }
 
     suspend fun getLicenses(): List<LicenseModel>? {

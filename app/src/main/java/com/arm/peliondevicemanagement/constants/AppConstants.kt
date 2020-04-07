@@ -25,6 +25,16 @@ object AppConstants {
     const val DATABASE_PAGE_SIZE = 20
     const val NETWORK_PAGE_SIZE = 50
 
+    const val WORKFLOW_ASSETS_DIRECTORY = "w_assets"
+    const val WORKFLOW_TASK_NAME_FILE = "file"
+    const val WORKFLOW_TASK_NAME_FILEPATH = "file_path"
+    const val WORKFLOW_TASK_TYPE_FILE = "FILE"
+    const val WORKFLOW_TASK_TYPE_STRING = "STRING"
+
+    // Date-Time constants
+    const val DEFAULT_DATE_FORMAT = "dd-MM-yyyy"
+    const val DEFAULT_TIME_FORMAT = "HH:mm"
+
     // Workflow constants
     const val READ_TASK = "Read file"
     const val WRITE_TASK = "Write file"

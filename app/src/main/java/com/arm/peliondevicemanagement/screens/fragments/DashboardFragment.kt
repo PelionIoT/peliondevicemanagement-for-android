@@ -29,7 +29,6 @@ import androidx.navigation.Navigation
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
 import com.arm.peliondevicemanagement.components.adapters.WorkflowAdapter
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
 import com.arm.peliondevicemanagement.components.viewmodels.WorkflowViewModel
@@ -37,7 +36,6 @@ import com.arm.peliondevicemanagement.databinding.FragmentDashboardBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
 import com.arm.peliondevicemanagement.constants.LoadState
-import com.arm.peliondevicemanagement.screens.activities.HostActivity
 
 class DashboardFragment : Fragment(), RecyclerItemClickListener {
 
@@ -91,6 +89,11 @@ class DashboardFragment : Fragment(), RecyclerItemClickListener {
             itemAnimator = DefaultItemAnimator()
             adapter = workflowAdapter
         }
+
+        viewBinder.syncProgressView.indeterminateDrawable.setColorFilter(
+            resources.getColor(android.R.color.black),
+            android.graphics.PorterDuff.Mode.MULTIPLY)
+
         resetSearchText()
     }
 
@@ -99,6 +102,9 @@ class DashboardFragment : Fragment(), RecyclerItemClickListener {
         viewBinder.searchBar.searchTextBox.setOnQueryTextListener(queryTextListener)
 
         workflowViewModel.getWorkflows().observe(viewLifecycleOwner, Observer {
+            if(it != null && it.isNotEmpty()){
+                setSwipeRefreshStatus(false)
+            }
             workflowAdapter.submitList(it)
         })
 
@@ -109,8 +115,19 @@ class DashboardFragment : Fragment(), RecyclerItemClickListener {
                 }
                 LoadState.LOADED -> {
                     setSwipeRefreshStatus(false)
+                    updateSyncView(false)
+                }
+                LoadState.DOWNLOADING -> {
+                    updateSyncView(true, "Downloading Assets")
+                }
+                LoadState.DOWNLOADED -> {
+                    updateSyncView(true, "Downloaded successfully")
+                }
+                LoadState.FAILED -> {
+                    updateSyncView(true, "Download failed")
                 }
                 else -> {
+                    updateSyncView(false)
                     setSwipeRefreshStatus(false)
                     showHide404View(true, "No jobs assigned")
                 }
@@ -123,7 +140,22 @@ class DashboardFragment : Fragment(), RecyclerItemClickListener {
 
         showHideSearchBar(false)
         showHide404View(false)
+        //updateSyncView(true)
         workflowViewModel.refresh()
+    }
+
+    private fun updateSyncView(visibility: Boolean, text: String? = null) {
+        if(visibility) {
+            viewBinder.syncView.visibility = View.VISIBLE
+            if(!text.isNullOrEmpty()){
+                viewBinder.syncSubText.visibility = View.VISIBLE
+                viewBinder.syncSubText.text = text
+            } else {
+                viewBinder.syncSubText.visibility = View.GONE
+            }
+        } else {
+            viewBinder.syncView.visibility = View.GONE
+        }
     }
 
     private fun setSwipeRefreshStatus(isRefreshing: Boolean) {

@@ -19,6 +19,7 @@ package com.arm.peliondevicemanagement.services.cache
 
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
 import com.arm.peliondevicemanagement.helpers.LogHelper
+import com.arm.peliondevicemanagement.services.data.SDATokenResponse
 import java.util.concurrent.Executor
 
 class LocalCache(
@@ -38,10 +39,20 @@ class LocalCache(
         }
     }
 
-    fun fetchWorkflows(after: String? = null): List<WorkflowModel> {
+    fun updateSDAToken(workflowID: String, sdaToken: SDATokenResponse?, updateFinished: () -> Unit) {
+        ioExecutor.execute {
+            LogHelper.debug(TAG, "Updating SDA-Token of workflow: $workflowID")
+            workflowDao.updateWorkflowSDAToken(workflowID, sdaToken)
+            updateFinished()
+        }
+    }
+
+    fun fetchWorkflows(limit: Int? = null, after: String? = null): List<WorkflowModel> {
         LogHelper.debug(TAG, "fetchWorkflows()")
-        return if(after != null){
-            workflowDao.fetchWorkflows(after)
+        return if(limit != null && after != null){
+            workflowDao.fetchWorkflows(limit, after)
+        } else if(limit != null && after == null) {
+            workflowDao.fetchWorkflows(limit)
         } else {
             workflowDao.fetchWorkflows()
         }

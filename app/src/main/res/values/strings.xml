@@ -47,6 +47,7 @@
     <string name="secure_text">Secure Device Access</string>
     <string name="refresh">Refresh</string>
     <string name="na">Not available</string>
+    <string name="syncing_jobs_text">Syncing Jobs</string>
 
     <string name="device_format"><xliff:g id="view">%1$s</xliff:g> Devices</string>
     <string name="ip_format">IP: <xliff:g id="view">%1$s</xliff:g></string>

@@ -22,6 +22,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -32,13 +34,18 @@ import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.adapters.WorkflowDeviceAdapter
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowDeviceRunModel
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
+import com.arm.peliondevicemanagement.components.viewmodels.WorkflowViewModel
+import com.arm.peliondevicemanagement.constants.AppConstants.DEFAULT_TIME_FORMAT
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_COMPLETED
 import com.arm.peliondevicemanagement.databinding.FragmentJobBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
-import com.arm.peliondevicemanagement.utils.PlatformUtils
+import com.arm.peliondevicemanagement.screens.activities.HostActivity
 import com.arm.peliondevicemanagement.utils.PlatformUtils.fetchAttributeDrawable
+import com.arm.peliondevicemanagement.utils.WorkflowUtils.getPermissionScopeFromTasks
+import com.arm.peliondevicemanagement.utils.WorkflowUtils.isValidSDAToken
 import com.arm.peliondevicemanagement.utils.PlatformUtils.parseJSONTimeIntoTimeAgo
 import com.arm.peliondevicemanagement.utils.PlatformUtils.parseJSONTimeString
+import kotlinx.android.synthetic.main.fragment_job.*
 
 class JobFragment : Fragment() {
 
@@ -51,10 +58,12 @@ class JobFragment : Fragment() {
 
     private val args: JobFragmentArgs by navArgs()
 
+    private lateinit var workflowViewModel: WorkflowViewModel
     private lateinit var workflowModel: WorkflowModel
     private lateinit var workflowDeviceAdapter: WorkflowDeviceAdapter
 
     private var totalDevicesCompleted: Int = 0
+    private var isSDATokenValid: Boolean = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -75,19 +84,13 @@ class JobFragment : Fragment() {
 
         setupData()
         setupViews()
+        setupListeners()
     }
 
     private fun setupData() {
-        totalDevicesCompleted = 0
-        workflowModel.workflowDevices?.forEach { device ->
-            if(device.deviceState == DEVICE_STATE_COMPLETED){
-                totalDevicesCompleted++
-            }
-        }
-        LogHelper.debug(TAG, "completedDevices: $totalDevicesCompleted, " +
-                "pendingDevices: ${workflowModel.workflowDevices!!.size - totalDevicesCompleted}")
-
+        workflowViewModel = ViewModelProvider(this).get(WorkflowViewModel::class.java)
         workflowDeviceAdapter = WorkflowDeviceAdapter(workflowModel.workflowDevices!!)
+        fetchCompletedDevicesCount()
     }
 
     private fun setupViews() {
@@ -103,10 +106,6 @@ class JobFragment : Fragment() {
         viewBinder.tvCreatedAt.text = context!!.getString(
             R.string.created_at_format, creationDateTime)
 
-        viewBinder.tvDeviceHeader.setOnClickListener {
-            expandCollapseDevicesRecView()
-        }
-
         val totalCompletedText = "$totalDevicesCompleted/${workflowModel.workflowDevices!!.size}"
 
         viewBinder.tvDeviceSubHeader.text = context!!
@@ -120,17 +119,115 @@ class JobFragment : Fragment() {
             adapter = workflowDeviceAdapter
         }
 
-        if(workflowModel.sdaToken != null){
-            val dateTime = parseJSONTimeString(workflowModel.sdaToken!!.expiresIn)
-            viewBinder.tvValidTill.text = context!!.getString(R.string.active_format, dateTime)
-        } else {
-            viewBinder.tvValidTill.text = context!!.getString(R.string.na)
-            viewBinder.refreshTokenButton.visibility = View.VISIBLE
+        verifySDAToken()
+    }
+
+    private fun setupListeners() {
+        workflowViewModel.getRefreshedSDAToken().observe(viewLifecycleOwner, Observer { tokenResponse ->
+            if(tokenResponse != null){
+                workflowModel.sdaToken = tokenResponse
+                workflowViewModel.updateLocalSDAToken(
+                    workflowModel.workflowID, tokenResponse)
+            } else {
+                showSnackbar("Failed to refresh token")
+            }
+            showHideSDAProgressbar(false)
+            verifySDAToken()
+        })
+
+        viewBinder.refreshTokenButton.setOnClickListener {
+            refreshSDAToken()
+        }
+
+        viewBinder.tvDeviceHeader.setOnClickListener {
+            expandCollapseDevicesRecView()
         }
 
         viewBinder.runJobButton.setOnClickListener {
-            navigateToJobRunFragment()
+            if(isSDATokenValid){
+                navigateToJobRunFragment()
+            } else {
+                showSnackbar("Refreshing secure-access, hang-on")
+                refreshSDAToken()
+            }
         }
+    }
+
+    private fun showSnackbar(message: String) {
+        (activity as HostActivity).showSnackbar(
+            viewBinder.root,message)
+    }
+
+    private fun fetchCompletedDevicesCount() {
+        totalDevicesCompleted = 0
+        workflowModel.workflowDevices?.forEach { device ->
+            if(device.deviceState == DEVICE_STATE_COMPLETED){
+                totalDevicesCompleted++
+            }
+        }
+        LogHelper.debug(TAG, "completedDevices: $totalDevicesCompleted, " +
+                "pendingDevices: ${workflowModel.workflowDevices!!.size - totalDevicesCompleted}")
+    }
+
+    private fun refreshSDAToken() {
+        showHideRefreshTokenButton(false)
+        showHideSDAProgressbar(true)
+        // Fetch permission-scope
+        val permissionScope = getPermissionScopeFromTasks(workflowModel.workflowTasks)
+        // Create audienceList for now.
+        val audience = "ep:016eead293eb926ca57ba92703c00000"
+        val audienceList = arrayListOf<String>()
+        audienceList.add(audience)
+        workflowViewModel.refreshSDAToken(permissionScope, audienceList)
+    }
+
+    private fun verifySDAToken() {
+        if(workflowModel.sdaToken != null){
+            val expiresIn = workflowModel.sdaToken!!.expiresIn
+            val expiryDate = parseJSONTimeString(expiresIn)
+            val expiryTime = parseJSONTimeString(expiresIn, DEFAULT_TIME_FORMAT)
+            val expiryDateTime = "$expiryDate, $expiryTime"
+            if(isValidSDAToken(expiresIn)){
+                viewBinder.tvValidTill.text = context!!.getString(
+                    R.string.active_format, expiryDateTime)
+                viewBinder.secureIconView.setImageDrawable(
+                    fetchAttributeDrawable(context!!, R.attr.iconShieldGreen))
+                showHideRefreshTokenButton(false)
+                isSDATokenValid = true
+                updateRunJobButtonText(context!!.getString(R.string.run_job))
+            } else {
+                viewBinder.tvValidTill.text = context!!.getString(
+                    R.string.expired_format, expiryDateTime)
+                viewBinder.secureIconView.setImageDrawable(
+                    fetchAttributeDrawable(context!!, R.attr.iconShieldRed))
+                showHideRefreshTokenButton(true)
+                isSDATokenValid = false
+                updateRunJobButtonText(context!!.getString(R.string.refresh))
+            }
+        } else {
+            viewBinder.tvValidTill.text = context!!.getString(R.string.na)
+            viewBinder.secureIconView.setImageDrawable(
+                fetchAttributeDrawable(context!!, R.attr.iconShieldYellow))
+            showHideRefreshTokenButton(true)
+            isSDATokenValid = false
+            updateRunJobButtonText(context!!.getString(R.string.refresh))
+        }
+    }
+
+    private fun updateRunJobButtonText(text: String) {
+        viewBinder.runJobButton.text = text
+    }
+
+    private fun showHideRefreshTokenButton(visibility: Boolean) = if(visibility){
+        refreshTokenButton.visibility = View.VISIBLE
+    } else {
+        refreshTokenButton.visibility = View.GONE
+    }
+
+    private fun showHideSDAProgressbar(visibility: Boolean) = if(visibility){
+        viewBinder.sdaProgressbar.visibility = View.VISIBLE
+    } else {
+        viewBinder.sdaProgressbar.visibility = View.GONE
     }
 
     private fun expandCollapseDevicesRecView() {
@@ -172,6 +269,7 @@ class JobFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _viewBinder = null
+        workflowViewModel.cancelAllRequests()
     }
 
 }
