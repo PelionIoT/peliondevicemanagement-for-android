@@ -120,6 +120,16 @@ class CloudRepository(private val cloudAPIService: CloudAPIService): BaseReposit
         }
     }
 
+    suspend fun syncWorkflow(workflowID: String): Boolean {
+        val status: Boolean
+        val response = doSafeAPIRequest(
+            call = { cloudAPIService.syncWorkflow(workflowID)},
+            errorMessage = "Unable to sync workflow"
+        )
+        status = response?.toString()?.isEmpty() ?: false
+        return status
+    }
+
     suspend fun getWorkflowTaskAssetFile(fileID: String): ResponseBody? {
         return doSafeAPIRequest(
             call = { cloudAPIService.getWorkflowTaskAssetFile(fileID)},

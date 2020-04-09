@@ -23,6 +23,7 @@ import android.os.CountDownTimer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -33,30 +34,26 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.adapters.WorkflowDeviceAdapter
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowDeviceModel
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowDeviceRunModel
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowTaskModel
+import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
 import com.arm.peliondevicemanagement.components.viewmodels.SDAViewModel
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_COMPLETED
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_CONNECTED
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_CONNECTING
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_DISCONNECTED
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_FAILED
-import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_PENDING
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_RUNNING
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_VERIFY
 import com.arm.peliondevicemanagement.databinding.FragmentJobRunBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.utils.PlatformUtils.getBleInstance
+import com.arm.peliondevicemanagement.utils.WorkflowUtils.getDeviceCommands
 import com.arm.pelionmobiletransportsdk.ble.BleDevice
 import com.arm.pelionmobiletransportsdk.ble.callbacks.BleScannerCallback
 import com.arm.pelionmobiletransportsdk.ble.scanner.BleManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.*
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 @ExperimentalCoroutinesApi
 class JobRunFragment : Fragment() {
@@ -70,16 +67,15 @@ class JobRunFragment : Fragment() {
 
     private val args: JobRunFragmentArgs by navArgs()
 
-    private lateinit var jobRunModel: WorkflowDeviceRunModel
+    private lateinit var jobRunModel: WorkflowModel
     private lateinit var workflowDeviceAdapter: WorkflowDeviceAdapter
 
     private val jobRunTimeOut: Long = 60000
     private var totalDevicesCompleted: Int = 0
     private lateinit var jobRunTimer: CountDownTimer
-    private var scanController: Continuation<Boolean>? = null
 
-    private var signalForward: Boolean = false
-    private var connectQueue: Queue<BleDevice>? = null
+    private var isScanCompleted: Boolean = false
+    private var isJobCompleted: Boolean = false
 
     private lateinit var sdaViewModel: SDAViewModel
 
@@ -93,14 +89,20 @@ class JobRunFragment : Fragment() {
 
         override fun onFinish() {
             LogHelper.debug(TAG, "BleScan->onFinish()")
-            if(scanController == null) return
-            scanController!!.resume(true)
+            if(mScannedDevices.isNotEmpty()){
+                isScanCompleted = true
+                updateStopButtonText("Stop")
+                connectDevices()
+            } else {
+                isScanCompleted = false
+                updateDeviceStatusText("No device available")
+                showHideProgressbar(false)
+                updateStopButtonText("Retry")
+            }
         }
 
         override fun onScanFailed(errorCode: Int) {
             LogHelper.debug(TAG, "BleScan->onScanFailed() $errorCode")
-            if(scanController == null) return
-            scanController!!.resume(false)
         }
 
         override fun onScanResult(callbackType: Int, result: ScanResult, bleDevice: BleDevice) {
@@ -109,6 +111,12 @@ class JobRunFragment : Fragment() {
                 LogHelper.debug(TAG, "BleScan->onScanResult() Found_Device: $bleDevice")
                 mScannedDevices.add(BleDevice(bleDevice.device, bleDevice.deviceRSSI))
             }
+        }
+    }
+
+    private val onBackPressedCallback: OnBackPressedCallback = object: OnBackPressedCallback(true){
+        override fun handleOnBackPressed() {
+            callOnBackPressed()
         }
     }
 
@@ -126,47 +134,38 @@ class JobRunFragment : Fragment() {
     }
 
     private fun init() {
-        jobRunModel = args.jobRunObject
-
-        /*jobRunModel = WorkflowDeviceRunModel("1",
-            "HelloTest",
-            "PENDING",
-            listOf(WorkflowTaskModel("1",
-                "T1","bla", false,
-                listOf(), listOf())),
-                listOf(WorkflowDeviceModel("01nd32", DEVICE_STATE_PENDING)),
-                "")*/
-
+        requireActivity().onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+        jobRunModel = args.workflowObject
         LogHelper.debug(TAG, "jobRunBundle: $jobRunModel")
 
         setupData()
         setupViews()
         setupListeners()
-        //setupScan()
+        setupScan()
     }
 
     private fun setupData() {
-        workflowDeviceAdapter = WorkflowDeviceAdapter(ArrayList(jobRunModel.jobDevices))
+        workflowDeviceAdapter = WorkflowDeviceAdapter(jobRunModel.workflowDevices!!)
 
         totalDevicesCompleted = 0
-        jobRunModel.jobDevices.forEach { device ->
+        jobRunModel.workflowDevices?.forEach { device ->
             if(device.deviceState == DEVICE_STATE_COMPLETED){
                 totalDevicesCompleted++
             }
         }
         LogHelper.debug(TAG, "completedDevices: $totalDevicesCompleted, " +
-                "pendingDevices: ${jobRunModel.jobDevices.size - totalDevicesCompleted}")
+                "pendingDevices: ${jobRunModel.workflowDevices?.size?.minus(totalDevicesCompleted)}")
 
     }
 
     private fun setupViews() {
-        viewBinder.tvName.text = jobRunModel.jobName
+        viewBinder.tvName.text = jobRunModel.workflowName
         viewBinder.tvTasks.text = context!!.getString(
             R.string.total_tasks_format,
-            jobRunModel.jobTasks.size.toString())
+            jobRunModel.workflowTasks.size.toString())
         viewBinder.tvDeviceSubHeader.text = context!!.getString(
             R.string.devices_completed_format,
-            "$totalDevicesCompleted/${jobRunModel.jobDevices.size}")
+            "$totalDevicesCompleted/${jobRunModel.workflowDevices?.size}")
 
         jobRunTimer = object: CountDownTimer(jobRunTimeOut, 1000) {
             override fun onTick(millisUntilFinished: Long) {
@@ -193,7 +192,11 @@ class JobRunFragment : Fragment() {
         }
 
         viewBinder.stopButton.setOnClickListener {
-            Navigation.findNavController(viewBinder.root).navigateUp()
+            if(isScanCompleted){
+                showCautionDialog()
+            } else {
+                setupScan()
+            }
         }
     }
 
@@ -219,7 +222,6 @@ class JobRunFragment : Fragment() {
                 }
                 DEVICE_STATE_DISCONNECTED -> {
                     LogHelper.debug(TAG, "Device_State: Disconnected")
-                    signalForward = true
                 }
                 DEVICE_STATE_FAILED -> {
                     LogHelper.debug(TAG, "Device_State: Failed")
@@ -228,6 +230,7 @@ class JobRunFragment : Fragment() {
         })
 
         sdaViewModel.responseLiveData.observe(viewLifecycleOwner, Observer { deviceResponse ->
+            LogHelper.debug(TAG, "DeviceResponse: $deviceResponse")
             if(deviceResponse.response.startsWith("sda")) {
                 // SDA response
                 if(deviceResponse.operationResponse != null){
@@ -239,14 +242,16 @@ class JobRunFragment : Fragment() {
                 }
             } else {
                 // Endpoint response
-                if(deviceResponse.response != "endpoint:null"){
+                if(deviceResponse.response.startsWith("endpoint")){
                     val endpoint = deviceResponse.response.substringAfter("endpoint:")
                     if(isEndpointMatch(endpoint)){
                         // Go forward and execute job
-                        runJob()
+                        sdaViewModel.runJob()
                     } else {
+                        LogHelper.debug(TAG, "Endpoint not matched: $endpoint")
                         // Terminate connection
-                        sdaViewModel.disconnectFromDevice()
+                        //sdaViewModel.disconnectFromDevice()
+                        sdaViewModel.runJob()
                     }
                 } else {
                     // Terminate connection
@@ -259,18 +264,17 @@ class JobRunFragment : Fragment() {
     private fun setupScan() {
         showHideProgressbar(true)
         updateDeviceStatusText("Scanning devices")
-        GlobalScope.launch {
-            if(scanNearbyDevices() && mScannedDevices.isNotEmpty()){
-                connectDevices()
-            } else {
-                updateDeviceStatusText("Scan Failed")
-            }
-        }
-
+        mScannedDevices = arrayListOf()
+        bleManager = getBleInstance()
+        bleManager!!.startScan(bleScanCallback)
     }
 
     private fun updateDeviceStatusText(message: String) {
         viewBinder.tvDeviceSubHeader.text = resources.getString(R.string.status_format, message)
+    }
+
+    private fun updateStopButtonText(message: String) {
+        viewBinder.stopButton.text = message
     }
 
     private fun showHideProgressbar(visibility: Boolean) = if(visibility) {
@@ -279,54 +283,24 @@ class JobRunFragment : Fragment() {
         viewBinder.progressBar.visibility = View.INVISIBLE
     }
 
-    private suspend fun scanNearbyDevices(): Boolean = withContext(Dispatchers.IO) {
-        return@withContext suspendCoroutine<Boolean> {
-            scanController = it
-            mScannedDevices = arrayListOf()
-            bleManager = getBleInstance(this@JobRunFragment.requireContext())
-            bleManager!!.startScan(bleScanCallback)
-        }
-    }
-
     private fun isEndpointMatch(endpoint: String): Boolean {
-        val isEndpointPresent = jobRunModel.jobDevices.find { it.deviceName == endpoint }
+        val isEndpointPresent = jobRunModel.workflowDevices?.find { it.deviceName == endpoint }
         return isEndpointPresent != null
     }
 
     private fun connectDevices() {
         updateDeviceStatusText("Found Devices")
-
-        connectQueue = LinkedList()
-        LogHelper.debug(TAG, "connectDevices() Adding devices to connectQueue")
-        mScannedDevices.forEach { device->
-            connectQueue!!.add(device)
-        }
-
-        while(connectQueue!!.size > 0){
-            if(signalForward){
-                signalForward = false
-                val device = connectQueue!!.poll()
-
-                LogHelper.debug(TAG, "connectDevice() Name: ${device!!.deviceName}, " +
-                        "MAC: ${device.deviceAddress}")
-
-                sdaViewModel.connectToDevice(
-                    this@JobRunFragment.requireContext(),
-                    device.deviceAddress)
-            }
-        }
-    }
-
-    private fun runJob() {
-        LogHelper.debug(TAG, "Now running job on device.")
-        signalForward = true
+        val deviceCommands = getDeviceCommands(jobRunModel.workflowTasks)
+        LogHelper.debug(TAG, "DeviceCommand Size: ${deviceCommands.size}")
+        sdaViewModel.connectDevices(requireContext(),
+            mScannedDevices,
+            jobRunModel.workflowID,
+            jobRunModel.sdaToken!!.accessToken,
+            deviceCommands)
     }
 
     private fun destroyObjects() {
-        signalForward = false
-        scanController = null
         bleManager = null
-        connectQueue = null
         jobRunTimer.cancel()
         sdaViewModel.cancelAllRequests()
         _viewBinder = null
@@ -337,5 +311,27 @@ class JobRunFragment : Fragment() {
         destroyObjects()
     }
 
+    private fun showCautionDialog() {
+        MaterialAlertDialogBuilder(context)
+            .setTitle("Attention Required")
+            .setMessage("You're about to cancel a running job,\nAre you sure?")
+            .setPositiveButton("Yes, Stop") { _, _ ->
+                Navigation.findNavController(viewBinder.root).navigateUp()
+            }
+            .setNegativeButton("No") { dialogInterface, _ ->
+                dialogInterface.dismiss()
+            }
+            .setCancelable(false)
+            .create()
+            .show()
+    }
+
+    private fun callOnBackPressed() {
+        if(!isJobCompleted){
+            showCautionDialog()
+        } else {
+            Navigation.findNavController(viewBinder.root).navigateUp()
+        }
+    }
 
 }

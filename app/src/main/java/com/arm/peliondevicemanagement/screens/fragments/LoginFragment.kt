@@ -25,6 +25,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import androidx.activity.OnBackPressedCallback
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
@@ -54,6 +55,12 @@ class LoginFragment : Fragment() {
     private lateinit var userEmail: String
     private lateinit var userPassword: String
 
+    private val onBackPressedCallback = object: OnBackPressedCallback(true){
+        override fun handleOnBackPressed() {
+            (activity as HostActivity).callCloseApp()
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -66,6 +73,7 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        requireActivity().onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
         initLogoPosition()
         setVersionName()
         runSplash()

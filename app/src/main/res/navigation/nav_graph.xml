@@ -210,8 +210,8 @@
         android:label="fragment_job_run"
         tools:layout="@layout/fragment_job_run">
         <argument
-            android:name="jobRunObject"
-            app:argType="com.arm.peliondevicemanagement.components.models.workflow.WorkflowDeviceRunModel" />
+            android:name="workflow_object"
+            app:argType="com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel" />
     </fragment>
 
 </navigation>

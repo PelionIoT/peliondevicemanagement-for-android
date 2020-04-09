@@ -21,20 +21,15 @@ import androidx.lifecycle.MutableLiveData
 import androidx.paging.PageKeyedDataSource
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowDeviceModel
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowTaskModel
 import com.arm.peliondevicemanagement.constants.AppConstants
 import com.arm.peliondevicemanagement.constants.AppConstants.DATABASE_PAGE_SIZE
 import com.arm.peliondevicemanagement.constants.AppConstants.NETWORK_PAGE_SIZE
-import com.arm.peliondevicemanagement.constants.AppConstants.WORKFLOW_TASK_NAME_FILE
-import com.arm.peliondevicemanagement.constants.AppConstants.WORKFLOW_TASK_TYPE_FILE
 import com.arm.peliondevicemanagement.constants.LoadState
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.services.CloudRepository
 import com.arm.peliondevicemanagement.services.cache.LocalCache
 import com.arm.peliondevicemanagement.services.data.SDATokenResponse
-import com.arm.peliondevicemanagement.utils.WorkflowFileUtils
-import com.arm.peliondevicemanagement.utils.WorkflowUtils.downloadTaskAssets
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.fetchSDAToken
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.getPermissionScopeFromTasks
 import kotlinx.coroutines.CoroutineScope
@@ -153,14 +148,27 @@ class WorkflowDataSource(
                                 )
                             )
                         }
+                        // FixME
                         // Fetch SDA_token
-                        val sdaTokenResponse = fetchAndSaveSDAToken(workflow)
+                        /*val sdaTokenResponse = fetchAndSaveSDAToken(workflow)
                         if(sdaTokenResponse != null){
                             workflow.sdaToken = sdaTokenResponse
                         }
                         // Download Task Assets
                         downloadTaskAssets(cloudRepository,
                             workflow.workflowID, workflow.workflowTasks)
+
+                        // Sync workflow
+                        if(workflow.workflowID == "016b22375e6e423cce18a69800000000" &&
+                                workflow.workflowStatus != WORKFLOW_STATE_SYNCED){
+                            val isSyncSuccessful = cloudRepository.syncWorkflow(workflow.workflowID)
+                            if(isSyncSuccessful){
+                                workflow.workflowStatus = WORKFLOW_STATE_SYNCED
+                                LogHelper.debug(TAG, "Workflow synced successfully")
+                            } else {
+                                LogHelper.debug(TAG, "Workflow sync failed")
+                            }
+                        }*/
                     }
                     // Store in DB
                     localCache.insertWorkflows(it) {

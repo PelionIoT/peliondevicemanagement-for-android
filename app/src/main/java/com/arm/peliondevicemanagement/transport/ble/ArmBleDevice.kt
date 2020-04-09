@@ -23,6 +23,8 @@ import android.bluetooth.BluetoothGattService
 import android.content.Context
 import android.util.Log
 import com.arm.mbed.sda.proxysdk.devices.AbstractDevice
+import com.arm.peliondevicemanagement.constants.AppConstants.SDA_CHARACTERISTIC
+import com.arm.peliondevicemanagement.constants.AppConstants.SDA_SERVICE
 import com.arm.peliondevicemanagement.transport.ISerialDataSink
 import com.arm.peliondevicemanagement.transport.sda.SerialMessage
 import com.arm.pelionmobiletransportsdk.ble.callbacks.BleGattConnectCallback
@@ -32,6 +34,7 @@ import com.arm.pelionmobiletransportsdk.ble.scanner.BleManager
 import com.arm.peliondevicemanagement.utils.ByteFactory
 import com.arm.pelionmobiletransportsdk.ble.callbacks.BleGattReadCallback
 import com.arm.pelionmobiletransportsdk.ble.commons.GattAttributes
+import com.arm.pelionmobiletransportsdk.ble.commons.HexUtils
 import kotlinx.coroutines.*
 import java.util.*
 import kotlin.coroutines.Continuation
@@ -44,16 +47,7 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
 
     companion object{
         private val TAG = ArmBleDevice::class.java.simpleName
-
-        const val MTU_SIZE: Int = 244
-
-        // Device Information Service
-        private const val DEVICE_INFO_SERVICE: String = "0000180a-0000-1000-8000-00805f9b34fb"
-        private const val SN_CHARACTERISTIC: String = ""
-
-        // Service & Characteristic IDs for Secure-Device-Access
-        private const val SDA_SERVICE: String = "6e400001-b5a3-f393-e0a9-e50e24dcca9e"
-        private const val SDA_CHARACTERISTIC: String = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
+        const val MTU_SIZE: Int = 200
     }
 
     private var mBleManager: BleManager? = null
@@ -110,20 +104,8 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
         mBleManager = BleManager.Builder().build()
     }
 
-    private fun ByteArray.toHex(): String {
-        return joinToString("") { "%02x".format(it) }
-    }
-
     fun isConnected(): Boolean {
         return mBleManager!!.isGattConnected()
-    }
-
-    suspend fun connect(): Boolean = withContext(Dispatchers.IO) {
-        return@withContext suspendCoroutine<Boolean> {
-            isInvokedByConnect = true
-            processController = it
-            mBleManager!!.connectGatt(context, deviceMAC, bleGattCallback)
-        }
     }
 
     suspend fun connect(callback: ArmBleConnectionCallback): Boolean = withContext(Dispatchers.IO) {
@@ -176,12 +158,15 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
     suspend fun readEndpoint(): String = withContext(Dispatchers.IO) {
         if(!isConnected()) return@withContext "null"
         return@withContext suspendCoroutine<String> {
-            mBleManager!!.read(DEVICE_INFO_SERVICE,
-                SN_CHARACTERISTIC,
+            mBleManager!!.read(
+                GattAttributes.DEVICE_INFORMATION_SERVICE,
+                GattAttributes.SERIAL_NUMBER_CHARACTERISTIC,
                 object: BleGattReadCallback {
-                    override fun onRead(data: String?, characteristic: BluetoothGattCharacteristic) {
-                        Log.d(TAG, "->onReadEndpoint() $data")
-                        it.resume(data!!)
+                    override fun onRead(hexString: String, characteristic: BluetoothGattCharacteristic) {
+                        //Log.d(TAG, "->onReadEndpoint() $hexString")
+                        val endpoint = HexUtils.convertHexToString(hexString)
+                        Log.d(TAG, "->Endpoint() $endpoint")
+                        it.resume(endpoint)
                     }
                 })
         }
@@ -206,7 +191,8 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
     }
 
     private suspend fun doWrite(protocolMessage: ByteArray) = withContext(Dispatchers.IO) {
-        val currentMtuSize = MTU_SIZE - 4
+        //val currentMtuSize = MTU_SIZE - 4
+        val currentMtuSize = MTU_SIZE
 
         Log.d(TAG, "->doWrite() MaxSupportedMTU: $currentMtuSize bytes")
         Log.d(TAG, "->doWrite() protocolMessage" +

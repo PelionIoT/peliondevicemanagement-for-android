@@ -22,6 +22,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -36,6 +37,7 @@ import com.arm.peliondevicemanagement.databinding.FragmentDashboardBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
 import com.arm.peliondevicemanagement.constants.LoadState
+import com.arm.peliondevicemanagement.screens.activities.HostActivity
 
 class DashboardFragment : Fragment(), RecyclerItemClickListener {
 
@@ -48,6 +50,12 @@ class DashboardFragment : Fragment(), RecyclerItemClickListener {
 
     private lateinit var workflowViewModel: WorkflowViewModel
     private var workflowAdapter = WorkflowAdapter(this)
+
+    private val onBackPressedCallback = object: OnBackPressedCallback(true){
+        override fun handleOnBackPressed() {
+            (activity as HostActivity).callCloseApp()
+        }
+    }
 
     private val queryTextListener = object : SearchView.OnQueryTextListener {
         override fun onQueryTextSubmit(query: String?): Boolean = false
@@ -81,6 +89,7 @@ class DashboardFragment : Fragment(), RecyclerItemClickListener {
     }
 
     private fun init() {
+        requireActivity().onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
         workflowViewModel = ViewModelProvider(this).get(WorkflowViewModel::class.java)
 
         viewBinder.rvWorkflows.apply {

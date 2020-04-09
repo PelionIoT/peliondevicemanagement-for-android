@@ -22,6 +22,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -57,6 +58,12 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
     private var accountAdapter: AccountAdapter? = null
     private var accountModelsList = arrayListOf<Account>()
 
+    private val onBackPressedCallback = object: OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            (activity as HostActivity).callCloseApp()
+        }
+    }
+
     private val queryTextListener = object : SearchView.OnQueryTextListener {
         override fun onQueryTextSubmit(query: String?): Boolean = false
 
@@ -83,6 +90,7 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
     }
 
     private fun init() {
+        requireActivity().onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
         loginViewModel = ViewModelProvider(this).get(LoginViewModel::class.java)
         accountAdapter = AccountAdapter(accountModelsList, this)
         viewBinder.rvAccounts.apply {

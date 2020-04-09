@@ -21,15 +21,22 @@ object AppConstants {
 
     const val ABOUT_JSON_FILE = "about.json"
 
+    // Service & Characteristic IDs for Secure-Device-Access
+    const val SDA_SERVICE: String = "6e400001-b5a3-f393-e0a9-e50e24dcca9e"
+    const val SDA_CHARACTERISTIC: String = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
+
     const val WORKFLOW_DATABASE_NAME = "Workflow.db"
     const val DATABASE_PAGE_SIZE = 20
     const val NETWORK_PAGE_SIZE = 50
 
+    // Workflow constants
     const val WORKFLOW_ASSETS_DIRECTORY = "w_assets"
-    const val WORKFLOW_TASK_NAME_FILE = "file"
-    const val WORKFLOW_TASK_NAME_FILEPATH = "file_path"
-    const val WORKFLOW_TASK_TYPE_FILE = "FILE"
-    const val WORKFLOW_TASK_TYPE_STRING = "STRING"
+    const val TASK_NAME_FILE = "file"
+    const val TASK_NAME_FILEPATH = "file_path"
+    const val TASK_TYPE_FILE = "FILE"
+    const val TASK_TYPE_STRING = "STRING"
+    const val WORKFLOW_STATE_SYNCED = "SYNCED"
+    const val WORKFLOW_STATE_COMPLETED = "COMPLETED"
 
     // Date-Time constants
     const val DEFAULT_DATE_FORMAT = "dd-MM-yyyy"

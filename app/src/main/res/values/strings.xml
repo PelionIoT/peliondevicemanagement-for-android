@@ -68,4 +68,13 @@
     <string name="fab_description">Run Job Button</string>
     <string name="cancel">Cancel</string>
 
+    <string name="attention_text">Attention Required</string>
+    <string name="location_perm_desc">This app needs location permission for scanning nearby BLE devices</string>
+    <string name="location_perm_denied_desc">You\'ve denied location permission, we need that for scanning nearby BLE devices\n\nAllow at [Settings] > [Permissions]</string>
+    <string name="location_service_denied_desc">You\'ve disabled location services, we need that for scanning nearby BLE devices\n\nAllow at [Settings] > [Location]</string>
+    <string name="grant_text">Grant</string>
+    <string name="deny_text">Deny</string>
+    <string name="open_settings_text">Open Settings</string>
+
+
 </resources>

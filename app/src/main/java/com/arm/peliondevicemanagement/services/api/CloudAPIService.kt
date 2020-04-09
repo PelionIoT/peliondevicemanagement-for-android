@@ -31,6 +31,7 @@ import com.arm.peliondevicemanagement.constants.APIConstants.API_CLOUD_UI_SERVER
 import com.arm.peliondevicemanagement.constants.APIConstants.API_LICENSES
 import com.arm.peliondevicemanagement.constants.APIConstants.API_SDA_TOKEN
 import com.arm.peliondevicemanagement.constants.APIConstants.API_WORKFLOW_FILES
+import com.arm.peliondevicemanagement.constants.APIConstants.API_WORKFLOW_SYNC
 import com.arm.peliondevicemanagement.constants.APIConstants.CONTENT_TYPE_JSON
 import com.arm.peliondevicemanagement.constants.APIConstants.DEFAULT_BASE_URL
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_AUTHORIZATION
@@ -116,6 +117,11 @@ interface CloudAPIService {
         @Query("limit") itemsPerPage: Int,
         @Query("after") after: String? = null
     ): Response<WorkflowsResponse>
+
+    @POST("$API_ASSIGNED_WORKFLOWS/{workflow_id}$API_WORKFLOW_SYNC")
+    suspend fun syncWorkflow(
+        @Path("workflow_id") workflowID: String
+    ): Response<ResponseBody>
 
     @Streaming
     @GET("$API_WORKFLOW_FILES/{file_id}")

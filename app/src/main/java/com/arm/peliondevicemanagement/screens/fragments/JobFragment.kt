@@ -17,6 +17,7 @@
 
 package com.arm.peliondevicemanagement.screens.fragments
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -40,11 +41,17 @@ import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_COMPLE
 import com.arm.peliondevicemanagement.databinding.FragmentJobBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.screens.activities.HostActivity
+import com.arm.peliondevicemanagement.utils.PlatformUtils.checkForLocationPermission
+import com.arm.peliondevicemanagement.utils.PlatformUtils.enableBluetooth
 import com.arm.peliondevicemanagement.utils.PlatformUtils.fetchAttributeDrawable
+import com.arm.peliondevicemanagement.utils.PlatformUtils.isBluetoothEnabled
+import com.arm.peliondevicemanagement.utils.PlatformUtils.isLocationServiceEnabled
+import com.arm.peliondevicemanagement.utils.PlatformUtils.openLocationServiceSettings
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.getPermissionScopeFromTasks
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.isValidSDAToken
 import com.arm.peliondevicemanagement.utils.PlatformUtils.parseJSONTimeIntoTimeAgo
 import com.arm.peliondevicemanagement.utils.PlatformUtils.parseJSONTimeString
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.fragment_job.*
 
 class JobFragment : Fragment() {
@@ -249,21 +256,35 @@ class JobFragment : Fragment() {
         }
     }
 
-    private fun navigateToJobRunFragment() {
-        val jobRunBundle = workflowModel.workflowDevices?.let {
-            WorkflowDeviceRunModel(
-                workflowModel.workflowID,
-                workflowModel.workflowName,
-                workflowModel.workflowStatus,
-                workflowModel.workflowTasks,
-                it,
-                "Not available"
-            )
-        }
+    private fun showLocationServicesDialog(context: Context) {
+        MaterialAlertDialogBuilder(context)
+            .setTitle(resources.getString(R.string.attention_text))
+            .setMessage(resources.getString(R.string.location_service_denied_desc))
+            .setPositiveButton(resources.getString(R.string.open_settings_text)) { _, _ ->
+                openLocationServiceSettings(context)
+            }
+            .setNegativeButton(resources.getString(R.string.cancel)) { dialogInterface, _ ->
+                dialogInterface.dismiss()
+            }
+            .setCancelable(false)
+            .create()
+            .show()
+    }
 
-        Navigation.findNavController(viewBinder.root)
-            .navigate(JobFragmentDirections
-                .actionJobFragmentToJobRunFragment(jobRunBundle!!))
+    private fun navigateToJobRunFragment() {
+        /*if(!isBluetoothEnabled()){
+            enableBluetooth(requireContext())
+            return
+        }*/
+        if(checkForLocationPermission(requireActivity())){
+            if(isLocationServiceEnabled(requireContext())){
+                Navigation.findNavController(viewBinder.root)
+                    .navigate(JobFragmentDirections
+                        .actionJobFragmentToJobRunFragment(workflowModel))
+            } else {
+                showLocationServicesDialog(requireContext())
+            }
+        }
     }
 
     override fun onDestroyView() {

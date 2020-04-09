@@ -92,16 +92,11 @@ open class BaseActivity : AppCompatActivity() {
             isForward = false)
     }
 
-    protected fun callCloseApp() = if(System.currentTimeMillis() - initiatedCloseMs < 2000){
+    internal fun callCloseApp() = if(System.currentTimeMillis() - initiatedCloseMs < 2000){
         finish()
     } else {
         initiatedCloseMs = System.currentTimeMillis()
         showToast("Press again to exit the app")
-    }
-
-    override fun onBackPressed() {
-        super.onBackPressed()
-        callCloseApp()
     }
 
 }

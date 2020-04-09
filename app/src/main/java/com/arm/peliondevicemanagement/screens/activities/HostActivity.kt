@@ -17,10 +17,16 @@
 
 package com.arm.peliondevicemanagement.screens.activities
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -34,7 +40,10 @@ import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.screens.fragments.AccountsFragmentDirections
 import com.arm.peliondevicemanagement.screens.fragments.DashboardFragmentDirections
+import com.arm.peliondevicemanagement.utils.PlatformUtils
+import com.arm.peliondevicemanagement.utils.PlatformUtils.requestLocationPermission
 import com.arm.peliondevicemanagement.utils.WorkflowUtils
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationView
 import kotlinx.android.synthetic.main.layout_drawer_header.view.*
 
@@ -215,9 +224,9 @@ class HostActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         }
     }
 
-    override fun onSupportNavigateUp(): Boolean {
+    /*override fun onSupportNavigateUp(): Boolean {
         return NavigationUI.navigateUp(navigationController, appBarConfiguration)
-    }
+    }*/
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         item.isChecked = true
@@ -249,11 +258,56 @@ class HostActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         return true
     }
 
+    override fun onOptionsItemSelected(menuItem : MenuItem) : Boolean {
+        if (menuItem.itemId == android.R.id.home) {
+            onBackPressedDispatcher.onBackPressed()
+        }
+        return super.onOptionsItemSelected(menuItem)
+    }
+
     override fun onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START)
         } else {
             super.onBackPressed()
+        }
+    }
+
+    @RequiresApi(23)
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        when(requestCode){
+            PlatformUtils.REQUEST_PERMISSION -> if(grantResults.isNotEmpty()) {
+                val locationAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED
+                if(!locationAccepted){
+                    if(shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)){
+                        MaterialAlertDialogBuilder(this)
+                            .setTitle(resources.getString(R.string.attention_text))
+                            .setMessage(resources.getString(R.string.location_perm_desc))
+                            .setPositiveButton(resources.getString(R.string.grant_text)) { _, _ ->
+                                requestLocationPermission(this)
+                            }
+                            .setNegativeButton(resources.getString(R.string.deny_text)) { dialogInterface, _ ->
+                                dialogInterface.dismiss()
+                            }
+                            .setCancelable(false)
+                            .create()
+                            .show()
+                    } else {
+                        MaterialAlertDialogBuilder(this)
+                            .setTitle(resources.getString(R.string.attention_text))
+                            .setMessage(resources.getString(R.string.location_perm_denied_desc))
+                            .setPositiveButton(resources.getString(R.string.open_settings_text)) { _, _ ->
+                                PlatformUtils.openAppSettings(this)
+                            }
+                            .setNegativeButton(resources.getString(R.string.cancel)) { dialogInterface, _ ->
+                                dialogInterface.dismiss()
+                            }
+                            .setCancelable(false)
+                            .create()
+                            .show()
+                    }
+                }
+            }
         }
     }
 }

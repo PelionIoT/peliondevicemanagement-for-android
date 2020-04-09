@@ -22,6 +22,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
+import com.arm.peliondevicemanagement.constants.AppConstants.WORKFLOW_STATE_COMPLETED
+import com.arm.peliondevicemanagement.constants.AppConstants.WORKFLOW_STATE_SYNCED
 import kotlinx.android.synthetic.main.layout_item_account.view.tvName
 import kotlinx.android.synthetic.main.layout_item_workflow.view.*
 
@@ -40,20 +42,24 @@ class WorkflowViewHolder(itemView: View,
         this.workflowModel = model
         itemView.apply {
             tvName.text = model.workflowName
+            val deviceCountText: String
             if(model.workflowAUDs.size == 1){
-                chipDeviceCount.text = model.workflowAUDs.size.toString() + " Device"
+                deviceCountText = model.workflowAUDs.size.toString() + " Device"
+                chipDeviceCount.text = deviceCountText
             } else {
-                chipDeviceCount.text = model.workflowAUDs.size.toString() + " Devices"
+                deviceCountText = model.workflowAUDs.size.toString() + " Devices"
+                chipDeviceCount.text = deviceCountText
             }
             chipLocation.text = model.workflowLocation
-            if(model.workflowStatus == "PENDING"){
-                syncStatusView.setBackgroundColor(resources.getColor(R.color.arm_yellow))
-                syncStatusCheckView.background = resources.getDrawable(R.drawable.ic_status_pending)
-                syncStatusCheckView.setImageDrawable(resources.getDrawable(R.drawable.ic_exclamation))
-            } else {
+            if(model.workflowStatus == WORKFLOW_STATE_SYNCED ||
+                model.workflowStatus == WORKFLOW_STATE_COMPLETED){
                 syncStatusView.setBackgroundColor(resources.getColor(R.color.arm_green))
                 syncStatusCheckView.background = resources.getDrawable(R.drawable.ic_status_ok)
                 syncStatusCheckView.setImageDrawable(resources.getDrawable(R.drawable.ic_check_light))
+            } else {
+                syncStatusView.setBackgroundColor(resources.getColor(R.color.arm_yellow))
+                syncStatusCheckView.background = resources.getDrawable(R.drawable.ic_status_pending)
+                syncStatusCheckView.setImageDrawable(resources.getDrawable(R.drawable.ic_exclamation))
             }
         }
     }

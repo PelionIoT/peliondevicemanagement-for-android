@@ -17,13 +17,25 @@
 
 package com.arm.peliondevicemanagement.utils
 
+import android.Manifest
+import android.app.Activity
 import android.bluetooth.le.ScanSettings
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.os.Build
+import android.provider.Settings
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.startActivity
+import com.arm.peliondevicemanagement.AppController
+import com.arm.peliondevicemanagement.constants.AppConstants.SDA_SERVICE
 import com.arm.peliondevicemanagement.constants.AppConstants.WORKFLOW_ASSETS_DIRECTORY
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.pelionmobiletransportsdk.TransportManager
+import com.arm.pelionmobiletransportsdk.ble.commons.GattAttributes
 import com.arm.pelionmobiletransportsdk.ble.scanner.BleManager
 import java.io.*
 import java.nio.charset.Charset
@@ -33,6 +45,7 @@ import java.util.*
 object PlatformUtils {
 
     private val TAG: String = PlatformUtils::class.java.simpleName
+    const val REQUEST_PERMISSION = 9040
 
     fun getJsonFromAssets(context: Context, fileName: String): String? {
         val jsonString: String
@@ -77,7 +90,12 @@ object PlatformUtils {
         return TimeAgo.getTimeAgo(date!!.time)
     }
 
-    fun getBleInstance(context: Context, serviceUUID: String = ""): BleManager {
+    fun isBluetoothEnabled(): Boolean = TransportManager.isBluetoothEnabled()
+
+    fun enableBluetooth(context: Context) = TransportManager.enableBluetooth(context)
+
+    fun getBleInstance(): BleManager {
+        val context = AppController.appController!!.applicationContext
         val scanSettings = ScanSettings.Builder()
             .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
             .setReportDelay(0)
@@ -91,12 +109,48 @@ object PlatformUtils {
         val bleBuilder = TransportManager.getBleBuilder(context)
             .addScanPeriod(TransportManager.DEFAULT_SCAN_PERIOD)
             .addSettingsScan(scanSettings.build())
-
-        if(serviceUUID.isNotEmpty()){
-            bleBuilder.addFilterServiceUuid(serviceUUID)
-        }
+            .addFilterServiceUuid(SDA_SERVICE)
 
         return bleBuilder.build()
+    }
+
+    fun isSDKEqualORHigher(version: Int): Boolean {
+        return Build.VERSION.SDK_INT >= version
+    }
+
+    fun hasLocationPermission(context: Context): Boolean {
+        return (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+    }
+
+    fun requestLocationPermission(context: Activity){
+        ActivityCompat.requestPermissions(context, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_PERMISSION)
+    }
+
+    fun checkForLocationPermission(context: Activity): Boolean {
+        // Check for the platform, if M or higher
+        return if(isSDKEqualORHigher(Build.VERSION_CODES.M)){
+            // Check if we already have it or not
+            if(!hasLocationPermission(context)){
+                // No? then make a new request
+                requestLocationPermission(context)
+                false
+            } else {
+                true
+            }
+        } else {
+            true
+        }
+    }
+
+    fun isLocationServiceEnabled(context: Context): Boolean = TransportManager.isLocationServicesEnabled(context)
+
+    fun openLocationServiceSettings(context: Context) = TransportManager.openLocationServicesSettings(context)
+
+    fun openAppSettings(context: Context){
+        val settingsIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+            Uri.fromParts("package", context.packageName, null))
+        settingsIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(settingsIntent)
     }
 
 }

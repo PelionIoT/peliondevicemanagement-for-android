@@ -19,16 +19,24 @@ package com.arm.peliondevicemanagement.utils
 
 import com.arm.mbed.sda.proxysdk.SdkUtil
 import com.arm.mbed.sda.proxysdk.http.CreateAccessTokenRequest
+import com.arm.mbed.sda.proxysdk.operation.OperationArgumentType
+import com.arm.mbed.sda.proxysdk.operation.ParamElement
 import com.arm.peliondevicemanagement.AppController
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowTaskModel
 import com.arm.peliondevicemanagement.constants.AppConstants
-import com.arm.peliondevicemanagement.constants.AppConstants.WORKFLOW_TASK_NAME_FILE
+import com.arm.peliondevicemanagement.constants.AppConstants.READ_TASK
+import com.arm.peliondevicemanagement.constants.AppConstants.TASK_NAME_FILE
+import com.arm.peliondevicemanagement.constants.AppConstants.TASK_NAME_FILEPATH
+import com.arm.peliondevicemanagement.constants.AppConstants.TASK_TYPE_FILE
+import com.arm.peliondevicemanagement.constants.AppConstants.TASK_TYPE_STRING
+import com.arm.peliondevicemanagement.constants.AppConstants.WRITE_TASK
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.services.CloudRepository
 import com.arm.peliondevicemanagement.services.cache.LocalCache
 import com.arm.peliondevicemanagement.services.data.SDATokenResponse
-import com.arm.peliondevicemanagement.services.store.WorkflowDataSource
+import com.arm.peliondevicemanagement.transport.sda.CommandConstants
+import com.arm.peliondevicemanagement.transport.sda.DeviceCommand
 import java.util.*
 import java.util.concurrent.Executors
 
@@ -138,8 +146,8 @@ object WorkflowUtils {
         workflowTasks.forEach { task ->
             if(task.taskName == AppConstants.WRITE_TASK){
                 task.inputParameters.forEach { inputParam ->
-                    if(inputParam.paramType == AppConstants.WORKFLOW_TASK_TYPE_FILE &&
-                        inputParam.paramName == WORKFLOW_TASK_NAME_FILE){
+                    if(inputParam.paramType == AppConstants.TASK_TYPE_FILE &&
+                        inputParam.paramName == TASK_NAME_FILE){
                         fileQueue.add(inputParam.paramValue)
                     }
                 }
@@ -172,6 +180,57 @@ object WorkflowUtils {
             LogHelper.debug(TAG, "No downloadable assets found.")
         }
 
+    }
+
+    fun getDeviceCommands(tasks: List<WorkflowTaskModel>): List<DeviceCommand> {
+        val deviceCommandList = arrayListOf<DeviceCommand>()
+        LogHelper.debug(TAG, "Scanning tasks for device-commands")
+        tasks.forEach {task ->
+            LogHelper.debug(TAG, "Found task: ${task.taskName}")
+            when(task.taskName){
+                READ_TASK -> {
+                    task.inputParameters.forEach { param ->
+                        if(param.paramName == TASK_NAME_FILEPATH &&
+                            param.paramType == TASK_TYPE_STRING
+                        ) {
+                            // FixME add file name only [ test.txt]
+                            // Construct command
+                            val commandParams = arrayOf(ParamElement(OperationArgumentType.STR, "text.txt"))
+                            val deviceCommand = DeviceCommand(CommandConstants.READ, commandParams)
+                            LogHelper.debug(TAG, "Adding DeviceCommand: $deviceCommand")
+                            deviceCommandList.add(deviceCommand)
+                        }
+                    }
+                }
+                WRITE_TASK -> {
+                    task.inputParameters.forEach { param ->
+                        var filePath: String? = null
+                        var fileContent: String? = null
+                        if(param.paramName == TASK_NAME_FILEPATH &&
+                            param.paramType == TASK_TYPE_STRING) {
+                            filePath = param.paramValue
+                        }
+
+                        if(param.paramName == TASK_NAME_FILE &&
+                            param.paramType == TASK_TYPE_FILE) {
+                            fileContent = "Hello Prakhar Bhatttt"
+                        }
+
+                        if(filePath != null && fileContent != null){
+                            // Construct command
+                            val commandParams = arrayOf(
+                                ParamElement(OperationArgumentType.STR, filePath),
+                                ParamElement(OperationArgumentType.STR, fileContent)
+                            )
+
+                            val deviceCommand = DeviceCommand(CommandConstants.CONFIGURE, commandParams)
+                            deviceCommandList.add(deviceCommand)
+                        }
+                    }
+                }
+            }
+        }
+        return deviceCommandList
     }
 
 }
