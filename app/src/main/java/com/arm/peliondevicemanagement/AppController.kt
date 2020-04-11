@@ -43,9 +43,12 @@ class AppController : Application() {
         LogHelper.debug(TAG, "onApplicationCreate()")
 
         appController = this
+        // Setup Cloud-Services
         cloudAPIService = CloudAPIService()
         cloudRepository = CloudRepository(cloudAPIService!!)
+        // Setup Local-DB
         workflowDB = WorkflowDB.getInstance(this)
+        // Setup Android-Keystore
         SecuredDeviceAccess.setKeyStorePath(this.filesDir.toString())
     }
 

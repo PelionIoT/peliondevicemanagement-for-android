@@ -22,9 +22,13 @@ import com.arm.mbed.sda.proxysdk.http.CreateAccessTokenRequest
 import com.arm.mbed.sda.proxysdk.operation.OperationArgumentType
 import com.arm.mbed.sda.proxysdk.operation.ParamElement
 import com.arm.peliondevicemanagement.AppController
+import com.arm.peliondevicemanagement.components.models.workflow.WorkflowDeviceModel
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowTaskModel
 import com.arm.peliondevicemanagement.constants.AppConstants
+import com.arm.peliondevicemanagement.constants.AppConstants.COMMAND_CONFIGURE
+import com.arm.peliondevicemanagement.constants.AppConstants.COMMAND_READ
 import com.arm.peliondevicemanagement.constants.AppConstants.READ_TASK
+import com.arm.peliondevicemanagement.constants.AppConstants.SDA_GRANT_TYPE
 import com.arm.peliondevicemanagement.constants.AppConstants.TASK_NAME_FILE
 import com.arm.peliondevicemanagement.constants.AppConstants.TASK_NAME_FILEPATH
 import com.arm.peliondevicemanagement.constants.AppConstants.TASK_TYPE_FILE
@@ -61,7 +65,7 @@ object WorkflowUtils {
 
     private fun createSDATokenRequest(popPemKey: String, scope: String, audience: List<String>): String {
         val request = CreateAccessTokenRequest()
-        request.grantType = "client_credentials"
+        request.grantType = SDA_GRANT_TYPE
         request.cnf = popPemKey
         request.scope = scope
         request.audience = audience
@@ -70,7 +74,16 @@ object WorkflowUtils {
         return request.toString()
     }
 
-    private fun validateSDAToken(accessToken: String, popPemKey: String) {
+    private fun getSDAPopPemPubKey(): String {
+        if(SharedPrefHelper.getSDAPopPemPubKey().isEmpty()){
+            val popPemPubKey = SdkUtil.getPopPemPubKey()
+            SharedPrefHelper.storeSDAPopPemPubKey(popPemPubKey)
+        }
+        return SharedPrefHelper.getSDAPopPemPubKey()
+    }
+
+    private fun validateSDATokenSanity(accessToken: String, popPemKey: String) {
+        //LogHelper.debug(TAG, "DoSanityCheck-> accessToken: $accessToken, popPemKey: $popPemKey")
         SdkUtil.validateTokenSanity(accessToken, popPemKey)
     }
 
@@ -79,10 +92,12 @@ object WorkflowUtils {
         scope: String,
         audienceList: List<String>): SDATokenResponse? {
         return try {
-            val popPemPubKey = SdkUtil.getPopPemPubKey()
+            val popPemPubKey = getSDAPopPemPubKey()
             val request = createSDATokenRequest(popPemPubKey, scope, audienceList)
+            //LogHelper.debug(TAG, "SDA_Token_Request-> $request")
             val tokenResponse = cloudRepository.getSDAToken(request)
-            validateSDAToken(tokenResponse?.accessToken!!, popPemPubKey)
+            validateSDATokenSanity(tokenResponse?.accessToken!!, popPemPubKey)
+            //LogHelper.debug(TAG, "TokenSanity->Passed")
             tokenResponse
         } catch (e: Throwable){
             LogHelper.debug(TAG, "Exception occurred: ${e.message}")
@@ -120,20 +135,33 @@ object WorkflowUtils {
         val scopeBuffer = StringBuffer()
 
         tasks.forEach { task ->
-            if(task.taskName == AppConstants.READ_TASK){
-                scopeBuffer.append(AppConstants.COMMAND_READ)
-            }
-            if(task.taskName == AppConstants.WRITE_TASK){
+            if(task.taskName == READ_TASK){
                 if(scopeBuffer.isNotEmpty()){
-                    scopeBuffer.append(" ${AppConstants.COMMAND_CONFIGURE}")
+                    scopeBuffer.append(" $COMMAND_READ")
                 } else {
-                    scopeBuffer.append(AppConstants.COMMAND_CONFIGURE)
+                    scopeBuffer.append(COMMAND_READ)
+                }
+            }
+            if(task.taskName == WRITE_TASK){
+                if(scopeBuffer.isNotEmpty()){
+                    scopeBuffer.append(" $COMMAND_CONFIGURE")
+                } else {
+                    scopeBuffer.append(COMMAND_CONFIGURE)
                 }
             }
         }
 
         scope = scopeBuffer.toString()
         return scope
+    }
+
+    fun getAudienceListFromDevices(devices: List<WorkflowDeviceModel>): List<String> {
+        val audienceList = arrayListOf<String>()
+        devices.forEach { device ->
+            val audience = "ep:${device.deviceName}"
+            audienceList.add(audience)
+        }
+        return audienceList
     }
 
     suspend fun downloadTaskAssets(cloudRepository: CloudRepository, workflowID: String, workflowTasks: List<WorkflowTaskModel>) {
@@ -184,48 +212,51 @@ object WorkflowUtils {
 
     fun getDeviceCommands(tasks: List<WorkflowTaskModel>): List<DeviceCommand> {
         val deviceCommandList = arrayListOf<DeviceCommand>()
-        LogHelper.debug(TAG, "Scanning tasks for device-commands")
+        LogHelper.debug(TAG, "Scanning tasks to construct device-commands")
         tasks.forEach {task ->
-            LogHelper.debug(TAG, "Found task: ${task.taskName}")
+            //LogHelper.debug(TAG, "Found task: ${task.taskName}")
             when(task.taskName){
                 READ_TASK -> {
                     task.inputParameters.forEach { param ->
                         if(param.paramName == TASK_NAME_FILEPATH &&
                             param.paramType == TASK_TYPE_STRING
                         ) {
-                            // FixME add file name only [ test.txt]
-                            // Construct command
-                            val commandParams = arrayOf(ParamElement(OperationArgumentType.STR, "text.txt"))
+                            val fileName = param.paramValue.substringAfterLast("/")
+                            val commandParams = arrayOf(ParamElement(OperationArgumentType.STR, fileName))
                             val deviceCommand = DeviceCommand(CommandConstants.READ, commandParams)
-                            LogHelper.debug(TAG, "Adding DeviceCommand: $deviceCommand")
+                            LogHelper.debug(TAG, "Adding device-command: $deviceCommand")
                             deviceCommandList.add(deviceCommand)
                         }
                     }
                 }
                 WRITE_TASK -> {
+                    var fileName: String? = null
+                    var fileContent: String? = null
                     task.inputParameters.forEach { param ->
-                        var filePath: String? = null
-                        var fileContent: String? = null
                         if(param.paramName == TASK_NAME_FILEPATH &&
                             param.paramType == TASK_TYPE_STRING) {
-                            filePath = param.paramValue
+                            fileName = param.paramValue.substringAfterLast("/")
                         }
 
                         if(param.paramName == TASK_NAME_FILE &&
                             param.paramType == TASK_TYPE_FILE) {
+                            // FixME [ Read content from given file ]
                             fileContent = "Hello Prakhar Bhatttt"
                         }
+                    }
 
-                        if(filePath != null && fileContent != null){
-                            // Construct command
-                            val commandParams = arrayOf(
-                                ParamElement(OperationArgumentType.STR, filePath),
-                                ParamElement(OperationArgumentType.STR, fileContent)
-                            )
+                    if(!fileName.isNullOrEmpty() && !fileContent.isNullOrEmpty()){
 
-                            val deviceCommand = DeviceCommand(CommandConstants.CONFIGURE, commandParams)
-                            deviceCommandList.add(deviceCommand)
-                        }
+                        val fileNameAndContent = "$fileName^$fileContent"
+
+                        // Construct command
+                        val commandParams = arrayOf(
+                            ParamElement(OperationArgumentType.STR, fileNameAndContent)
+                        )
+
+                        val deviceCommand = DeviceCommand(CommandConstants.CONFIGURE, commandParams)
+                        LogHelper.debug(TAG, "Adding device-command: $deviceCommand")
+                        deviceCommandList.add(deviceCommand)
                     }
                 }
             }

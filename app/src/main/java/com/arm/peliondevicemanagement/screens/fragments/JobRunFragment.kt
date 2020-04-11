@@ -142,6 +142,7 @@ class JobRunFragment : Fragment() {
         setupViews()
         setupListeners()
         setupScan()
+        //isScanCompleted = true
     }
 
     private fun setupData() {
@@ -219,12 +220,14 @@ class JobRunFragment : Fragment() {
                 }
                 DEVICE_STATE_COMPLETED -> {
                     LogHelper.debug(TAG, "Device_State: Completed")
+                    sdaViewModel.disconnectFromDevice()
                 }
                 DEVICE_STATE_DISCONNECTED -> {
                     LogHelper.debug(TAG, "Device_State: Disconnected")
                 }
                 DEVICE_STATE_FAILED -> {
                     LogHelper.debug(TAG, "Device_State: Failed")
+                    sdaViewModel.disconnectFromDevice()
                 }
             }
         })
@@ -234,11 +237,11 @@ class JobRunFragment : Fragment() {
             if(deviceResponse.response.startsWith("sda")) {
                 // SDA response
                 if(deviceResponse.operationResponse != null){
-                    // Success, now terminate connection
-                    sdaViewModel.disconnectFromDevice()
+                    // Success, now store run-logs and release command-lock
+                    sdaViewModel.setDeviceCommandLockState(false)
                 } else {
-                    // Failed, now terminate connection
-                    sdaViewModel.disconnectFromDevice()
+                    // Failed, now release command-lock
+                    sdaViewModel.setDeviceCommandLockState(false)
                 }
             } else {
                 // Endpoint response
@@ -250,8 +253,7 @@ class JobRunFragment : Fragment() {
                     } else {
                         LogHelper.debug(TAG, "Endpoint not matched: $endpoint")
                         // Terminate connection
-                        //sdaViewModel.disconnectFromDevice()
-                        sdaViewModel.runJob()
+                        sdaViewModel.disconnectFromDevice()
                     }
                 } else {
                     // Terminate connection
@@ -291,7 +293,7 @@ class JobRunFragment : Fragment() {
     private fun connectDevices() {
         updateDeviceStatusText("Found Devices")
         val deviceCommands = getDeviceCommands(jobRunModel.workflowTasks)
-        LogHelper.debug(TAG, "DeviceCommand Size: ${deviceCommands.size}")
+        LogHelper.debug(TAG, "DeviceCommands Size: ${deviceCommands.size}")
         sdaViewModel.connectDevices(requireContext(),
             mScannedDevices,
             jobRunModel.workflowID,

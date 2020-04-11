@@ -31,6 +31,7 @@ import com.arm.peliondevicemanagement.services.CloudRepository
 import com.arm.peliondevicemanagement.services.cache.LocalCache
 import com.arm.peliondevicemanagement.services.data.SDATokenResponse
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.fetchSDAToken
+import com.arm.peliondevicemanagement.utils.WorkflowUtils.getAudienceListFromDevices
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.getPermissionScopeFromTasks
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -188,14 +189,12 @@ class WorkflowDataSource(
         }
     }
 
-    // FIXME
     private suspend fun fetchAndSaveSDAToken(workflow: WorkflowModel): SDATokenResponse? {
         // Fetch permission-scope
         val permissionScope = getPermissionScopeFromTasks(workflow.workflowTasks)
-        val audience = "ep:016eead293eb926ca57ba92703c00000"
-        val audienceList = arrayListOf<String>()
-        audienceList.add(audience)
-
+        // Fetch audience
+        val audienceList = getAudienceListFromDevices(workflow.workflowDevices!!)
+        // Call access-token request
         return fetchSDAToken(cloudRepository, permissionScope, audienceList)
     }
 }

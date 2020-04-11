@@ -50,7 +50,8 @@ class SDAViewModel : ViewModel() {
     private val scope = CoroutineScope(coroutineContext)
 
     private var deviceLock: Boolean = false
-    private var device: ArmBleDevice? = null
+    private var deviceCommandLock: Boolean = false
+    private var bleDevice: ArmBleDevice? = null
     private val bleConnectionCallback = object: ArmBleDevice.ArmBleConnectionCallback {
         override fun onDisconnect() {
             deviceStateLiveData.postValue(DEVICE_STATE_DISCONNECTED)
@@ -64,21 +65,23 @@ class SDAViewModel : ViewModel() {
     val deviceStateLiveData = MutableLiveData<String>()
     val responseLiveData = MutableLiveData<DeviceResponseModel>()
 
+    fun setDeviceCommandLockState(locked: Boolean) = deviceCommandLock
+
     private fun connectToDevice(context: Context, deviceMAC: String) {
         scope.launch {
             try {
                 deviceStateLiveData.postValue(DEVICE_STATE_CONNECTING)
-                device = ArmBleDevice(context, deviceMAC)
-                if(device!!.connect(bleConnectionCallback)){
+                bleDevice = ArmBleDevice(context, deviceMAC)
+                if(bleDevice!!.connect(bleConnectionCallback)){
                     delay(20)
-                    if(device!!.requestHigherMtu(ArmBleDevice.MTU_SIZE)){
+                    if(bleDevice!!.requestHigherMtu(ArmBleDevice.MTU_SIZE)){
                         deviceStateLiveData.postValue(DEVICE_STATE_CONNECTED)
                     } else {
-                        device = null
+                        bleDevice = null
                         deviceStateLiveData.postValue(DEVICE_STATE_FAILED)
                     }
                 } else {
-                    device = null
+                    bleDevice = null
                     deviceStateLiveData.postValue(DEVICE_STATE_FAILED)
                 }
             } catch (e: Throwable) {
@@ -92,8 +95,8 @@ class SDAViewModel : ViewModel() {
         scope.launch {
             try {
                 delay(20)
-                device!!.disconnect()
-                device = null
+                bleDevice!!.disconnect()
+                bleDevice = null
                 deviceStateLiveData.postValue(DEVICE_STATE_DISCONNECTED)
                 deviceLock = false
             } catch (e: Throwable) {
@@ -106,7 +109,7 @@ class SDAViewModel : ViewModel() {
     fun fetchDeviceEndpoint() {
         scope.launch {
             deviceStateLiveData.postValue(DEVICE_STATE_VERIFY)
-            val deviceEndpoint = device!!.readEndpoint()
+            val deviceEndpoint = bleDevice!!.readEndpoint()
             responseLiveData.postValue(
                 DeviceResponseModel("endpoint:$deviceEndpoint", null))
         }
@@ -132,47 +135,52 @@ class SDAViewModel : ViewModel() {
                 }
                 LogHelper.debug(TAG, "DeviceLock released, now moving to next device")
             }
-            // All operations are completed
-            //jobID = null
-            //accessToken = null
-            //jobCommands = null
         }
     }
 
     fun runJob(){
-        LogHelper.debug(TAG, "runJob() Let's do last stage verifications")
-        // Stage 1
-        if(accessToken != null){
-            LogHelper.debug(TAG, "AccessToken->OK")
-        } else {
-            LogHelper.debug(TAG, "AccessToken->N/A")
-            deviceStateLiveData.postValue(DEVICE_STATE_FAILED)
-            responseLiveData.postValue(DeviceResponseModel("sda", null))
-            return
+        scope.launch {
+            LogHelper.debug(TAG, "runJob() Do last-stage verifications")
+            // Stage 1 [ Token-check ]
+            if(accessToken != null){
+                LogHelper.debug(TAG, "AccessToken->OK, accessToken: $accessToken")
+            } else {
+                LogHelper.debug(TAG, "AccessToken->N/A")
+                deviceStateLiveData.postValue(DEVICE_STATE_FAILED)
+                responseLiveData.postValue(DeviceResponseModel("sda", null))
+                return@launch
+            }
+            // Stage 2 [ Command-Check ]
+            if(!jobCommands.isNullOrEmpty()){
+                LogHelper.debug(TAG, "DeviceCommands->OK, Total: ${jobCommands?.size}")
+            } else {
+                LogHelper.debug(TAG, "DeviceCommands->N/A")
+                deviceStateLiveData.postValue(DEVICE_STATE_FAILED)
+                responseLiveData.postValue(DeviceResponseModel("sda", null))
+                return@launch
+            }
+            // Stage 3 [ Showdown Time ]
+            LogHelper.debug(TAG, "All Done, now RUNNNN")
+            jobCommands?.forEach { deviceCommand ->
+                LogHelper.debug(TAG, "Sending command to device ${deviceCommand.command}")
+                deviceCommandLock = true
+                sendMessageToDevice(deviceCommand)
+                while (deviceCommandLock){
+                    // Wait for the operation to complete
+                }
+                LogHelper.debug(TAG, "DeviceCommandLock released, now moving to next command")
+            }
         }
-        // Stage 2
-        if(!jobCommands.isNullOrEmpty()){
-            LogHelper.debug(TAG, "DeviceCommands->OK, Total: ${jobCommands?.size}, content: $jobCommands")
-        } else {
-            LogHelper.debug(TAG, "DeviceCommands->N/A")
-            deviceStateLiveData.postValue(DEVICE_STATE_FAILED)
-            responseLiveData.postValue(DeviceResponseModel("sda", null))
-            return
-        }
-        // All Done, now RUNNNN
-        LogHelper.debug(TAG, "All Done, now RUNNNN")
-        //deviceStateLiveData.postValue(DEVICE_STATE_COMPLETED)
-        //responseLiveData.postValue(DeviceResponseModel("sda", null))
-        sendMessageToDevice(jobCommands!![0])
     }
 
-    fun sendMessageToDevice(deviceCommand: DeviceCommand) {
+    private fun sendMessageToDevice(deviceCommand: DeviceCommand) {
         var deviceResponse: DeviceResponseModel
         scope.launch {
             try {
+                LogHelper.debug(TAG, "sendMessageToDevice() deviceCommand: $deviceCommand")
                 deviceStateLiveData.postValue(DEVICE_STATE_RUNNING)
                 val opResponse = SecuredDeviceAccess.sendMessage(accessToken,
-                    deviceCommand.command, deviceCommand.commandParams, device)
+                    deviceCommand.command, deviceCommand.commandParams, bleDevice)
                 if(opResponse != null){
                     deviceStateLiveData.postValue(DEVICE_STATE_COMPLETED)
                 } else {

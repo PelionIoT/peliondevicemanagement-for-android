@@ -19,36 +19,36 @@ package com.arm.peliondevicemanagement.constants
 
 object AppConstants {
 
+    // About & Licenses
     const val ABOUT_JSON_FILE = "about.json"
 
-    // Service & Characteristic IDs for Secure-Device-Access
-    const val SDA_SERVICE: String = "6e400001-b5a3-f393-e0a9-e50e24dcca9e"
-    const val SDA_CHARACTERISTIC: String = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
-
+    // Local-Cache constants
     const val WORKFLOW_DATABASE_NAME = "Workflow.db"
     const val DATABASE_PAGE_SIZE = 20
     const val NETWORK_PAGE_SIZE = 50
 
     // Workflow constants
-    const val WORKFLOW_ASSETS_DIRECTORY = "w_assets"
+    const val READ_TASK = "Read file"
+    const val WRITE_TASK = "Write file"
     const val TASK_NAME_FILE = "file"
     const val TASK_NAME_FILEPATH = "file_path"
     const val TASK_TYPE_FILE = "FILE"
     const val TASK_TYPE_STRING = "STRING"
     const val WORKFLOW_STATE_SYNCED = "SYNCED"
     const val WORKFLOW_STATE_COMPLETED = "COMPLETED"
+    const val WORKFLOW_ASSETS_DIRECTORY = "w_assets"
 
     // Date-Time constants
     const val DEFAULT_DATE_FORMAT = "dd-MM-yyyy"
     const val DEFAULT_TIME_FORMAT = "HH:mm"
 
-    // Workflow constants
-    const val READ_TASK = "Read file"
-    const val WRITE_TASK = "Write file"
-
     // SDA constants
+    const val SDA_GRANT_TYPE = "client_credentials"
     const val COMMAND_READ = "read-data"
     const val COMMAND_CONFIGURE = "configure"
+    // Service & Characteristic IDs for SDA
+    const val SDA_SERVICE: String = "6e400001-b5a3-f393-e0a9-e50e24dcca9e"
+    const val SDA_CHARACTERISTIC: String = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
 
     // Device states
     const val DEVICE_STATE_PENDING = "Pending"

@@ -49,4 +49,7 @@ object SharedPrefConstants {
     // Feature Flags
     const val STORE_WORKFLOW_SERVICE_STATUS = "workflowEnabled"
 
+    // SDA Flags
+    const val STORE_SDA_POPPEMPUB_KEY = "sdaPopPemPubKey"
+
 }

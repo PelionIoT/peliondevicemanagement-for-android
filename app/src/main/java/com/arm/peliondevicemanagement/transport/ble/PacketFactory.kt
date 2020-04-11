@@ -38,10 +38,7 @@ class PacketFactory(packetNumber: Int, controlFrame: Byte,
         this.packetNumber = packetNumber.toByte()
         this.controlFrame = controlFrame
         this.packetLength = packetLength.toByte()
-        this.totalPayloadSize =
-            bitShifter(
-                totalPayloadSize
-            )
+        this.totalPayloadSize = bitShifter(totalPayloadSize)
         this.isReRequestedPacket = if(isReRequestedPacket) 1 else 0
         // Reserving 2bytes fixme
         this.packetReserved[0] = packetReserved[0]
@@ -60,11 +57,9 @@ class PacketFactory(packetNumber: Int, controlFrame: Byte,
                 packetArray[0].toInt(),
                 packetArray[1],
                 packetArray[2].toInt(),
-                bitUnShifter(
-                    byteArrayOf(
+                bitUnShifter(byteArrayOf(
                         packetArray[3],
-                        packetArray[4]
-                    )
+                        packetArray[4])
                 ),
                 false, byteArrayOf(0, 0),
                 packetArray.copyOfRange(8, packetArray.size - 1),

@@ -47,7 +47,9 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
 
     companion object{
         private val TAG = ArmBleDevice::class.java.simpleName
-        const val MTU_SIZE: Int = 200
+        const val MTU_SIZE: Int = 244
+        // Should always be 4 bytes less than the MTU
+        private const val TMSN_MTU_SIZE: Int = MTU_SIZE - 4
     }
 
     private var mBleManager: BleManager? = null
@@ -180,7 +182,7 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
                     packet,
                     object : BleGattWriteCallback {
                         override fun onWrite(hexString: String, buffer: ByteArray, characteristic: BluetoothGattCharacteristic) {
-                            Log.d(TAG, "->onAir() $hexString")
+                            //Log.d(TAG, "->onAir() $hexString")
                             currentPosition = totalPacketsToWrite - dataOutQueue.size
                             Log.d(TAG, "->onWrite() currentQueuePosition: $currentPosition, remainingItemsInQueue: ${dataOutQueue.size}")
                             isAckReceived = true
@@ -191,10 +193,10 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
     }
 
     private suspend fun doWrite(protocolMessage: ByteArray) = withContext(Dispatchers.IO) {
-        //val currentMtuSize = MTU_SIZE - 4
-        val currentMtuSize = MTU_SIZE
+        // FixME [ Use TMSN_MTU_SIZE here ]
+        val transmissionMtuSize = 200
 
-        Log.d(TAG, "->doWrite() MaxSupportedMTU: $currentMtuSize bytes")
+        Log.d(TAG, "->doWrite() MaxTransmissionMTU: $transmissionMtuSize bytes")
         Log.d(TAG, "->doWrite() protocolMessage" +
                 "\nsize: ${protocolMessage.size}," +
                 "\ndata: ${protocolMessage.contentToString()}")
@@ -204,29 +206,25 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
         val messageQueue: Queue<ByteArray> = if(protocolMessage.size == 46){
             ByteFactory.splitBytes(protocolMessage, 46)
         } else {
-            // fixME [ do not touch this ]
-            ByteFactory.splitBytes(protocolMessage, (currentMtuSize - 9))
-            //ByteFactory.splitBytes(protocolMessage, (200 - 9))
+            ByteFactory.splitBytes(protocolMessage, (transmissionMtuSize - 9))
         }
         Log.d(TAG, "->doWrite() ItemsInMessageQueue: ${messageQueue.size}")
 
         // Construct packets
         var packetNumber = 1
         val messageSize = messageQueue.size
-        var isMore = 1
+        var hasMore = 1
         messageQueue.forEach { messageChunk ->
             if(packetNumber == messageSize){
-                isMore = 0
+                hasMore = 0
             }
 
-            Log.d(TAG, "->doWrite() sN: $globalNumber, fN: $packetNumber, isMoreFragment: $isMore")
+            Log.d(TAG, "->doWrite() sN: $globalNumber, " +
+                    "fN: $packetNumber, isMoreFragment: $hasMore")
 
             val newPacket = PacketFactory(
                 globalNumber,
-                PacketFactory.createControlFrame(
-                    packetNumber,
-                    isMore
-                ),
+                PacketFactory.createControlFrame(packetNumber, hasMore),
                 (messageChunk.size),
                 protocolMessage.size, false,
                 byteArrayOf(0, 0), messageChunk,
@@ -244,14 +242,12 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
         dataOutQueue = if(packetBuffer.size == 55) {
             ByteFactory.splitBytes(packetBuffer, 55)
         } else {
-            // fixME [ do not touch this ]
-            ByteFactory.splitBytes(packetBuffer, currentMtuSize)
-            //ByteFactory.splitBytes(packetBuffer, 200)
+            ByteFactory.splitBytes(packetBuffer, transmissionMtuSize)
         }
+
         // Count total packets to write
         totalPacketsToWrite = dataOutQueue.size
         Log.d(TAG, "->doWrite() ItemsInPacketQueue: ${dataOutQueue.size}, TotalPacketsToWrite: $totalPacketsToWrite")
-
         isAckReceived = true
 
         while (dataOutQueue.size > 0){

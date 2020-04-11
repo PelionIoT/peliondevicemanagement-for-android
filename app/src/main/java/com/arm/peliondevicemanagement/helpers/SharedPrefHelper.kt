@@ -60,6 +60,10 @@ object SharedPrefHelper {
         SharedPrefManager.with(context = AppController.appController!!)!!
             .getString(SharedPrefConstants.STORE_SELECTED_ACCOUNT_NAME, "")!!
 
+    internal fun getSDAPopPemPubKey(): String =
+        SharedPrefManager.with(context = AppController.appController!!)!!
+            .getString(SharedPrefConstants.STORE_SDA_POPPEMPUB_KEY, "")!!
+
     internal fun isMultiAccountSupported(): Boolean =
         SharedPrefManager.with(context = AppController.appController!!)!!
             .getBoolean(SharedPrefConstants.STORE_SUPPORTS_MULTI_ACCOUNTS, false)
@@ -116,6 +120,11 @@ object SharedPrefHelper {
             .putString(SharedPrefConstants.STORE_SELECTED_ACCOUNT_NAME, accountName)
             .apply()
 
+    internal fun storeSDAPopPemPubKey(popPemPubKey: String) =
+        SharedPrefManager.with(context = AppController.appController!!)!!.edit()
+            .putString(SharedPrefConstants.STORE_SDA_POPPEMPUB_KEY, popPemPubKey)
+            .apply()
+
     internal fun setDarkThemeStatus(enabled: Boolean) =
         SharedPrefManager.with(context = AppController.appController!!)!!.edit()
             .putBoolean(SharedPrefConstants.STORE_DARK_THEME_STATUS, enabled)
@@ -156,6 +165,7 @@ object SharedPrefHelper {
         editor.remove(SharedPrefConstants.STORE_USER_ACCOUNT_PROFILE)
         editor.remove(SharedPrefConstants.STORE_SELECTED_ACCOUNT_ID)
         editor.remove(SharedPrefConstants.STORE_SELECTED_ACCOUNT_NAME)
+        editor.remove(SharedPrefConstants.STORE_SDA_POPPEMPUB_KEY)
         editor.apply()
     }
 }

@@ -31,6 +31,8 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionManager
+import com.arm.mbed.sda.proxysdk.SecuredDeviceAccess
+import com.arm.mbed.sda.proxysdk.server.UserPasswordServer
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.adapters.WorkflowDeviceAdapter
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowDeviceRunModel
@@ -41,6 +43,7 @@ import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_COMPLE
 import com.arm.peliondevicemanagement.databinding.FragmentJobBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.screens.activities.HostActivity
+import com.arm.peliondevicemanagement.services.data.SDATokenResponse
 import com.arm.peliondevicemanagement.utils.PlatformUtils.checkForLocationPermission
 import com.arm.peliondevicemanagement.utils.PlatformUtils.enableBluetooth
 import com.arm.peliondevicemanagement.utils.PlatformUtils.fetchAttributeDrawable
@@ -51,8 +54,13 @@ import com.arm.peliondevicemanagement.utils.WorkflowUtils.getPermissionScopeFrom
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.isValidSDAToken
 import com.arm.peliondevicemanagement.utils.PlatformUtils.parseJSONTimeIntoTimeAgo
 import com.arm.peliondevicemanagement.utils.PlatformUtils.parseJSONTimeString
+import com.arm.peliondevicemanagement.utils.WorkflowUtils.getAudienceListFromDevices
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.fragment_job.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class JobFragment : Fragment() {
 
@@ -181,10 +189,9 @@ class JobFragment : Fragment() {
         showHideSDAProgressbar(true)
         // Fetch permission-scope
         val permissionScope = getPermissionScopeFromTasks(workflowModel.workflowTasks)
-        // Create audienceList for now.
-        val audience = "ep:016eead293eb926ca57ba92703c00000"
-        val audienceList = arrayListOf<String>()
-        audienceList.add(audience)
+        // Create audienceList
+        val audienceList  = getAudienceListFromDevices(workflowModel.workflowDevices!!)
+        // Call access-token request
         workflowViewModel.refreshSDAToken(permissionScope, audienceList)
     }
 
@@ -272,10 +279,10 @@ class JobFragment : Fragment() {
     }
 
     private fun navigateToJobRunFragment() {
-        /*if(!isBluetoothEnabled()){
+        if(!isBluetoothEnabled()){
             enableBluetooth(requireContext())
             return
-        }*/
+        }
         if(checkForLocationPermission(requireActivity())){
             if(isLocationServiceEnabled(requireContext())){
                 Navigation.findNavController(viewBinder.root)
