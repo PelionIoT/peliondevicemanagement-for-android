@@ -108,13 +108,13 @@
                 />
 
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingStart="25dp"
-                android:paddingEnd="16dp"
+                android:paddingEnd="5dp"
                 android:paddingBottom="15dp"
                 android:id="@+id/tvTime"
-                android:text="@string/elapsed_time_format"
+                android:text="@string/elapsed_time_text"
                 android:layout_below="@id/tvTasks"
                 android:fontFamily="@font/lato_regular"
                 android:ellipsize="middle"
@@ -122,6 +122,16 @@
                 android:textSize="14sp"
                 android:textStyle="bold"
                 />
+
+            <Chronometer
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/lato_regular"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_below="@id/tvTasks"
+                android:layout_toEndOf="@+id/tvTime"
+                android:id="@+id/elapsedTimer"/>
 
         </RelativeLayout>
     </com.google.android.material.card.MaterialCardView>
@@ -174,7 +184,7 @@
                 android:paddingStart="20dp"
                 android:paddingEnd="16dp"
                 android:paddingBottom="5dp"
-                android:id="@+id/tvDeviceSubHeader"
+                android:id="@+id/tvCompleted"
                 android:layout_below="@+id/tvDeviceHeader"
                 android:text="@string/devices_completed_format"
                 android:layout_toEndOf="@id/deviceIconView"
@@ -182,17 +192,6 @@
                 android:ellipsize="middle"
                 android:singleLine="true"
                 android:textSize="14sp"
-                />
-
-            <ProgressBar
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/tvDeviceSubHeader"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:indeterminate="true"
-                android:layout_marginStart="24dp"
-                android:layout_marginEnd="24dp"
-                android:id="@+id/progressBar"
                 />
 
             <androidx.recyclerview.widget.RecyclerView
@@ -203,21 +202,59 @@
                 android:layout_marginEnd="16dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="5dp"
-                android:layout_below="@id/tvDeviceSubHeader"
+                android:layout_below="@id/tvCompleted"
                 android:paddingBottom="8dp"
                 android:clipToPadding="false"
-                android:visibility="invisible"
                 />
 
         </RelativeLayout>
     </com.google.android.material.card.MaterialCardView>
+
+    <!--<RelativeLayout
+        android:layout_below="@id/cardJobRunItem"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginStart="24dp"
+            android:id="@+id/tvDeviceHeader"
+            android:text="@string/devices"
+            android:drawableStart="?attr/iconDevice"
+            android:drawablePadding="20dp"
+            android:fontFamily="@font/lato_regular"
+            android:ellipsize="middle"
+            android:singleLine="true"
+            android:textSize="16sp"
+            />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/rvDevices"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="5dp"
+            android:layout_below="@id/tvDeviceHeader"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:clipToPadding="false"
+            />
+
+    </RelativeLayout>-->
 
     <com.google.android.material.button.MaterialButton
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:id="@+id/stopButton"
         android:textAllCaps="false"
-        android:text="@string/cancel"
+        android:text="@string/cancel_text"
         app:backgroundTint="?attr/colorAccent"
         android:fontFamily="@font/lato_regular"
         android:layout_alignParentBottom="true"/>

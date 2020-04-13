@@ -44,6 +44,7 @@
     <string name="devices">Devices</string>
     <string name="pending_text">Pending</string>
     <string name="running_text">Running</string>
+    <string name="stopped_text">Stopped</string>
     <string name="secure_text">Secure Device Access</string>
     <string name="refresh">Refresh</string>
     <string name="na">Not available</string>
@@ -59,14 +60,15 @@
     <string name="last_executed_format">Last Updated: <xliff:g id="view">%1$s</xliff:g></string>
     <string name="devices_completed_format">Completed: <xliff:g id="view">%1$s</xliff:g></string>
     <string name="total_tasks_format">Total Tasks: <xliff:g id="view">%1$s</xliff:g></string>
-    <string name="elapsed_time_format">Time Left: <xliff:g id="view">%1$s</xliff:g></string>
     <string name="active_format">Active till: <xliff:g id="view">%1$s</xliff:g></string>
     <string name="expired_format">Expired on: <xliff:g id="view">%1$s</xliff:g></string>
+    <string name="elapsed_time_text">Time Elapsed:</string>
 
     <string name="hello_blank_fragment">Hello</string>
     <string name="run_job">Run Job</string>
     <string name="fab_description">Run Job Button</string>
-    <string name="cancel">Cancel</string>
+    <string name="cancel_text">Cancel</string>
+    <string name="finish_text">Finish</string>
 
     <string name="attention_text">Attention Required</string>
     <string name="location_perm_desc">This app needs location permission for scanning nearby BLE devices</string>

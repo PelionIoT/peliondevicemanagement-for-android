@@ -63,6 +63,7 @@
         <item name="iconShieldYellow">@drawable/ic_shield_yellow</item>
         <item name="iconShieldRed">@drawable/ic_shield_red</item>
         <item name="iconRefresh">@drawable/ic_refresh_dark</item>
+        <item name="iconStop">@drawable/ic_stop_dark</item>
     </style>
 
     <!-- Launch Theme -->
@@ -119,6 +120,7 @@
         <item name="iconShieldYellow">@drawable/ic_shield_yellow</item>
         <item name="iconShieldRed">@drawable/ic_shield_red</item>
         <item name="iconRefresh">@drawable/ic_refresh_light</item>
+        <item name="iconStop">@drawable/ic_stop_light</item>
     </style>
 
     <style name="AppTheme.Toolbar">

@@ -31,11 +31,8 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionManager
-import com.arm.mbed.sda.proxysdk.SecuredDeviceAccess
-import com.arm.mbed.sda.proxysdk.server.UserPasswordServer
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.adapters.WorkflowDeviceAdapter
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowDeviceRunModel
 import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
 import com.arm.peliondevicemanagement.components.viewmodels.WorkflowViewModel
 import com.arm.peliondevicemanagement.constants.AppConstants.DEFAULT_TIME_FORMAT
@@ -43,11 +40,8 @@ import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_COMPLE
 import com.arm.peliondevicemanagement.databinding.FragmentJobBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.screens.activities.HostActivity
-import com.arm.peliondevicemanagement.services.data.SDATokenResponse
 import com.arm.peliondevicemanagement.utils.PlatformUtils.checkForLocationPermission
-import com.arm.peliondevicemanagement.utils.PlatformUtils.enableBluetooth
 import com.arm.peliondevicemanagement.utils.PlatformUtils.fetchAttributeDrawable
-import com.arm.peliondevicemanagement.utils.PlatformUtils.isBluetoothEnabled
 import com.arm.peliondevicemanagement.utils.PlatformUtils.isLocationServiceEnabled
 import com.arm.peliondevicemanagement.utils.PlatformUtils.openLocationServiceSettings
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.getPermissionScopeFromTasks
@@ -57,10 +51,6 @@ import com.arm.peliondevicemanagement.utils.PlatformUtils.parseJSONTimeString
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.getAudienceListFromDevices
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.fragment_job.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class JobFragment : Fragment() {
 
@@ -123,7 +113,7 @@ class JobFragment : Fragment() {
 
         val totalCompletedText = "$totalDevicesCompleted/${workflowModel.workflowDevices!!.size}"
 
-        viewBinder.tvDeviceSubHeader.text = context!!
+        viewBinder.tvCompleted.text = context!!
             .getString(R.string.devices_completed_format,
                 totalCompletedText)
 
@@ -270,7 +260,7 @@ class JobFragment : Fragment() {
             .setPositiveButton(resources.getString(R.string.open_settings_text)) { _, _ ->
                 openLocationServiceSettings(context)
             }
-            .setNegativeButton(resources.getString(R.string.cancel)) { dialogInterface, _ ->
+            .setNegativeButton(resources.getString(R.string.cancel_text)) { dialogInterface, _ ->
                 dialogInterface.dismiss()
             }
             .setCancelable(false)
@@ -279,10 +269,10 @@ class JobFragment : Fragment() {
     }
 
     private fun navigateToJobRunFragment() {
-        if(!isBluetoothEnabled()){
+        /*if(!isBluetoothEnabled()){
             enableBluetooth(requireContext())
             return
-        }
+        }*/
         if(checkForLocationPermission(requireActivity())){
             if(isLocationServiceEnabled(requireContext())){
                 Navigation.findNavController(viewBinder.root)

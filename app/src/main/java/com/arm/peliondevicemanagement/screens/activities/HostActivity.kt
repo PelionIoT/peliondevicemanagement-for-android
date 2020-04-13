@@ -296,7 +296,7 @@ class HostActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                             .setPositiveButton(resources.getString(R.string.open_settings_text)) { _, _ ->
                                 PlatformUtils.openAppSettings(this)
                             }
-                            .setNegativeButton(resources.getString(R.string.cancel)) { dialogInterface, _ ->
+                            .setNegativeButton(resources.getString(R.string.cancel_text)) { dialogInterface, _ ->
                                 dialogInterface.dismiss()
                             }
                             .setCancelable(false)

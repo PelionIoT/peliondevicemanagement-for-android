@@ -43,9 +43,12 @@ object AppConstants {
     const val DEFAULT_TIME_FORMAT = "HH:mm"
 
     // SDA constants
+    const val SDA = "sda"
     const val SDA_GRANT_TYPE = "client_credentials"
     const val COMMAND_READ = "read-data"
     const val COMMAND_CONFIGURE = "configure"
+    const val JOB_COMPLETED = "jobCompleted"
+    const val ENDPOINT = "endpoint"
     // Service & Characteristic IDs for SDA
     const val SDA_SERVICE: String = "6e400001-b5a3-f393-e0a9-e50e24dcca9e"
     const val SDA_CHARACTERISTIC: String = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"

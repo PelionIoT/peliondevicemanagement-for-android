@@ -22,6 +22,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.arm.mbed.sda.proxysdk.SecuredDeviceAccess
 import com.arm.peliondevicemanagement.components.models.workflow.DeviceResponseModel
+import com.arm.peliondevicemanagement.components.models.workflow.DeviceStateResponseModel
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_COMPLETED
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_CONNECTED
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_CONNECTING
@@ -29,8 +30,14 @@ import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_DISCON
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_FAILED
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_RUNNING
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_VERIFY
+import com.arm.peliondevicemanagement.constants.AppConstants.ENDPOINT
+import com.arm.peliondevicemanagement.constants.AppConstants.JOB_COMPLETED
+import com.arm.peliondevicemanagement.constants.AppConstants.SDA
+import com.arm.peliondevicemanagement.constants.DeviceState
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.transport.ble.ArmBleDevice
+import com.arm.peliondevicemanagement.transport.ble.DumBleDevice
+import com.arm.peliondevicemanagement.transport.ble.DummyBleDevice
 import com.arm.peliondevicemanagement.transport.sda.DeviceCommand
 import com.arm.pelionmobiletransportsdk.ble.BleDevice
 import kotlinx.coroutines.*
@@ -51,42 +58,52 @@ class SDAViewModel : ViewModel() {
 
     private var deviceLock: Boolean = false
     private var deviceCommandLock: Boolean = false
-    private var bleDevice: ArmBleDevice? = null
+    // FixME
+    //private var bleDevice: ArmBleDevice? = null
+    private var bleDevice: DummyBleDevice? = null
     private val bleConnectionCallback = object: ArmBleDevice.ArmBleConnectionCallback {
         override fun onDisconnect() {
-            deviceStateLiveData.postValue(DEVICE_STATE_DISCONNECTED)
+            deviceStateLiveData.postValue(DeviceStateResponseModel(DeviceState.DISCONNECTED, activeDeviceIdentifier))
         }
     }
+
+    private var activeDeviceIdentifier: String = "Unknown Device"
 
     private var jobID: String? = null
     private var accessToken: String? = null
     private var jobCommands: List<DeviceCommand>? = null
 
-    val deviceStateLiveData = MutableLiveData<String>()
+    val deviceStateLiveData = MutableLiveData<DeviceStateResponseModel>()
     val responseLiveData = MutableLiveData<DeviceResponseModel>()
 
-    fun setDeviceCommandLockState(locked: Boolean) = deviceCommandLock
+    fun setDeviceCommandLockState(locked: Boolean){
+        deviceCommandLock = locked
+    }
 
     private fun connectToDevice(context: Context, deviceMAC: String) {
         scope.launch {
             try {
-                deviceStateLiveData.postValue(DEVICE_STATE_CONNECTING)
-                bleDevice = ArmBleDevice(context, deviceMAC)
+                activeDeviceIdentifier = deviceMAC
+                deviceStateLiveData.postValue(DeviceStateResponseModel(DeviceState.CONNECTING, activeDeviceIdentifier))
+                //bleDevice = ArmBleDevice(context, deviceMAC)
+                // FixME
+                bleDevice = DummyBleDevice(context, deviceMAC)
                 if(bleDevice!!.connect(bleConnectionCallback)){
                     delay(20)
-                    if(bleDevice!!.requestHigherMtu(ArmBleDevice.MTU_SIZE)){
-                        deviceStateLiveData.postValue(DEVICE_STATE_CONNECTED)
+                    // FixME
+                    if(bleDevice!!.requestHigherMtu(DummyBleDevice.MTU_SIZE)){
+                        deviceStateLiveData.postValue(DeviceStateResponseModel(DeviceState.CONNECTED, activeDeviceIdentifier))
                     } else {
                         bleDevice = null
-                        deviceStateLiveData.postValue(DEVICE_STATE_FAILED)
+                        deviceStateLiveData.postValue(DeviceStateResponseModel(DeviceState.FAILED, activeDeviceIdentifier))
                     }
                 } else {
                     bleDevice = null
-                    deviceStateLiveData.postValue(DEVICE_STATE_FAILED)
+                    deviceStateLiveData.postValue(DeviceStateResponseModel(DeviceState.FAILED, activeDeviceIdentifier))
                 }
             } catch (e: Throwable) {
                 LogHelper.debug(TAG, "Exception occurred: ${e.message}")
-                deviceStateLiveData.postValue(DEVICE_STATE_FAILED)
+                deviceStateLiveData.postValue(DeviceStateResponseModel(DeviceState.FAILED, activeDeviceIdentifier))
             }
         }
     }
@@ -97,26 +114,40 @@ class SDAViewModel : ViewModel() {
                 delay(20)
                 bleDevice!!.disconnect()
                 bleDevice = null
-                deviceStateLiveData.postValue(DEVICE_STATE_DISCONNECTED)
+                deviceStateLiveData.postValue(DeviceStateResponseModel(DeviceState.DISCONNECTED, activeDeviceIdentifier))
                 deviceLock = false
             } catch (e: Throwable) {
                 LogHelper.debug(TAG, "Exception occurred: ${e.message}")
-                deviceStateLiveData.postValue(DEVICE_STATE_FAILED)
+                deviceStateLiveData.postValue(DeviceStateResponseModel(DeviceState.FAILED, activeDeviceIdentifier))
             }
         }
     }
 
     fun fetchDeviceEndpoint() {
         scope.launch {
-            deviceStateLiveData.postValue(DEVICE_STATE_VERIFY)
-            val deviceEndpoint = bleDevice!!.readEndpoint()
+            var deviceEndpoint = bleDevice!!.readEndpoint()
+            // FixME
+            when (activeDeviceIdentifier) {
+                "FE:7E:7E:BD:AB:87" -> {
+                    deviceEndpoint = "FE:7E:7E:BD:AB:87"
+                }
+                "XD:7E:7E:BD:AB:70" -> {
+                    deviceEndpoint = "026eead293eb926ca57ba92703c00000"
+                    activeDeviceIdentifier = deviceEndpoint
+                }
+                else -> {
+                    activeDeviceIdentifier = deviceEndpoint
+                }
+            }
+            deviceStateLiveData.postValue(DeviceStateResponseModel(DeviceState.VERIFY, activeDeviceIdentifier))
             responseLiveData.postValue(
-                DeviceResponseModel("endpoint:$deviceEndpoint", null))
+                DeviceResponseModel("$ENDPOINT:$deviceEndpoint", null))
         }
     }
 
+    // FixME [ devices: List<BleDevice> ]
     fun connectDevices(context: Context,
-                       devices: List<BleDevice>,
+                       devices: List<DumBleDevice>,
                        workflowID: String,
                        sdaToken: String,
                        commands: List<DeviceCommand>){
@@ -135,6 +166,8 @@ class SDAViewModel : ViewModel() {
                 }
                 LogHelper.debug(TAG, "DeviceLock released, now moving to next device")
             }
+            // Signal all-devices completed
+            responseLiveData.postValue(DeviceResponseModel(JOB_COMPLETED, null))
         }
     }
 
@@ -143,10 +176,10 @@ class SDAViewModel : ViewModel() {
             LogHelper.debug(TAG, "runJob() Do last-stage verifications")
             // Stage 1 [ Token-check ]
             if(accessToken != null){
-                LogHelper.debug(TAG, "AccessToken->OK, accessToken: $accessToken")
+                LogHelper.debug(TAG, "AccessToken->OK")
             } else {
                 LogHelper.debug(TAG, "AccessToken->N/A")
-                deviceStateLiveData.postValue(DEVICE_STATE_FAILED)
+                deviceStateLiveData.postValue(DeviceStateResponseModel(DeviceState.FAILED, activeDeviceIdentifier))
                 responseLiveData.postValue(DeviceResponseModel("sda", null))
                 return@launch
             }
@@ -155,7 +188,7 @@ class SDAViewModel : ViewModel() {
                 LogHelper.debug(TAG, "DeviceCommands->OK, Total: ${jobCommands?.size}")
             } else {
                 LogHelper.debug(TAG, "DeviceCommands->N/A")
-                deviceStateLiveData.postValue(DEVICE_STATE_FAILED)
+                deviceStateLiveData.postValue(DeviceStateResponseModel(DeviceState.FAILED, activeDeviceIdentifier))
                 responseLiveData.postValue(DeviceResponseModel("sda", null))
                 return@launch
             }
@@ -170,6 +203,9 @@ class SDAViewModel : ViewModel() {
                 }
                 LogHelper.debug(TAG, "DeviceCommandLock released, now moving to next command")
             }
+            // All commands are now completed
+            LogHelper.debug(TAG, "All commands on this device are now complete")
+            deviceStateLiveData.postValue(DeviceStateResponseModel(DeviceState.COMPLETED, activeDeviceIdentifier))
         }
     }
 
@@ -178,20 +214,20 @@ class SDAViewModel : ViewModel() {
         scope.launch {
             try {
                 LogHelper.debug(TAG, "sendMessageToDevice() deviceCommand: $deviceCommand")
-                deviceStateLiveData.postValue(DEVICE_STATE_RUNNING)
+                deviceStateLiveData.postValue(DeviceStateResponseModel(DeviceState.RUNNING, activeDeviceIdentifier))
                 val opResponse = SecuredDeviceAccess.sendMessage(accessToken,
                     deviceCommand.command, deviceCommand.commandParams, bleDevice)
                 if(opResponse != null){
-                    deviceStateLiveData.postValue(DEVICE_STATE_COMPLETED)
+                    deviceStateLiveData.postValue(DeviceStateResponseModel(DeviceState.COMMAND_COMPLETED, activeDeviceIdentifier))
                 } else {
-                    deviceStateLiveData.postValue(DEVICE_STATE_FAILED)
+                    deviceStateLiveData.postValue(DeviceStateResponseModel(DeviceState.COMMAND_FAILED, activeDeviceIdentifier))
                 }
-                deviceResponse = DeviceResponseModel("sda", opResponse)
+                deviceResponse = DeviceResponseModel(SDA, opResponse)
                 responseLiveData.postValue(deviceResponse)
             } catch (e: Throwable){
                 LogHelper.debug(TAG, "Exception occurred: ${e.message}")
-                deviceStateLiveData.postValue(DEVICE_STATE_FAILED)
-                deviceResponse = DeviceResponseModel("sda", null)
+                deviceStateLiveData.postValue(DeviceStateResponseModel(DeviceState.FAILED, activeDeviceIdentifier))
+                deviceResponse = DeviceResponseModel(SDA, null)
                 responseLiveData.postValue(deviceResponse)
             }
         }
