@@ -143,8 +143,6 @@
         android:layout_below="@id/cardJobRunItem"
         android:animateLayoutChanges="true"
         android:layout_marginTop="10dp"
-        android:layout_marginBottom="5dp"
-        android:layout_above="@+id/stopButton"
         app:cardBackgroundColor="?attr/cardColor"
         app:strokeColor="@drawable/stroke_color"
         app:strokeWidth="1dp"
@@ -210,53 +208,21 @@
         </RelativeLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!--<RelativeLayout
-        android:layout_below="@id/cardJobRunItem"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="5dp"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginStart="24dp"
-            android:id="@+id/tvDeviceHeader"
-            android:text="@string/devices"
-            android:drawableStart="?attr/iconDevice"
-            android:drawablePadding="20dp"
-            android:fontFamily="@font/lato_regular"
-            android:ellipsize="middle"
-            android:singleLine="true"
-            android:textSize="16sp"
-            />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/rvDevices"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="15dp"
-            android:layout_marginBottom="5dp"
-            android:layout_below="@id/tvDeviceHeader"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:clipToPadding="false"
-            />
-
-    </RelativeLayout>-->
-
-    <com.google.android.material.button.MaterialButton
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:id="@+id/stopButton"
-        android:textAllCaps="false"
-        android:text="@string/cancel_text"
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/fab_description"
+        android:text="@string/stop_text"
+        app:icon="?attr/iconStop"
         app:backgroundTint="?attr/colorAccent"
-        android:fontFamily="@font/lato_regular"
+        app:iconTint="@android:color/white"
+        app:layout_anchorGravity="bottom"
+        app:elevation="10dp"
+        android:textAllCaps="false"
+        android:id="@+id/stopButton"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="25dp"
+        android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"/>
 
 </RelativeLayout>

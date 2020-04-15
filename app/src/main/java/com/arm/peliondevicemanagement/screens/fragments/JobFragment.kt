@@ -18,6 +18,7 @@
 package com.arm.peliondevicemanagement.screens.fragments
 
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -41,7 +42,9 @@ import com.arm.peliondevicemanagement.databinding.FragmentJobBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.screens.activities.HostActivity
 import com.arm.peliondevicemanagement.utils.PlatformUtils.checkForLocationPermission
+import com.arm.peliondevicemanagement.utils.PlatformUtils.enableBluetooth
 import com.arm.peliondevicemanagement.utils.PlatformUtils.fetchAttributeDrawable
+import com.arm.peliondevicemanagement.utils.PlatformUtils.isBluetoothEnabled
 import com.arm.peliondevicemanagement.utils.PlatformUtils.isLocationServiceEnabled
 import com.arm.peliondevicemanagement.utils.PlatformUtils.openLocationServiceSettings
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.getPermissionScopeFromTasks
@@ -148,6 +151,17 @@ class JobFragment : Fragment() {
             expandCollapseDevicesRecView()
         }
 
+        viewBinder.rvDevices.addOnScrollListener(object: RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if(dy>0){
+                    viewBinder.runJobButton.hide()
+                } else {
+                    viewBinder.runJobButton.show()
+                }
+                super.onScrolled(recyclerView, dx, dy)
+            }
+        })
+
         viewBinder.runJobButton.setOnClickListener {
             if(isSDATokenValid){
                 navigateToJobRunFragment()
@@ -198,7 +212,10 @@ class JobFragment : Fragment() {
                     fetchAttributeDrawable(context!!, R.attr.iconShieldGreen))
                 showHideRefreshTokenButton(false)
                 isSDATokenValid = true
-                updateRunJobButtonText(context!!.getString(R.string.run_job))
+                updateRunJobButtonText(
+                    resources.getDrawable(R.drawable.ic_play_light),
+                    resources.getString(R.string.run_job)
+                )
             } else {
                 viewBinder.tvValidTill.text = context!!.getString(
                     R.string.expired_format, expiryDateTime)
@@ -206,7 +223,10 @@ class JobFragment : Fragment() {
                     fetchAttributeDrawable(context!!, R.attr.iconShieldRed))
                 showHideRefreshTokenButton(true)
                 isSDATokenValid = false
-                updateRunJobButtonText(context!!.getString(R.string.refresh))
+                updateRunJobButtonText(
+                    resources.getDrawable(R.drawable.ic_refresh_light),
+                    resources.getString(R.string.refresh)
+                )
             }
         } else {
             viewBinder.tvValidTill.text = context!!.getString(R.string.na)
@@ -214,11 +234,15 @@ class JobFragment : Fragment() {
                 fetchAttributeDrawable(context!!, R.attr.iconShieldYellow))
             showHideRefreshTokenButton(true)
             isSDATokenValid = false
-            updateRunJobButtonText(context!!.getString(R.string.refresh))
+            updateRunJobButtonText(
+                resources.getDrawable(R.drawable.ic_refresh_light),
+                resources.getString(R.string.refresh)
+            )
         }
     }
 
-    private fun updateRunJobButtonText(text: String) {
+    private fun updateRunJobButtonText(icon: Drawable, text: String) {
+        viewBinder.runJobButton.icon = icon
         viewBinder.runJobButton.text = text
     }
 

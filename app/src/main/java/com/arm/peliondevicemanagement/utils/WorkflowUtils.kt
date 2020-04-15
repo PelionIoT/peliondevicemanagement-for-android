@@ -41,6 +41,7 @@ import com.arm.peliondevicemanagement.services.cache.LocalCache
 import com.arm.peliondevicemanagement.services.data.SDATokenResponse
 import com.arm.peliondevicemanagement.transport.sda.CommandConstants
 import com.arm.peliondevicemanagement.transport.sda.DeviceCommand
+import com.arm.peliondevicemanagement.utils.WorkflowFileUtils.readWorkflowAssetFile
 import java.util.*
 import java.util.concurrent.Executors
 
@@ -167,27 +168,30 @@ object WorkflowUtils {
     suspend fun downloadTaskAssets(cloudRepository: CloudRepository, workflowID: String, workflowTasks: List<WorkflowTaskModel>) {
         val userID = SharedPrefHelper.getSelectedUserID()
         val accountID = SharedPrefHelper.getSelectedAccountID()
-        val filePath = "$userID/$accountID/$workflowID"
+        var filePath = "$userID/$accountID/$workflowID"
 
         LogHelper.debug(TAG, "Scanning workflow task-assets")
-        val fileQueue = arrayListOf<String>()
+        val fileQueue = hashMapOf<String, String>()
         workflowTasks.forEach { task ->
-            if(task.taskName == AppConstants.WRITE_TASK){
+            if(task.taskName == WRITE_TASK){
                 task.inputParameters.forEach { inputParam ->
-                    if(inputParam.paramType == AppConstants.TASK_TYPE_FILE &&
+                    if(inputParam.paramType == TASK_TYPE_FILE &&
                         inputParam.paramName == TASK_NAME_FILE){
-                        fileQueue.add(inputParam.paramValue)
+                        fileQueue[task.taskID] = inputParam.paramValue
                     }
                 }
             }
         }
 
         if(!fileQueue.isNullOrEmpty()){
-            fileQueue.forEach { fileID ->
+            fileQueue.forEach { fileMap ->
+                val fileID = fileMap.value
                 LogHelper.debug(TAG, "Downloading file: $fileID")
                 val fileResponse = cloudRepository.getWorkflowTaskAssetFile(fileID)
                 if(fileResponse != null){
                     val inputStream = fileResponse.byteStream()
+                    // Append taskID to filePath
+                    filePath += "/${fileMap.key}"
                     LogHelper.debug(TAG, "Saving to $filePath")
                     val isSuccessful = WorkflowFileUtils.downloadWorkflowAssetFile(
                         filePath,
@@ -210,7 +214,11 @@ object WorkflowUtils {
 
     }
 
-    fun getDeviceCommands(tasks: List<WorkflowTaskModel>): List<DeviceCommand> {
+    fun getDeviceCommands(workflowID: String, tasks: List<WorkflowTaskModel>): List<DeviceCommand> {
+        val userID = SharedPrefHelper.getSelectedUserID()
+        val accountID = SharedPrefHelper.getSelectedAccountID()
+
+
         val deviceCommandList = arrayListOf<DeviceCommand>()
         LogHelper.debug(TAG, "Scanning tasks to construct device-commands")
         tasks.forEach {task ->
@@ -240,8 +248,14 @@ object WorkflowUtils {
 
                         if(param.paramName == TASK_NAME_FILE &&
                             param.paramType == TASK_TYPE_FILE) {
-                            // FixME [ Read content from given file ]
-                            fileContent = "Hello Prakhar Bhatttt"
+                            // Construct filePath
+                            val filePath = "$userID/$accountID/$workflowID/${task.taskID}"
+                            // Read the file
+                            val content = readWorkflowAssetFile(filePath, param.paramValue)
+                            if(content != null){
+                                fileContent = content
+                                //LogHelper.debug(TAG, "FileRead: $fileContent")
+                            }
                         }
                     }
 

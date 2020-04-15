@@ -63,7 +63,7 @@ object WorkflowFileUtils {
         val fileInputStream = FileInputStream(file)
         fileInputStream.bufferedReader().useLines { lines ->
             return lines.fold("") { some, text ->
-                "$some\n$text"
+                "$some$text"
             }
         }
     }

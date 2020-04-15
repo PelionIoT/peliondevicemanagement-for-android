@@ -41,19 +41,19 @@ class DeviceViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
 
             when (model.deviceState) {
                 DEVICE_STATE_COMPLETED -> {
-                    viewProgressbar.visibility = View.GONE
+                    viewProgressbar.visibility = View.INVISIBLE
                     viewDeviceStatus.visibility = View.VISIBLE
                     viewDeviceStatus.background = resources.getDrawable(R.drawable.ic_status_ok)
                     viewDeviceStatus.setImageDrawable(resources.getDrawable(R.drawable.ic_check_light))
                 }
                 DEVICE_STATE_FAILED -> {
-                    viewProgressbar.visibility = View.GONE
+                    viewProgressbar.visibility = View.INVISIBLE
                     viewDeviceStatus.visibility = View.VISIBLE
                     viewDeviceStatus.background = resources.getDrawable(R.drawable.ic_status_failed)
                     viewDeviceStatus.setImageDrawable(resources.getDrawable(R.drawable.ic_exclamation))
                 }
                 DEVICE_STATE_PENDING -> {
-                    viewProgressbar.visibility = View.GONE
+                    viewProgressbar.visibility = View.INVISIBLE
                     viewDeviceStatus.visibility = View.VISIBLE
                     viewDeviceStatus.background = resources.getDrawable(R.drawable.ic_status_pending)
                     viewDeviceStatus.setImageDrawable(resources.getDrawable(R.drawable.ic_exclamation))

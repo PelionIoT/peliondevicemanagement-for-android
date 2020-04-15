@@ -24,6 +24,8 @@ import com.arm.peliondevicemanagement.transport.ISerialDataSink
 import com.arm.peliondevicemanagement.transport.sda.SerialMessage
 import com.arm.peliondevicemanagement.utils.ByteFactory
 import kotlinx.coroutines.*
+import java.io.IOException
+import java.lang.Exception
 import java.util.Queue
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -90,6 +92,7 @@ class DummyBleDevice(private val context: Context, private val deviceMac: String
         delay(200)
         return@withContext suspendCoroutine<Boolean> {
             LogHelper.debug(TAG, "->onMtuChanged() size: $size bytes")
+            //throw Exception(IOException("MTU failed"))
             it.resume(true)
         }
     }
@@ -124,7 +127,7 @@ class DummyBleDevice(private val context: Context, private val deviceMac: String
         val messageQueue: Queue<ByteArray> = if(protocolMessage.size == 46){
             ByteFactory.splitBytes(protocolMessage, 46)
         } else {
-            ByteFactory.splitBytes(protocolMessage, (transmissionMtuSize - 9))
+            ByteFactory.splitBytes(protocolMessage, (transmissionMtuSize - 8))
         }
         LogHelper.debug(TAG, "->doWrite() ItemsInMessageQueue: ${messageQueue.size}")
 
@@ -145,8 +148,7 @@ class DummyBleDevice(private val context: Context, private val deviceMac: String
                 PacketFactory.createControlFrame(packetNumber, hasMore),
                 (messageChunk.size),
                 protocolMessage.size, false,
-                byteArrayOf(0, 0), messageChunk,
-                32
+                byteArrayOf(0, 0), messageChunk
             ).getPacket()
 
             packetBuffer += newPacket
@@ -157,8 +159,8 @@ class DummyBleDevice(private val context: Context, private val deviceMac: String
         LogHelper.debug(TAG, "->doWrite() PacketBufferSize: ${packetBuffer.size}")
 
         // Construct packet queue
-        dataOutQueue = if(packetBuffer.size == 55) {
-            ByteFactory.splitBytes(packetBuffer, 55)
+        dataOutQueue = if(packetBuffer.size == 54) {
+            ByteFactory.splitBytes(packetBuffer, 54)
         } else {
             ByteFactory.splitBytes(packetBuffer, transmissionMtuSize)
         }
@@ -218,8 +220,40 @@ class DummyBleDevice(private val context: Context, private val deviceMac: String
                 "\npayloadSize: ${packetReceived.getDataPayload().size}," +
                 "\npayloadContent: ${packetReceived.getDataPayload().contentToString()}")
 
-        operationResponse = packetReceived.getDataPayload()
-        isFinalResponseReceived = true
+        if(packetReceived.getPacket().size == 24){
+            // Nonce Response
+            operationResponse = packetReceived.getDataPayload()
+            LogHelper.debug(TAG, "onNewData()-> Returning nonce-response")
+            isFinalResponseReceived = true
+        } else {
+            val hasMore = PacketFactory.hasMoreFragment(packetReceived.getPacket()[1])
+            if(hasMore){
+                // There's more to the response
+                val payload = packetReceived.getDataPayload()
+                val tempBuffer = ByteArray(operationResponse.size + payload.size)
+                System.arraycopy(operationResponse, 0, tempBuffer, 0, operationResponse.size)
+                System.arraycopy(payload, 0, tempBuffer, operationResponse.size, payload.size)
+                // Assign new buffer to operationResponse
+                operationResponse = tempBuffer
+                LogHelper.debug(TAG, "onNewData()-> Waiting for more response, hasMore: true")
+            } else {
+                if(operationResponse.isNotEmpty()){
+                    // There's more to the response
+                    val payload = packetReceived.getDataPayload()
+                    val tempBuffer = ByteArray(operationResponse.size + payload.size)
+                    System.arraycopy(operationResponse, 0, tempBuffer, 0, operationResponse.size)
+                    System.arraycopy(payload, 0, tempBuffer, operationResponse.size, payload.size)
+                    // Assign new buffer to operationResponse
+                    operationResponse = tempBuffer
+                    LogHelper.debug(TAG, "onNewData()-> Returning final operation-response")
+                    isFinalResponseReceived = true
+                } else {
+                    operationResponse = packetReceived.getDataPayload()
+                    LogHelper.debug(TAG, "onNewData()-> Returning operation-response")
+                    isFinalResponseReceived = true
+                }
+            }
+        }
     }
 }
 

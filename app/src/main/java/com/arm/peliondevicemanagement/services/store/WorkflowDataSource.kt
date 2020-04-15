@@ -30,6 +30,7 @@ import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.services.CloudRepository
 import com.arm.peliondevicemanagement.services.cache.LocalCache
 import com.arm.peliondevicemanagement.services.data.SDATokenResponse
+import com.arm.peliondevicemanagement.utils.WorkflowUtils.downloadTaskAssets
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.fetchSDAToken
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.getAudienceListFromDevices
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.getPermissionScopeFromTasks
@@ -149,9 +150,8 @@ class WorkflowDataSource(
                                 )
                             )
                         }
-                        // FixME
                         // Fetch SDA_token
-                        /*val sdaTokenResponse = fetchAndSaveSDAToken(workflow)
+                        val sdaTokenResponse = fetchAndSaveSDAToken(workflow)
                         if(sdaTokenResponse != null){
                             workflow.sdaToken = sdaTokenResponse
                         }
@@ -159,8 +159,9 @@ class WorkflowDataSource(
                         downloadTaskAssets(cloudRepository,
                             workflow.workflowID, workflow.workflowTasks)
 
+                        // FixME
                         // Sync workflow
-                        if(workflow.workflowID == "016b22375e6e423cce18a69800000000" &&
+                        /*if(workflow.workflowID == "016b22375e6e423cce18a69800000000" &&
                                 workflow.workflowStatus != WORKFLOW_STATE_SYNCED){
                             val isSyncSuccessful = cloudRepository.syncWorkflow(workflow.workflowID)
                             if(isSyncSuccessful){

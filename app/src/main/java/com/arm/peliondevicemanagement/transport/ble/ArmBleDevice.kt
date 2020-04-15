@@ -25,6 +25,7 @@ import android.util.Log
 import com.arm.mbed.sda.proxysdk.devices.AbstractDevice
 import com.arm.peliondevicemanagement.constants.AppConstants.SDA_CHARACTERISTIC
 import com.arm.peliondevicemanagement.constants.AppConstants.SDA_SERVICE
+import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.transport.ISerialDataSink
 import com.arm.peliondevicemanagement.transport.sda.SerialMessage
 import com.arm.pelionmobiletransportsdk.ble.callbacks.BleGattConnectCallback
@@ -62,6 +63,7 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
     private var currentPosition: Int = 0
     private var globalNumber: Int = 0
     private var isAckReceived: Boolean = false
+    private var isFinalResponseReceived: Boolean = false
 
     private var bleConnectionCallback: ArmBleConnectionCallback? = null
 
@@ -206,7 +208,7 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
         val messageQueue: Queue<ByteArray> = if(protocolMessage.size == 46){
             ByteFactory.splitBytes(protocolMessage, 46)
         } else {
-            ByteFactory.splitBytes(protocolMessage, (transmissionMtuSize - 9))
+            ByteFactory.splitBytes(protocolMessage, (transmissionMtuSize - 8))
         }
         Log.d(TAG, "->doWrite() ItemsInMessageQueue: ${messageQueue.size}")
 
@@ -227,8 +229,7 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
                 PacketFactory.createControlFrame(packetNumber, hasMore),
                 (messageChunk.size),
                 protocolMessage.size, false,
-                byteArrayOf(0, 0), messageChunk,
-                32
+                byteArrayOf(0, 0), messageChunk
             ).getPacket()
 
             packetBuffer += newPacket
@@ -239,8 +240,8 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
         Log.d(TAG, "->doWrite() PacketBufferSize: ${packetBuffer.size}")
 
         // Construct packet queue
-        dataOutQueue = if(packetBuffer.size == 55) {
-            ByteFactory.splitBytes(packetBuffer, 55)
+        dataOutQueue = if(packetBuffer.size == 54) {
+            ByteFactory.splitBytes(packetBuffer, 54)
         } else {
             ByteFactory.splitBytes(packetBuffer, transmissionMtuSize)
         }
@@ -259,9 +260,13 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
             }
         }
 
-        delay(5000)
         // Now wait for final response
         Log.d(TAG, "->doWrite() Write complete, now waiting for response.")
+
+        while (!isFinalResponseReceived){
+            // Wait here for full response
+        }
+        isFinalResponseReceived = false
     }
 
     override fun sendMessage(operationMessage: ByteArray): ByteArray {
@@ -291,7 +296,39 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
                 "\npayloadSize: ${packetReceived.getDataPayload().size}," +
                 "\npayloadContent: ${packetReceived.getDataPayload().contentToString()}")
 
-        operationResponse = packetReceived.getDataPayload()
+        if(packetReceived.getPacket().size == 24){
+            // Nonce Response
+            operationResponse = packetReceived.getDataPayload()
+            isFinalResponseReceived = true
+        } else {
+            val hasMore = PacketFactory.hasMoreFragment(packetReceived.getPacket()[1])
+            if(hasMore){
+                // There's more to the response
+                val payload = packetReceived.getDataPayload()
+                val tempBuffer = ByteArray(operationResponse.size + payload.size)
+                System.arraycopy(operationResponse, 0, tempBuffer, 0, operationResponse.size)
+                System.arraycopy(payload, 0, tempBuffer, operationResponse.size, payload.size)
+                // Assign new buffer to operationResponse
+                operationResponse = tempBuffer
+                LogHelper.debug(TAG, "Waiting for more response, hasMore: true")
+            } else {
+                if(operationResponse.isNotEmpty()){
+                    // There's more to the response
+                    val payload = packetReceived.getDataPayload()
+                    val tempBuffer = ByteArray(operationResponse.size + payload.size)
+                    System.arraycopy(operationResponse, 0, tempBuffer, 0, operationResponse.size)
+                    System.arraycopy(payload, 0, tempBuffer, operationResponse.size, payload.size)
+                    // Assign new buffer to operationResponse
+                    operationResponse = tempBuffer
+                    LogHelper.debug(TAG, "Final response received, hasMore: false")
+                    isFinalResponseReceived = true
+                } else {
+                    operationResponse = packetReceived.getDataPayload()
+                    LogHelper.debug(TAG, "Final response received")
+                    isFinalResponseReceived = true
+                }
+            }
+        }
 
 
         // Append new data with existing data.

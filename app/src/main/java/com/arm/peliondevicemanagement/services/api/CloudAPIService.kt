@@ -77,6 +77,7 @@ interface CloudAPIService {
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(10, TimeUnit.SECONDS)
                 .writeTimeout(10, TimeUnit.SECONDS)
+                .cache(null)
                 .build()
 
             return Retrofit.Builder()

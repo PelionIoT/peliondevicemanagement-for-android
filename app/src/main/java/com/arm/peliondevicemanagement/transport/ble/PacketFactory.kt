@@ -20,7 +20,7 @@ package com.arm.peliondevicemanagement.transport.ble
 class PacketFactory(packetNumber: Int, controlFrame: Byte,
                     packetLength: Int, totalPayloadSize: Int,
                     isReRequestedPacket: Boolean, packetReserved: ByteArray,
-                    packetPayload: ByteArray, packetCRC: Int) {
+                    packetPayload: ByteArray) {
 
     // Packet Structure
     private var packetNumber: Byte =  0
@@ -30,7 +30,7 @@ class PacketFactory(packetNumber: Int, controlFrame: Byte,
     private var isReRequestedPacket: Byte = 0
     private var packetReserved: ByteArray = ByteArray(2)
     private var packetPayload: ByteArray = byteArrayOf()
-    private var packetCRC: Byte = 0
+    //private var packetCRC: Byte = 0
 
     private var completeByteArray = ByteArray(8)
 
@@ -43,11 +43,11 @@ class PacketFactory(packetNumber: Int, controlFrame: Byte,
         // Reserving 2bytes fixme
         this.packetReserved[0] = packetReserved[0]
         this.packetReserved[1] = packetReserved[1]
-        if(packetPayload.size > 231){
+        if(packetPayload.size > 232){
             throw ArrayIndexOutOfBoundsException("Packet Payload Max limit: 231")
         }
         this.packetPayload = packetPayload
-        this.packetCRC = packetCRC.toByte()
+        //this.packetCRC = packetCRC.toByte()
         buildPacket()
     }
 
@@ -62,8 +62,8 @@ class PacketFactory(packetNumber: Int, controlFrame: Byte,
                         packetArray[4])
                 ),
                 false, byteArrayOf(0, 0),
-                packetArray.copyOfRange(8, packetArray.size - 1),
-                packetArray[(packetArray.size - 1)].toInt()
+                packetArray.copyOfRange(8, packetArray.size - 1)
+                //packetArray[(packetArray.size - 1)].toInt()
             )
         }
 
@@ -83,6 +83,10 @@ class PacketFactory(packetNumber: Int, controlFrame: Byte,
             return controlFrame.toByte()
         }
 
+        fun hasMoreFragment(controlFrame: Byte): Boolean {
+            return (1 == (controlFrame.toInt() shr 2) and 1)
+        }
+
         private fun bitUnShifter(byteArray: ByteArray): Int {
             val upperBit = byteArray[1].toInt()
             val lowerBit = byteArray[0].toInt()
@@ -91,11 +95,10 @@ class PacketFactory(packetNumber: Int, controlFrame: Byte,
 
             val reversedUpper = (upperBit.and(0xFF) shl 8)
             val reversedLower = (lowerBit.and(0xFF))
-            val reversedNumber = reversedUpper + reversedLower
 
             /*print("Reversed Shifted Bits-> Upper: $reversedUpper, " +
                     "Lower: $reversedLower, Number: $reversedNumber\n")*/
-            return reversedNumber
+            return reversedUpper + reversedLower
         }
     }
 
@@ -118,7 +121,7 @@ class PacketFactory(packetNumber: Int, controlFrame: Byte,
         completeByteArray = tempBuffer
 
         // Attach packetCRC to main array
-        completeByteArray += packetCRC
+        //completeByteArray += packetCRC
     }
 
     fun getPacket(): ByteArray {

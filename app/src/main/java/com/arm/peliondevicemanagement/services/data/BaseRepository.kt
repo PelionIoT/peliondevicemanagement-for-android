@@ -48,6 +48,7 @@ open class BaseRepository{
                 "code: ${response.code()}, message: ${response.message()},\n" +
                 "body: ${response.body()},\nerrorBody: $errorResponse")*/
 
+        //LogHelper.debug("API_Response", "ResponseSuccessStatus: ${response.isSuccessful}")
         if(response.isSuccessful) return Result.Success(response.body()!!)
 
         // Parse error-response

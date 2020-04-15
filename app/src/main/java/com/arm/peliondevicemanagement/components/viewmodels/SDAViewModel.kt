@@ -104,6 +104,9 @@ class SDAViewModel : ViewModel() {
             } catch (e: Throwable) {
                 LogHelper.debug(TAG, "Exception occurred: ${e.message}")
                 deviceStateLiveData.postValue(DeviceStateResponseModel(DeviceState.FAILED, activeDeviceIdentifier))
+                // Release the locks to avoid deadlock
+                deviceLock = false
+                deviceCommandLock = false
             }
         }
     }
@@ -119,15 +122,18 @@ class SDAViewModel : ViewModel() {
             } catch (e: Throwable) {
                 LogHelper.debug(TAG, "Exception occurred: ${e.message}")
                 deviceStateLiveData.postValue(DeviceStateResponseModel(DeviceState.FAILED, activeDeviceIdentifier))
+                // Release the locks to avoid deadlock
+                deviceLock = false
+                deviceCommandLock = false
             }
         }
     }
 
     fun fetchDeviceEndpoint() {
         scope.launch {
-            var deviceEndpoint = bleDevice!!.readEndpoint()
+            val deviceEndpoint = bleDevice!!.readEndpoint()
             // FixME
-            when (activeDeviceIdentifier) {
+            /*when (activeDeviceIdentifier) {
                 "FE:7E:7E:BD:AB:87" -> {
                     deviceEndpoint = "FE:7E:7E:BD:AB:87"
                 }
@@ -138,7 +144,8 @@ class SDAViewModel : ViewModel() {
                 else -> {
                     activeDeviceIdentifier = deviceEndpoint
                 }
-            }
+            }*/
+            activeDeviceIdentifier = deviceEndpoint
             deviceStateLiveData.postValue(DeviceStateResponseModel(DeviceState.VERIFY, activeDeviceIdentifier))
             responseLiveData.postValue(
                 DeviceResponseModel("$ENDPOINT:$deviceEndpoint", null))
@@ -229,6 +236,9 @@ class SDAViewModel : ViewModel() {
                 deviceStateLiveData.postValue(DeviceStateResponseModel(DeviceState.FAILED, activeDeviceIdentifier))
                 deviceResponse = DeviceResponseModel(SDA, null)
                 responseLiveData.postValue(deviceResponse)
+                // Release the locks to avoid deadlock
+                deviceLock = false
+                deviceCommandLock = false
             }
         }
     }

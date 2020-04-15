@@ -40,7 +40,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingStart="24dp"
-            android:paddingEnd="10dp"
+            android:paddingEnd="2dp"
             android:paddingBottom="5dp"
             android:paddingTop="10dp"
             android:id="@+id/tvName"
@@ -49,7 +49,7 @@
             android:ellipsize="middle"
             android:singleLine="true"
             android:textSize="16sp"
-            android:layout_toStartOf="@id/viewDeviceStatus"
+            android:layout_toStartOf="@id/viewProgressbar"
             android:layout_marginEnd="10dp"
             tools:text="Test Device 01"
         />
@@ -68,7 +68,7 @@
             android:singleLine="true"
             android:textSize="14sp"
             android:layout_below="@id/tvName"
-            android:layout_toStartOf="@id/viewDeviceStatus"
+            android:layout_toStartOf="@id/viewProgressbar"
             android:layout_marginEnd="5dp"
             />
 
@@ -91,7 +91,7 @@
             android:layout_centerVertical="true"
             android:indeterminate="true"
             android:id="@+id/viewProgressbar"
-            android:visibility="gone"
+            android:visibility="invisible"
             tools:visibility="visible"
             />
 

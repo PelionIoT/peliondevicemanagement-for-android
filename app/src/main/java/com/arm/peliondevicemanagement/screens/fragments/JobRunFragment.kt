@@ -18,6 +18,7 @@
 package com.arm.peliondevicemanagement.screens.fragments
 
 import android.bluetooth.le.ScanResult
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.SystemClock
@@ -91,13 +92,19 @@ class JobRunFragment : Fragment() {
             LogHelper.debug(TAG, "BleScan->onFinish()")
             if(mScannedDevices.isNotEmpty()){
                 isScanCompleted = true
-                updateStopButtonText("Stop")
+                updateStopButtonText(
+                    resources.getDrawable(R.drawable.ic_stop_light),
+                    resources.getString(R.string.stop_text)
+                )
                 removeTemporaryDeviceItemFromList()
                 connectDevices()
             } else {
                 isScanCompleted = false
                 updateDeviceItemInList(0,"No devices found", "Failed")
-                updateStopButtonText("Retry")
+                updateStopButtonText(
+                    resources.getDrawable(R.drawable.ic_refresh_light),
+                    resources.getString(R.string.retry_text)
+                )
             }
         }
 
@@ -188,6 +195,17 @@ class JobRunFragment : Fragment() {
     }
 
     private fun setupListeners() {
+
+        viewBinder.rvDevices.addOnScrollListener(object: RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if(dy>0){
+                    viewBinder.stopButton.hide()
+                } else {
+                    viewBinder.stopButton.show()
+                }
+                super.onScrolled(recyclerView, dx, dy)
+            }
+        })
 
         viewBinder.stopButton.setOnClickListener {
             if(isScanCompleted && !isJobCompleted){
@@ -325,7 +343,8 @@ class JobRunFragment : Fragment() {
         bleManager!!.startScan(bleScanCallback)
     }
 
-    private fun updateStopButtonText(message: String) {
+    private fun updateStopButtonText(icon: Drawable, message: String) {
+        viewBinder.stopButton.icon = icon
         viewBinder.stopButton.text = message
     }
 
@@ -339,11 +358,11 @@ class JobRunFragment : Fragment() {
         // DummyData
         val mScannedDevices = ArrayList<DumBleDevice>()
         mScannedDevices.add(DumBleDevice("TestDev1", "DD:7E:7E:BD:AB:78", 22))
-        mScannedDevices.add(DumBleDevice("TestDev2", "FE:7E:7E:BD:AB:87", 25))
+        //mScannedDevices.add(DumBleDevice("TestDev2", "FE:7E:7E:BD:AB:87", 25))
         //mScannedDevices.add(DumBleDevice("TestDev3", "DS:7E:7E:BD:AB:79", 20))
         //mScannedDevices.add(DumBleDevice("TestDev4", "XD:7E:7E:BD:AB:70", 20))
 
-        val deviceCommands = getDeviceCommands(jobRunModel.workflowTasks)
+        val deviceCommands = getDeviceCommands(jobRunModel.workflowID, jobRunModel.workflowTasks)
         LogHelper.debug(TAG, "DeviceCommands Size: ${deviceCommands.size}")
         sdaViewModel.connectDevices(requireContext(),
             mScannedDevices,
@@ -360,7 +379,10 @@ class JobRunFragment : Fragment() {
                 requireContext(),
                 R.attr.iconStop)
         )
-        viewBinder.stopButton.text = resources.getString(R.string.finish_text)
+        updateStopButtonText(
+            resources.getDrawable(R.drawable.ic_check_light),
+            resources.getString(R.string.finish_text)
+        )
         viewBinder.elapsedTimer.stop()
     }
 

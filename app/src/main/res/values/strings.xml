@@ -69,6 +69,8 @@
     <string name="fab_description">Run Job Button</string>
     <string name="cancel_text">Cancel</string>
     <string name="finish_text">Finish</string>
+    <string name="stop_text">Stop</string>
+    <string name="retry_text">Retry</string>
 
     <string name="attention_text">Attention Required</string>
     <string name="location_perm_desc">This app needs location permission for scanning nearby BLE devices</string>

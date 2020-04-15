@@ -56,6 +56,7 @@ class HostActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     private lateinit var navigationMenu: Menu
 
     private var isAccountGraph: Boolean = false
+    private var isJobRunGraph: Boolean = false
 
     companion object {
         private val TAG: String = HostActivity::class.java.simpleName
@@ -121,11 +122,13 @@ class HostActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                     showHideDrawerItems(true)
                 }
                 R.id.jobFragment -> {
+                    isJobRunGraph = false
                     showHideToolbar(true)
                     updateToolbarTitle("Job")
                     enableDisableDrawer(false)
                 }
                 R.id.jobRunFragment -> {
+                    isJobRunGraph = true
                     showHideToolbar(true)
                     updateToolbarTitle("Job Run")
                     enableDisableDrawer(false)
@@ -221,9 +224,14 @@ class HostActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         }
     }
 
-    /*override fun onSupportNavigateUp(): Boolean {
-        return NavigationUI.navigateUp(navigationController, appBarConfiguration)
-    }*/
+    override fun onSupportNavigateUp(): Boolean {
+        return if(isJobRunGraph) {
+            onBackPressedDispatcher.onBackPressed()
+            true
+        } else {
+            NavigationUI.navigateUp(navigationController, appBarConfiguration)
+        }
+    }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         item.isChecked = true
@@ -253,13 +261,6 @@ class HostActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             }
         }
         return true
-    }
-
-    override fun onOptionsItemSelected(menuItem : MenuItem) : Boolean {
-        if (menuItem.itemId == android.R.id.home) {
-            onBackPressedDispatcher.onBackPressed()
-        }
-        return super.onOptionsItemSelected(menuItem)
     }
 
     override fun onBackPressed() {
