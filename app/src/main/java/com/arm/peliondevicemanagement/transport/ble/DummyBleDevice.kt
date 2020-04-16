@@ -24,8 +24,6 @@ import com.arm.peliondevicemanagement.transport.ISerialDataSink
 import com.arm.peliondevicemanagement.transport.sda.SerialMessage
 import com.arm.peliondevicemanagement.utils.ByteFactory
 import kotlinx.coroutines.*
-import java.io.IOException
-import java.lang.Exception
 import java.util.Queue
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -92,7 +90,6 @@ class DummyBleDevice(private val context: Context, private val deviceMac: String
         delay(200)
         return@withContext suspendCoroutine<Boolean> {
             LogHelper.debug(TAG, "->onMtuChanged() size: $size bytes")
-            //throw Exception(IOException("MTU failed"))
             it.resume(true)
         }
     }

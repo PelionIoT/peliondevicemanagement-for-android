@@ -18,21 +18,21 @@
 package com.arm.peliondevicemanagement.helpers.converters
 
 import androidx.room.TypeConverter
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowDeviceModel
+import com.arm.peliondevicemanagement.components.models.workflow.device.WorkflowDevice
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlin.collections.ArrayList
 class WDevicesListConverter {
 
     @TypeConverter
-    fun fromString(value: String?): ArrayList<WorkflowDeviceModel>? {
-        val type = object: TypeToken<ArrayList<WorkflowDeviceModel>?>() {}.type
+    fun fromString(value: String?): ArrayList<WorkflowDevice>? {
+        val type = object: TypeToken<ArrayList<WorkflowDevice>?>() {}.type
         return Gson().fromJson(value, type)
     }
 
     @TypeConverter
-    fun fromList(list: ArrayList<WorkflowDeviceModel>?): String {
-        val type = object: TypeToken<ArrayList<WorkflowDeviceModel>?>() {}.type
+    fun fromList(list: ArrayList<WorkflowDevice>?): String {
+        val type = object: TypeToken<ArrayList<WorkflowDevice>?>() {}.type
         return Gson().toJson(list, type)
     }
 }

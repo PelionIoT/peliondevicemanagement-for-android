@@ -22,8 +22,10 @@ import com.arm.mbed.sda.proxysdk.http.CreateAccessTokenRequest
 import com.arm.mbed.sda.proxysdk.operation.OperationArgumentType
 import com.arm.mbed.sda.proxysdk.operation.ParamElement
 import com.arm.peliondevicemanagement.AppController
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowDeviceModel
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowTaskModel
+import com.arm.peliondevicemanagement.components.models.workflow.device.DeviceRunLogs
+import com.arm.peliondevicemanagement.components.models.workflow.device.WorkflowDevice
+import com.arm.peliondevicemanagement.components.models.workflow.task.*
+import com.arm.peliondevicemanagement.constants.APIConstants.KEY_ERROR_CODE
 import com.arm.peliondevicemanagement.constants.AppConstants
 import com.arm.peliondevicemanagement.constants.AppConstants.COMMAND_CONFIGURE
 import com.arm.peliondevicemanagement.constants.AppConstants.COMMAND_READ
@@ -34,6 +36,9 @@ import com.arm.peliondevicemanagement.constants.AppConstants.TASK_NAME_FILEPATH
 import com.arm.peliondevicemanagement.constants.AppConstants.TASK_TYPE_FILE
 import com.arm.peliondevicemanagement.constants.AppConstants.TASK_TYPE_STRING
 import com.arm.peliondevicemanagement.constants.AppConstants.WRITE_TASK
+import com.arm.peliondevicemanagement.constants.state.DeviceRunState
+import com.arm.peliondevicemanagement.constants.state.TaskRunState
+import com.arm.peliondevicemanagement.constants.state.TaskTypeState
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.services.CloudRepository
@@ -44,6 +49,7 @@ import com.arm.peliondevicemanagement.transport.sda.DeviceCommand
 import com.arm.peliondevicemanagement.utils.WorkflowFileUtils.readWorkflowAssetFile
 import java.util.*
 import java.util.concurrent.Executors
+import kotlin.collections.ArrayList
 
 object WorkflowUtils {
 
@@ -80,7 +86,7 @@ object WorkflowUtils {
             val popPemPubKey = SdkUtil.getPopPemPubKey()
             SharedPrefHelper.storeSDAPopPemPubKey(popPemPubKey)
         }
-        return SharedPrefHelper.getSDAPopPemPubKey()
+        return SharedPrefHelper.getSDAPopPemPubKey().trim()
     }
 
     private fun validateSDATokenSanity(accessToken: String, popPemKey: String) {
@@ -131,7 +137,7 @@ object WorkflowUtils {
         return tokenStatus
     }
 
-    fun getPermissionScopeFromTasks(tasks: List<WorkflowTaskModel>): String {
+    fun getPermissionScopeFromTasks(tasks: List<WorkflowTask>): String {
         val scope: String
         val scopeBuffer = StringBuffer()
 
@@ -156,7 +162,7 @@ object WorkflowUtils {
         return scope
     }
 
-    fun getAudienceListFromDevices(devices: List<WorkflowDeviceModel>): List<String> {
+    fun getAudienceListFromDevices(devices: List<WorkflowDevice>): List<String> {
         val audienceList = arrayListOf<String>()
         devices.forEach { device ->
             val audience = "ep:${device.deviceName}"
@@ -165,7 +171,7 @@ object WorkflowUtils {
         return audienceList
     }
 
-    suspend fun downloadTaskAssets(cloudRepository: CloudRepository, workflowID: String, workflowTasks: List<WorkflowTaskModel>) {
+    suspend fun downloadTaskAssets(cloudRepository: CloudRepository, workflowID: String, workflowTasks: List<WorkflowTask>) {
         val userID = SharedPrefHelper.getSelectedUserID()
         val accountID = SharedPrefHelper.getSelectedAccountID()
         var filePath = "$userID/$accountID/$workflowID"
@@ -214,12 +220,12 @@ object WorkflowUtils {
 
     }
 
-    fun getDeviceCommands(workflowID: String, tasks: List<WorkflowTaskModel>): List<DeviceCommand> {
+    fun getDeviceCommands(workflowID: String, tasks: List<WorkflowTask>): List<TaskDeviceCommand> {
         val userID = SharedPrefHelper.getSelectedUserID()
         val accountID = SharedPrefHelper.getSelectedAccountID()
 
 
-        val deviceCommandList = arrayListOf<DeviceCommand>()
+        val deviceCommandList = arrayListOf<TaskDeviceCommand>()
         LogHelper.debug(TAG, "Scanning tasks to construct device-commands")
         tasks.forEach {task ->
             //LogHelper.debug(TAG, "Found task: ${task.taskName}")
@@ -233,7 +239,7 @@ object WorkflowUtils {
                             val commandParams = arrayOf(ParamElement(OperationArgumentType.STR, fileName))
                             val deviceCommand = DeviceCommand(CommandConstants.READ, commandParams)
                             LogHelper.debug(TAG, "Adding device-command: $deviceCommand")
-                            deviceCommandList.add(deviceCommand)
+                            deviceCommandList.add(TaskDeviceCommand(task.taskID, deviceCommand))
                         }
                     }
                 }
@@ -270,12 +276,55 @@ object WorkflowUtils {
 
                         val deviceCommand = DeviceCommand(CommandConstants.CONFIGURE, commandParams)
                         LogHelper.debug(TAG, "Adding device-command: $deviceCommand")
-                        deviceCommandList.add(deviceCommand)
+                        deviceCommandList.add(TaskDeviceCommand(task.taskID, deviceCommand))
                     }
                 }
             }
         }
         return deviceCommandList
+    }
+
+    fun createTaskRunLog(taskID: String, state: TaskRunState, fileID: String? = null): TaskRun {
+        val outputParamsList = ArrayList<TaskRunParam>()
+        when(state) {
+            TaskRunState.SUCCEEDED -> {
+                outputParamsList.add(
+                    TaskRunParam(KEY_ERROR_CODE, TaskTypeState.NUMBER.name, "0")
+                )
+                outputParamsList.add(
+                    TaskRunParam(TASK_NAME_FILE, TaskTypeState.FILE.name, fileID!!)
+                )
+                return TaskRun(taskID, TaskRunState.SUCCEEDED.name, outputParamsList)
+            }
+            TaskRunState.FAILED -> {
+                outputParamsList.add(
+                    TaskRunParam(KEY_ERROR_CODE, TaskTypeState.NUMBER.name, "-1")
+                )
+                return TaskRun(taskID, DeviceRunState.HAS_FAILURES.name, outputParamsList)
+            }
+            TaskRunState.SKIPPED -> {
+                return TaskRun(taskID, TaskRunState.SKIPPED.name, null)
+            }
+        }
+    }
+
+    fun createDeviceRunLog(workflowID: String, deviceID: String,
+                           location: String, executionTime: String,
+                           log: String, taskRuns: List<TaskRun>,
+                           failedCount: Int? = null): DeviceRunLogs {
+        return if(failedCount != null){
+            DeviceRunLogs(
+                workflowID, deviceID,
+                DeviceRunState.HAS_FAILURES.name, location,
+                executionTime, log, taskRuns
+            )
+        } else {
+            DeviceRunLogs(
+                workflowID, deviceID,
+                DeviceRunState.SUCCEEDED.name, location,
+                executionTime, log, taskRuns
+            )
+        }
     }
 
 }

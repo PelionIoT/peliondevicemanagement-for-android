@@ -18,9 +18,6 @@
 package com.arm.peliondevicemanagement.helpers.converters
 
 import androidx.room.TypeConverter
-import com.arm.mbed.sda.proxysdk.http.CreateAccessTokenResponse
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowDeviceModel
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowTaskModel
 import com.arm.peliondevicemanagement.services.data.SDATokenResponse
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken

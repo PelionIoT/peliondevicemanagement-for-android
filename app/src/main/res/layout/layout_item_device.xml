@@ -21,7 +21,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/cardDeviceItem"
     android:layout_marginBottom="5dp"
     android:clickable="true"
     android:focusable="true"

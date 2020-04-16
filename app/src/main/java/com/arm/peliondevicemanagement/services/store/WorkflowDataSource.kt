@@ -19,12 +19,12 @@ package com.arm.peliondevicemanagement.services.store
 
 import androidx.lifecycle.MutableLiveData
 import androidx.paging.PageKeyedDataSource
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowDeviceModel
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
+import com.arm.peliondevicemanagement.components.models.workflow.device.WorkflowDevice
+import com.arm.peliondevicemanagement.components.models.workflow.Workflow
 import com.arm.peliondevicemanagement.constants.AppConstants
 import com.arm.peliondevicemanagement.constants.AppConstants.DATABASE_PAGE_SIZE
 import com.arm.peliondevicemanagement.constants.AppConstants.NETWORK_PAGE_SIZE
-import com.arm.peliondevicemanagement.constants.LoadState
+import com.arm.peliondevicemanagement.constants.state.LoadState
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.services.CloudRepository
@@ -42,7 +42,7 @@ class WorkflowDataSource(
     private val cloudRepository: CloudRepository,
     private val localCache: LocalCache,
     private val stateLiveData: MutableLiveData<LoadState>
-): PageKeyedDataSource<String, WorkflowModel>()  {
+): PageKeyedDataSource<String, Workflow>()  {
 
     companion object {
         private val TAG: String = WorkflowDataSource::class.java.simpleName
@@ -50,9 +50,9 @@ class WorkflowDataSource(
 
     override fun loadInitial(
         params: LoadInitialParams<String>,
-        callback: LoadInitialCallback<String, WorkflowModel>
+        callback: LoadInitialCallback<String, Workflow>
     ) {
-        var workflowList: List<WorkflowModel>
+        var workflowList: List<Workflow>
         workflowList = localCache.fetchWorkflows(DATABASE_PAGE_SIZE)
 
         if(workflowList.isEmpty()){
@@ -85,11 +85,11 @@ class WorkflowDataSource(
 
     override fun loadAfter(
         params: LoadParams<String>,
-        callback: LoadCallback<String, WorkflowModel>
+        callback: LoadCallback<String, Workflow>
     ) {
         // params.key = afterID
         LogHelper.debug(TAG, "loadAfter() afterID: ${params.key}")
-        var workflowList: List<WorkflowModel>
+        var workflowList: List<Workflow>
         workflowList = localCache.fetchWorkflows(DATABASE_PAGE_SIZE, params.key)
 
         if(workflowList.isEmpty()){
@@ -119,7 +119,7 @@ class WorkflowDataSource(
 
     override fun loadBefore(
         params: LoadParams<String>,
-        callback: LoadCallback<String, WorkflowModel>
+        callback: LoadCallback<String, Workflow>
     ) {
         // Not needed
     }
@@ -144,7 +144,7 @@ class WorkflowDataSource(
                         workflow.workflowDevices = arrayListOf()
                         workflow.workflowAUDs.forEach { aud ->
                             workflow.workflowDevices!!.add(
-                                WorkflowDeviceModel(
+                                WorkflowDevice(
                                     aud.substring(3, aud.length),
                                     AppConstants.DEVICE_STATE_PENDING
                                 )
@@ -190,7 +190,7 @@ class WorkflowDataSource(
         }
     }
 
-    private suspend fun fetchAndSaveSDAToken(workflow: WorkflowModel): SDATokenResponse? {
+    private suspend fun fetchAndSaveSDAToken(workflow: Workflow): SDATokenResponse? {
         // Fetch permission-scope
         val permissionScope = getPermissionScopeFromTasks(workflow.workflowTasks)
         // Fetch audience

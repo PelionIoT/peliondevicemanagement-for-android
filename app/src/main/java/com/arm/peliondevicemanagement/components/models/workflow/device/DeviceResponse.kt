@@ -15,15 +15,14 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.services.data
+package com.arm.peliondevicemanagement.components.models.workflow.device
 
-import com.google.gson.annotations.SerializedName
+import com.arm.mbed.sda.proxysdk.protocol.OperationResponse
+import com.arm.peliondevicemanagement.constants.state.DeviceResponseState
 
-data class ErrorResponse(
-    @SerializedName("code")
-    var errorCode: Int,
-    @SerializedName("type")
-    var errorType: String,
-    @SerializedName("message")
-    var errorMessage: String
+data class DeviceResponse(
+    val responseState: DeviceResponseState,
+    val response: String? = null,
+    val operationResponse: OperationResponse? = null,
+    val taskID: String? = null
 )

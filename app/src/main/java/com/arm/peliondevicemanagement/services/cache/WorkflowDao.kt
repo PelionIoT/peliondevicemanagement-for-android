@@ -18,36 +18,32 @@
 package com.arm.peliondevicemanagement.services.cache
 
 import androidx.room.*
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowDeviceModel
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
+import com.arm.peliondevicemanagement.components.models.workflow.device.WorkflowDevice
+import com.arm.peliondevicemanagement.components.models.workflow.Workflow
 import com.arm.peliondevicemanagement.helpers.converters.SDATokenResponseConverter
+import com.arm.peliondevicemanagement.helpers.converters.WDevicesListConverter
 import com.arm.peliondevicemanagement.services.data.SDATokenResponse
-import retrofit2.http.DELETE
 
 @Dao
 interface WorkflowDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertWorkflows(workflows: List<WorkflowModel>)
-
-    // FixME
-    @Query("SELECT * FROM workflows ORDER BY workflowCreatedAt ASC")
-    fun fetchWorkflows(): List<WorkflowModel>
+    fun insertWorkflows(workflows: List<Workflow>)
 
     // FixME [ Add assignee field after testing ]
-    @Query("SELECT * FROM workflows WHERE accountID=:accountID ORDER BY workflowCreatedAt ASC LIMIT :limit")
-    fun fetchWorkflows(accountID: String, limit: Int): List<WorkflowModel>
+    @Query("SELECT * FROM workflows WHERE accountID=:accountID ORDER BY pKey ASC LIMIT :limit")
+    fun fetchWorkflows(accountID: String, limit: Int): List<Workflow>
 
-    @Query("SELECT * FROM workflows WHERE accountID=:accountID AND (workflowCreatedAt > " +
-            "(SELECT workflowCreatedAt FROM workflows WHERE workflowID LIKE :afterID)) " +
-            "ORDER BY workflowCreatedAt ASC LIMIT :limit")
-    fun fetchWorkflows(accountID: String, limit: Int, afterID: String): List<WorkflowModel>
+    @Query("SELECT * FROM workflows WHERE accountID=:accountID AND (pKey > " +
+            "(SELECT pKey FROM workflows WHERE workflowID LIKE :afterID)) " +
+            "ORDER BY pKey ASC LIMIT :limit")
+    fun fetchWorkflows(accountID: String, limit: Int, afterID: String): List<Workflow>
 
-    @Query("SELECT * FROM workflows WHERE workflowID=:workflowID")
-    fun fetchWorkflow(workflowID: String): WorkflowModel
+    @Query("SELECT * FROM workflows WHERE (accountID=:accountID AND workflowID=:workflowID)")
+    fun fetchWorkflow(accountID: String, workflowID: String): Workflow
 
     @Update
-    fun updateWorkflow(workflow: WorkflowModel)
+    fun updateWorkflow(workflow: Workflow)
 
     @Query("UPDATE workflows SET workflowStatus=:status WHERE workflowID=:workflowID")
     fun updateWorkflowStatus(workflowID: String, status: String)
@@ -56,9 +52,9 @@ interface WorkflowDao {
     @Query("UPDATE workflows SET sdaToken=:sdaToken WHERE workflowID=:workflowID")
     fun updateWorkflowSDAToken(workflowID: String, sdaToken: SDATokenResponse?)
 
-    // FixME
-    /*@Query("UPDATE workflows SET workflowDevices=:devices WHERE workflowID=:workflowID")
-    fun updateWorkflowDevices(workflowID: String, devices: List<WorkflowDeviceModel>)*/
+    @TypeConverters(WDevicesListConverter::class)
+    @Query("UPDATE workflows SET workflowDevices=:devices WHERE workflowID=:workflowID")
+    fun updateWorkflowDevices(workflowID: String, devices: ArrayList<WorkflowDevice>)
 
     /*@DELETE
     fun deleteWorkflow(workflowID: String)*/

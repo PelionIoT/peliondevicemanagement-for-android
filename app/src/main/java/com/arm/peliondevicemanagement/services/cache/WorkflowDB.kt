@@ -21,12 +21,11 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.arm.peliondevicemanagement.components.models.user.UserProfile
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
+import com.arm.peliondevicemanagement.components.models.workflow.Workflow
 import com.arm.peliondevicemanagement.constants.AppConstants.WORKFLOW_DATABASE_NAME
 
 @Database(
-    entities = [WorkflowModel::class],
+    entities = [Workflow::class],
     version = 1,
     exportSchema = false
 )

@@ -21,10 +21,10 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.R
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowDeviceModel
+import com.arm.peliondevicemanagement.components.models.workflow.device.WorkflowDevice
 import com.arm.peliondevicemanagement.components.viewholders.DeviceViewHolder
 
-class WorkflowDeviceAdapter(private val workflowDeviceList: List<WorkflowDeviceModel>):
+class WorkflowDeviceAdapter(private val workflowDeviceList: List<WorkflowDevice>):
     RecyclerView.Adapter<DeviceViewHolder>() {
 
     companion object {

@@ -21,7 +21,7 @@ import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
+import com.arm.peliondevicemanagement.components.models.workflow.Workflow
 import com.arm.peliondevicemanagement.constants.AppConstants.WORKFLOW_STATE_COMPLETED
 import com.arm.peliondevicemanagement.constants.AppConstants.WORKFLOW_STATE_SYNCED
 import kotlinx.android.synthetic.main.layout_item_account.view.tvName
@@ -30,7 +30,7 @@ import kotlinx.android.synthetic.main.layout_item_workflow.view.*
 class WorkflowViewHolder(itemView: View,
                          private val itemClickListener: RecyclerItemClickListener): RecyclerView.ViewHolder(itemView) {
 
-    private lateinit var workflowModel: WorkflowModel
+    private lateinit var workflowModel: Workflow
 
     init {
         itemView.setOnClickListener {
@@ -38,7 +38,7 @@ class WorkflowViewHolder(itemView: View,
         }
     }
 
-    internal fun bind(model: WorkflowModel) {
+    internal fun bind(model: Workflow) {
         this.workflowModel = model
         itemView.apply {
             tvName.text = model.workflowName

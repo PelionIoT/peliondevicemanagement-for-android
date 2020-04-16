@@ -39,7 +39,6 @@ class CloudRepository(private val cloudAPIService: CloudAPIService): BaseReposit
 
     suspend fun doAuth(username: String, password: String, accountID: String = ""): LoginResponse? {
         val loginResponse: LoginResponse?
-        val errorMessage = "Unable to login"
 
         if(accountID.isNotEmpty()){
             loginResponse = doSafeAPIRequest(
@@ -47,16 +46,16 @@ class CloudRepository(private val cloudAPIService: CloudAPIService): BaseReposit
                     KEY_USERNAME to username,
                     KEY_PASSWORD to password,
                     KEY_GRANT_TYPE to KEY_PASSWORD,
-                    KEY_ACCOUNT to accountID))},
-                errorMessage = errorMessage
+                    KEY_ACCOUNT to accountID))
+                }
             )
         } else {
             loginResponse = doSafeAPIRequest(
                 call = { cloudAPIService.doAuth(createJSONRequestBody(
                     KEY_USERNAME to username,
                     KEY_PASSWORD to password,
-                    KEY_GRANT_TYPE to KEY_PASSWORD))},
-                errorMessage = errorMessage
+                    KEY_GRANT_TYPE to KEY_PASSWORD))
+                }
             )
         }
         return loginResponse
@@ -65,43 +64,40 @@ class CloudRepository(private val cloudAPIService: CloudAPIService): BaseReposit
     suspend fun doImpersonate(accountID: String): LoginResponse? {
         return doSafeAPIRequest(
             call = { cloudAPIService.doImpersonate(createJSONRequestBody(
-                KEY_ACCOUNT_ID to accountID
-            ))},
-            errorMessage = "Unable to refresh token"
+                    KEY_ACCOUNT_ID to accountID
+                ))
+            }
         )
     }
 
     suspend fun getSDAToken(request: String): SDATokenResponse? {
         return doSafeAPIRequest(
-            call = { cloudAPIService.getSDAToken(request.toRequestBody(CONTENT_TYPE_JSON))},
-            errorMessage = "Unable to fetch SDA token"
+            call = { cloudAPIService.getSDAToken(
+                request.toRequestBody(CONTENT_TYPE_JSON))
+            }
         )
     }
 
     suspend fun getUserProfile(): UserProfile? {
         return doSafeAPIRequest(
-        call = { cloudAPIService.getUserProfile()},
-        errorMessage = "Unable to fetch user-profile"
+        call = { cloudAPIService.getUserProfile()}
         )
     }
 
     suspend fun getAccountProfile(): AccountProfileModel? {
         return doSafeAPIRequest(
-            call = { cloudAPIService.getAccountProfile()},
-            errorMessage = "Unable to fetch account-profile"
+            call = { cloudAPIService.getAccountProfile()}
         )
     }
 
     suspend fun getAssignedWorkflows(itemsPerPage: Int, after: String? = null): WorkflowsResponse? {
         return if(after != null){
             doSafeAPIRequest(
-                call = { cloudAPIService.getAssignedWorkflows(itemsPerPage, after)},
-                errorMessage = "Unable to fetch workflows"
+                call = { cloudAPIService.getAssignedWorkflows(itemsPerPage, after)}
             )
         } else {
             doSafeAPIRequest(
-                call = { cloudAPIService.getAssignedWorkflows(itemsPerPage)},
-                errorMessage = "Unable to fetch workflows"
+                call = { cloudAPIService.getAssignedWorkflows(itemsPerPage)}
             )
         }
     }
@@ -109,13 +105,11 @@ class CloudRepository(private val cloudAPIService: CloudAPIService): BaseReposit
     suspend fun getAllWorkflows(itemsPerPage: Int, after: String? = null): WorkflowsResponse? {
         return if(after != null){
             doSafeAPIRequest(
-                call = { cloudAPIService.getAllWorkflows(itemsPerPage, after)},
-                errorMessage = "Unable to fetch workflows"
+                call = { cloudAPIService.getAllWorkflows(itemsPerPage, after)}
             )
         } else {
             doSafeAPIRequest(
-                call = { cloudAPIService.getAllWorkflows(itemsPerPage)},
-                errorMessage = "Unable to fetch workflows"
+                call = { cloudAPIService.getAllWorkflows(itemsPerPage)}
             )
         }
     }
@@ -123,8 +117,7 @@ class CloudRepository(private val cloudAPIService: CloudAPIService): BaseReposit
     suspend fun syncWorkflow(workflowID: String): Boolean {
         val status: Boolean
         val response = doSafeAPIRequest(
-            call = { cloudAPIService.syncWorkflow(workflowID)},
-            errorMessage = "Unable to sync workflow"
+            call = { cloudAPIService.syncWorkflow(workflowID)}
         )
         status = response?.toString()?.isEmpty() ?: false
         return status
@@ -132,15 +125,13 @@ class CloudRepository(private val cloudAPIService: CloudAPIService): BaseReposit
 
     suspend fun getWorkflowTaskAssetFile(fileID: String): ResponseBody? {
         return doSafeAPIRequest(
-            call = { cloudAPIService.getWorkflowTaskAssetFile(fileID)},
-            errorMessage = "Unable to fetch workflow file"
+            call = { cloudAPIService.getWorkflowTaskAssetFile(fileID)}
         )
     }
 
     suspend fun getLicenses(): List<LicenseModel>? {
         return doSafeAPIRequest(
-            call = { cloudAPIService.getLicenses()},
-            errorMessage = "Unable to fetch licenses"
+            call = { cloudAPIService.getLicenses()}
         )
     }
 

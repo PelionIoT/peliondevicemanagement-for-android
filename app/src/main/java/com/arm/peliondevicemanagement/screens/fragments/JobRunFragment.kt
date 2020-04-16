@@ -17,15 +17,14 @@
 
 package com.arm.peliondevicemanagement.screens.fragments
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.bluetooth.le.ScanResult
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.os.CountDownTimer
-import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Chronometer
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -37,19 +36,22 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.adapters.WorkflowDeviceAdapter
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowDeviceModel
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
+import com.arm.peliondevicemanagement.components.models.workflow.device.DeviceResponse
+import com.arm.peliondevicemanagement.components.models.workflow.device.DeviceRun
+import com.arm.peliondevicemanagement.components.models.workflow.device.DeviceRunLogs
+import com.arm.peliondevicemanagement.components.models.workflow.device.WorkflowDevice
+import com.arm.peliondevicemanagement.components.models.workflow.task.TaskRun
 import com.arm.peliondevicemanagement.components.viewmodels.SDAViewModel
+import com.arm.peliondevicemanagement.components.viewmodels.WorkflowViewModel
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_COMPLETED
-import com.arm.peliondevicemanagement.constants.AppConstants.ENDPOINT
-import com.arm.peliondevicemanagement.constants.AppConstants.JOB_COMPLETED
-import com.arm.peliondevicemanagement.constants.AppConstants.SDA
-import com.arm.peliondevicemanagement.constants.DeviceState
+import com.arm.peliondevicemanagement.constants.state.*
 import com.arm.peliondevicemanagement.databinding.FragmentJobRunBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.transport.ble.DumBleDevice
 import com.arm.peliondevicemanagement.utils.PlatformUtils
 import com.arm.peliondevicemanagement.utils.PlatformUtils.getBleInstance
+import com.arm.peliondevicemanagement.utils.WorkflowUtils.createDeviceRunLog
+import com.arm.peliondevicemanagement.utils.WorkflowUtils.createTaskRunLog
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.getDeviceCommands
 import com.arm.pelionmobiletransportsdk.ble.BleDevice
 import com.arm.pelionmobiletransportsdk.ble.callbacks.BleScannerCallback
@@ -69,7 +71,7 @@ class JobRunFragment : Fragment() {
 
     private val args: JobRunFragmentArgs by navArgs()
 
-    private lateinit var jobRunModel: WorkflowModel
+    private lateinit var deviceRunModel: DeviceRun
     private lateinit var workflowDeviceAdapter: WorkflowDeviceAdapter
     private var totalDevicesCompleted: Int = 0
 
@@ -78,6 +80,7 @@ class JobRunFragment : Fragment() {
 
     private var activeItemPosition: Int = 0
 
+    private lateinit var workflowViewModel: WorkflowViewModel
     private lateinit var sdaViewModel: SDAViewModel
 
     private var bleManager: BleManager? = null
@@ -100,7 +103,7 @@ class JobRunFragment : Fragment() {
                 connectDevices()
             } else {
                 isScanCompleted = false
-                updateDeviceItemInList(0,"No devices found", "Failed")
+                addTemporaryDeviceItemInList("No devices found", DeviceScanState.FAILED)
                 updateStopButtonText(
                     resources.getDrawable(R.drawable.ic_refresh_light),
                     resources.getString(R.string.retry_text)
@@ -142,8 +145,8 @@ class JobRunFragment : Fragment() {
 
     private fun init() {
         requireActivity().onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
-        jobRunModel = args.workflowObject
-        LogHelper.debug(TAG, "jobRunBundle: $jobRunModel")
+        deviceRunModel = args.runObject
+        //LogHelper.debug(TAG, "deviceRunBundle: $deviceRunModel")
 
         setupData()
         setupViews()
@@ -156,21 +159,23 @@ class JobRunFragment : Fragment() {
     }
 
     private fun setupData() {
-        workflowDeviceAdapter = WorkflowDeviceAdapter(jobRunModel.workflowDevices!!)
-        //jobRunModel.workflowDevices?.add(WorkflowDeviceModel("026eead293eb926ca57ba92703c00000", "Pending"))
+        workflowViewModel = ViewModelProvider(this).get(WorkflowViewModel::class.java)
+        workflowDeviceAdapter = WorkflowDeviceAdapter(deviceRunModel.workflowDevices)
+        //deviceRunModel.workflowDevices.add(WorkflowDevice("026eead293eb926ca57ba92703c00000", "Pending"))
+        //deviceRunModel.workflowDevices.add(WorkflowDevice("036eead293eb926ca57ba92703c00000", "Pending"))
     }
 
     private fun setTotalDevicesCompletedStatus(){
         totalDevicesCompleted = 0
-        jobRunModel.workflowDevices?.forEach { device ->
+        deviceRunModel.workflowDevices.forEach { device ->
             if(device.deviceState == DEVICE_STATE_COMPLETED){
                 totalDevicesCompleted++
             }
         }
         LogHelper.debug(TAG, "completedDevices: $totalDevicesCompleted, " +
-                "pendingDevices: ${jobRunModel.workflowDevices?.size?.minus(totalDevicesCompleted)}")
+                "pendingDevices: ${deviceRunModel.workflowDevices.size.minus(totalDevicesCompleted)}")
 
-        val completedOutOfPending = "$totalDevicesCompleted/${jobRunModel.workflowDevices?.size}"
+        val completedOutOfPending = "$totalDevicesCompleted/${deviceRunModel.workflowDevices.size}"
         viewBinder.tvCompleted.text = resources.getString(
             R.string.devices_completed_format,
             completedOutOfPending
@@ -178,10 +183,10 @@ class JobRunFragment : Fragment() {
     }
 
     private fun setupViews() {
-        viewBinder.tvName.text = jobRunModel.workflowName
+        viewBinder.tvName.text = deviceRunModel.workflowName
         viewBinder.tvTasks.text = context!!.getString(
             R.string.total_tasks_format,
-            jobRunModel.workflowTasks.size.toString())
+            deviceRunModel.workflowTasks.size.toString())
         viewBinder.elapsedTimer.start()
 
         viewBinder.rvDevices.apply {
@@ -223,21 +228,15 @@ class JobRunFragment : Fragment() {
                 DeviceState.CONNECTING -> {
                     LogHelper.debug(TAG, "DeviceState: Connecting, " +
                             "deviceIdentifier: ${stateResponse.deviceIdentifier}")
-                    addTemporaryDeviceItemInList(stateResponse.deviceIdentifier, "Connecting")
+                    addTemporaryDeviceItemInList(stateResponse.deviceIdentifier, DeviceScanState.CONNECTING)
                 }
                 DeviceState.CONNECTED -> {
                     LogHelper.debug(TAG, "DeviceState: Connected, " +
                             "deviceIdentifier: ${stateResponse.deviceIdentifier}")
-                    updateDeviceItemInList(0,stateResponse.deviceIdentifier, "Connected")
-                    sdaViewModel.fetchDeviceEndpoint()
-                }
-                DeviceState.VERIFY -> {
-                    LogHelper.debug(TAG, "DeviceState: Verify, " +
-                            "deviceIdentifier: ${stateResponse.deviceIdentifier}")
                     removeTemporaryDeviceItemFromList()
                     activeItemPosition = getItemPosition(stateResponse.deviceIdentifier)
                     if(activeItemPosition >= 0){
-                        updateDeviceItemInList(activeItemPosition, stateResponse.deviceIdentifier, "Verify")
+                        updateDeviceItemInList(activeItemPosition, stateResponse.deviceIdentifier, "Connected")
                     } else {
                         activeItemPosition = 0
                     }
@@ -250,12 +249,12 @@ class JobRunFragment : Fragment() {
                 DeviceState.COMMAND_COMPLETED -> {
                     LogHelper.debug(TAG, "DeviceState: Command-Completed, " +
                             "deviceIdentifier: ${stateResponse.deviceIdentifier}")
-                    updateDeviceItemInList(activeItemPosition, stateResponse.deviceIdentifier, "Action Completed")
+                    //updateDeviceItemInList(activeItemPosition, stateResponse.deviceIdentifier, "Action Completed")
                 }
                 DeviceState.COMMAND_FAILED -> {
                     LogHelper.debug(TAG, "DeviceState: Command-Failed, " +
                             "deviceIdentifier: ${stateResponse.deviceIdentifier}")
-                    updateDeviceItemInList(activeItemPosition, stateResponse.deviceIdentifier, "Action Failed")
+                    //updateDeviceItemInList(activeItemPosition, stateResponse.deviceIdentifier, "Action Failed")
                 }
                 DeviceState.COMPLETED -> {
                     LogHelper.debug(TAG, "DeviceState: Completed, " +
@@ -272,37 +271,23 @@ class JobRunFragment : Fragment() {
                 DeviceState.FAILED -> {
                     LogHelper.debug(TAG, "DeviceState: Failed, " +
                             "deviceIdentifier: ${stateResponse.deviceIdentifier}")
-                    updateDeviceItemInList(activeItemPosition, stateResponse.deviceIdentifier, "Failed")
                     sdaViewModel.disconnectFromDevice()
                 }
             }
         })
 
         sdaViewModel.responseLiveData.observe(viewLifecycleOwner, Observer { deviceResponse ->
-            LogHelper.debug(TAG, "DeviceResponse: $deviceResponse")
-            if(deviceResponse.response.startsWith(SDA)) {
-                // SDA response
-                if(deviceResponse.operationResponse != null){
-                    // Success, now store run-logs and release command-lock
-                    sdaViewModel.setDeviceCommandLockState(false)
-                } else {
-                    // Failed, now release command-lock
-                    sdaViewModel.setDeviceCommandLockState(false)
+            //LogHelper.debug(TAG, "DeviceResponse: $deviceResponse")
+            when(deviceResponse.responseState){
+                DeviceResponseState.SDA -> {
+                    // Process SDA response
+                    processSDAResponse(deviceResponse)
                 }
-            } else {
-                // Endpoint response
-                if(deviceResponse.response.startsWith(ENDPOINT)){
-                    val endpoint = deviceResponse.response.substringAfter("endpoint:")
-                    if(isEndpointMatch(endpoint)){
-                        // Go forward and execute job
-                        LogHelper.debug(TAG, "Endpoint matched: $endpoint, ->runJob()")
-                        sdaViewModel.runJob()
-                    } else {
-                        LogHelper.debug(TAG, "Endpoint not matched: $endpoint")
-                        // Terminate connection
-                        sdaViewModel.disconnectFromDevice()
-                    }
-                } else if(deviceResponse.response.startsWith(JOB_COMPLETED)) {
+                DeviceResponseState.ENDPOINT -> {
+                    // Process endpoint response
+                    processEndpointResponse(deviceResponse.response!!)
+                }
+                DeviceResponseState.JOB_COMPLETED -> {
                     LogHelper.debug(TAG, "All devices are now completed")
                     finalizeEverything()
                 }
@@ -310,34 +295,118 @@ class JobRunFragment : Fragment() {
         })
     }
 
-    private fun addTemporaryDeviceItemInList(deviceText: String, deviceState: String){
-        jobRunModel.workflowDevices?.add(0, WorkflowDeviceModel(deviceText, deviceState))
-        workflowDeviceAdapter.notifyItemChanged(0)
+    private fun processSDAResponse(deviceResponse: DeviceResponse) {
+        val deviceRunLog: DeviceRunLogs
+        val taskRunLog: TaskRun
+        var failureCount = 0
+        if(deviceResponse.operationResponse != null){
+            // Create run-log
+            taskRunLog = createTaskRunLog(
+                deviceResponse.taskID!!, TaskRunState.SUCCEEDED, "undefined"
+            )
+            LogHelper.debug(TAG, "TaskRunLogs: $taskRunLog")
+        } else {
+            failureCount++
+            // Create run-log
+            taskRunLog = createTaskRunLog(
+                deviceResponse.taskID!!, TaskRunState.FAILED
+            )
+            LogHelper.debug(TAG, "TaskRunLogs: $taskRunLog")
+        }
+
+        deviceRunLog = if(failureCount>0){
+            createDeviceRunLog(deviceRunModel.workflowID,
+                deviceResponse.response!!, "null",
+                "null", "null",
+                listOf(taskRunLog), failureCount)
+        } else {
+            createDeviceRunLog(deviceRunModel.workflowID,
+                deviceResponse.response!!, "null",
+                "null", "null",
+                listOf(taskRunLog))
+        }
+
+        LogHelper.debug(TAG, "DeviceRunLogs: $deviceRunLog")
+    }
+
+    private fun processEndpointResponse(endpoint: String) {
+        if(isEndpointMatch(endpoint)){
+            // Go forward and execute job
+            LogHelper.debug(TAG, "Endpoint matched: $endpoint, ->runJob()")
+            sdaViewModel.runJob()
+        } else {
+            LogHelper.debug(TAG, "Endpoint not matched: $endpoint")
+            // Terminate connection
+            sdaViewModel.disconnectFromDevice()
+        }
+    }
+
+    private fun addTemporaryDeviceItemInList(deviceText: String, deviceState: DeviceScanState, failedCount: Int? = null){
+        val scanItem = viewBinder.scanDeviceItem
+        scanItem.root.alpha = 1.0f
+        when(deviceState){
+            DeviceScanState.ONGOING -> {
+                scanItem.tvName.text = deviceText
+                scanItem.tvDescription.text = resources.getString(R.string.ongoing_text)
+                scanItem.viewDeviceStatus.visibility = View.GONE
+                scanItem.viewProgressbar.visibility = View.VISIBLE
+            }
+            DeviceScanState.FAILED -> {
+                if (failedCount != null) {
+                    when {
+                        (failedCount > 1) -> {
+                            scanItem.tvName.text = resources.getString(R.string.failed_devices_format, failedCount.toString())
+                        }
+                        failedCount == 1 -> {
+                            scanItem.tvName.text = resources.getString(R.string.failed_device_format, failedCount.toString())
+                        }
+                    }
+                } else {
+                    scanItem.tvName.text = deviceText
+                }
+                scanItem.tvDescription.text = resources.getString(R.string.failed_text)
+                scanItem.viewDeviceStatus.background = resources.getDrawable(R.drawable.ic_status_failed)
+                scanItem.viewDeviceStatus.setImageDrawable(resources.getDrawable(R.drawable.ic_exclamation))
+                scanItem.viewProgressbar.visibility = View.INVISIBLE
+                scanItem.viewDeviceStatus.visibility = View.VISIBLE
+            }
+            DeviceScanState.CONNECTING -> {
+                scanItem.tvName.text = deviceText
+                scanItem.tvDescription.text = resources.getString(R.string.connecting_text)
+                scanItem.viewDeviceStatus.visibility = View.GONE
+                scanItem.viewProgressbar.visibility = View.VISIBLE
+            }
+        }
+        scanItem.root.visibility = View.VISIBLE
     }
 
     private fun updateDeviceItemInList(position: Int, deviceName: String, deviceState: String){
-        jobRunModel.workflowDevices?.set(position, WorkflowDeviceModel(deviceName, deviceState))
+        deviceRunModel.workflowDevices[position] = WorkflowDevice(deviceName, deviceState)
         workflowDeviceAdapter.notifyItemChanged(position)
     }
 
     private fun removeTemporaryDeviceItemFromList() {
-        jobRunModel.workflowDevices?.removeAt(0)
-        workflowDeviceAdapter.notifyItemRemoved(0)
+        val scanItem = viewBinder.scanDeviceItem.root
+        scanItem.animate()
+            .alpha(0.0f)
+            .translationY(0f)
+            .setDuration(300)
+            .setListener(object: AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator?) {
+                    super.onAnimationEnd(animation)
+                    viewBinder.scanDeviceItem.root.visibility = View.GONE
+                }
+            })
     }
 
     private fun getItemPosition(deviceIdentifier: String): Int {
-        return jobRunModel.workflowDevices?.indexOf(
-            WorkflowDeviceModel(deviceIdentifier, "Pending")
-        )!!
+        return deviceRunModel.workflowDevices.indexOf(
+            WorkflowDevice(deviceIdentifier, "Pending")
+        )
     }
 
     private fun setupScan() {
-        val scanDeviceItemPosition = getItemPosition("No devices found")
-        if(scanDeviceItemPosition >= 0) {
-            updateDeviceItemInList(0,"Scanning Devices", "Ongoing")
-        } else {
-            addTemporaryDeviceItemInList("Scanning Devices", "Ongoing")
-        }
+        addTemporaryDeviceItemInList("Scanning devices", DeviceScanState.ONGOING)
         mScannedDevices = arrayListOf()
         bleManager = getBleInstance()
         bleManager!!.startScan(bleScanCallback)
@@ -349,7 +418,7 @@ class JobRunFragment : Fragment() {
     }
 
     private fun isEndpointMatch(endpoint: String): Boolean {
-        val isEndpointPresent = jobRunModel.workflowDevices?.find { it.deviceName == endpoint }
+        val isEndpointPresent = deviceRunModel.workflowDevices.find { it.deviceName == endpoint }
         return isEndpointPresent != null
     }
 
@@ -362,12 +431,12 @@ class JobRunFragment : Fragment() {
         //mScannedDevices.add(DumBleDevice("TestDev3", "DS:7E:7E:BD:AB:79", 20))
         //mScannedDevices.add(DumBleDevice("TestDev4", "XD:7E:7E:BD:AB:70", 20))
 
-        val deviceCommands = getDeviceCommands(jobRunModel.workflowID, jobRunModel.workflowTasks)
+        val deviceCommands = getDeviceCommands(deviceRunModel.workflowID, deviceRunModel.workflowTasks)
         LogHelper.debug(TAG, "DeviceCommands Size: ${deviceCommands.size}")
         sdaViewModel.connectDevices(requireContext(),
             mScannedDevices,
-            jobRunModel.workflowID,
-            jobRunModel.sdaToken!!.accessToken,
+            deviceRunModel.workflowID,
+            deviceRunModel.workflowSDAToken,
             deviceCommands)
     }
 
@@ -384,10 +453,25 @@ class JobRunFragment : Fragment() {
             resources.getString(R.string.finish_text)
         )
         viewBinder.elapsedTimer.stop()
+
+        var failedCount = 0
+        deviceRunModel.workflowDevices.forEach { device ->
+            if(device.deviceState != DEVICE_STATE_COMPLETED){
+                failedCount++
+            }
+        }
+        if(failedCount > 0){
+            addTemporaryDeviceItemInList("", DeviceScanState.FAILED, failedCount)
+        }
+    }
+
+    private fun saveLogsToDB() {
+
     }
 
     private fun destroyObjects() {
         bleManager = null
+        workflowViewModel.cancelAllRequests()
         sdaViewModel.cancelAllRequests()
         _viewBinder = null
     }

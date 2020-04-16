@@ -25,8 +25,8 @@ import java.io.IOException
 
 open class BaseRepository{
 
-    suspend fun <T : Any> doSafeAPIRequest(call: suspend () -> Response<T>, errorMessage: String): T? {
-        val result : Result<T> = returnSafeAPIResponse(call,errorMessage)
+    suspend fun <T : Any> doSafeAPIRequest(call: suspend () -> Response<T>): T? {
+        val result : Result<T> = returnSafeAPIResponse(call)
         var data : T? = null
 
         when(result) {
@@ -39,22 +39,27 @@ open class BaseRepository{
         return data
     }
 
-    private suspend fun <T: Any> returnSafeAPIResponse(call: suspend ()-> Response<T>, errorMessage: String) : Result<T>{
+    private suspend fun <T: Any> returnSafeAPIResponse(call: suspend ()-> Response<T>) : Result<T>{
         // Call network-request
         val response = call.invoke()
 
         // Print to console
         /*LogHelper.debug("returnSafeAPIResponse()", "success: ${response.isSuccessful},\n" +
                 "code: ${response.code()}, message: ${response.message()},\n" +
-                "body: ${response.body()},\nerrorBody: $errorResponse")*/
+                "body: ${response.body()}")*/
 
-        //LogHelper.debug("API_Response", "ResponseSuccessStatus: ${response.isSuccessful}")
         if(response.isSuccessful) return Result.Success(response.body()!!)
 
         // Parse error-response
         val gson = Gson()
         val type = object : TypeToken<ErrorResponse>() {}.type
         val errorResponse: ErrorResponse? = gson.fromJson(response.errorBody()!!.charStream(), type)
+
+        if(errorResponse?.errorCode == 0 && response.code() == 400){
+            errorResponse.errorCode = 400
+            errorResponse.errorType = "bad_request"
+            errorResponse.errorMessage = "Invalid request"
+        }
 
         return Result.Error(IOException("ERROR- $errorResponse"))
     }

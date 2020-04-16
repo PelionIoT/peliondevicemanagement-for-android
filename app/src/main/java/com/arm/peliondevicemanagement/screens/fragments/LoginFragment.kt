@@ -263,7 +263,7 @@ class LoginFragment : Fragment() {
     private fun processMultiAccountData(accounts: List<Account>) {
         // Store listOfAccounts as JSON in SharedPrefs
         val accountsJSON = Gson().toJson(accounts)
-        LogHelper.debug(TAG, "onUserAccounts()-> $accountsJSON")
+        //LogHelper.debug(TAG, "onUserAccounts()-> $accountsJSON")
 
         //Store data
         SharedPrefHelper.storeUserCredentials(userEmail, userPassword)
@@ -273,7 +273,7 @@ class LoginFragment : Fragment() {
 
     private fun processSingleAccountData(accessToken: String) {
         // Save access-token
-        LogHelper.debug(TAG, "onUserAccessToken()-> $accessToken")
+        //LogHelper.debug(TAG, "onUserAccessToken()-> $accessToken")
         SharedPrefHelper.storeUserAccessToken(accessToken)
         // Store account-type status
         if(!SharedPrefHelper.getStoredAccounts().isNullOrBlank()){
@@ -288,7 +288,7 @@ class LoginFragment : Fragment() {
     private fun processUserProfileData(userProfile: UserProfile) {
         // Store user-profile data as JSON in SharedPrefs
         val profileJSON = Gson().toJson(userProfile)
-        LogHelper.debug(TAG, "onUserProfile()-> $profileJSON")
+        //LogHelper.debug(TAG, "onUserProfile()-> $profileJSON")
         SharedPrefHelper.storeUserProfile(profileJSON)
         SharedPrefHelper.storeSelectedUserID(userProfile.userID)
         // Now fetch selected account's profile
@@ -298,7 +298,7 @@ class LoginFragment : Fragment() {
     private fun processUserAccountProfileData(accountProfile: AccountProfileModel) {
         // Store user account-profile data as JSON in SharedPrefs
         val accountProfileJSON = Gson().toJson(accountProfile)
-        LogHelper.debug(TAG, "onAccountProfile()-> $accountProfileJSON")
+        //LogHelper.debug(TAG, "onAccountProfile()-> $accountProfileJSON")
         SharedPrefHelper.storeUserAccountProfile(accountProfileJSON)
     }
 

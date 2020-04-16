@@ -31,12 +31,12 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.components.adapters.WorkflowAdapter
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
+import com.arm.peliondevicemanagement.components.models.workflow.Workflow
 import com.arm.peliondevicemanagement.components.viewmodels.WorkflowViewModel
 import com.arm.peliondevicemanagement.databinding.FragmentDashboardBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
-import com.arm.peliondevicemanagement.constants.LoadState
+import com.arm.peliondevicemanagement.constants.state.LoadState
 import com.arm.peliondevicemanagement.screens.activities.HostActivity
 
 class DashboardFragment : Fragment(), RecyclerItemClickListener {
@@ -91,6 +91,8 @@ class DashboardFragment : Fragment(), RecyclerItemClickListener {
     private fun init() {
         requireActivity().onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
         workflowViewModel = ViewModelProvider(this).get(WorkflowViewModel::class.java)
+
+        workflowViewModel.initWorkflowLiveData()
 
         viewBinder.rvWorkflows.apply {
             layoutManager = LinearLayoutManager(context,
@@ -193,17 +195,17 @@ class DashboardFragment : Fragment(), RecyclerItemClickListener {
     }
 
     override fun onItemClick(data: Any) {
-        val model = data as WorkflowModel
+        val model = data as Workflow
         LogHelper.debug(TAG, "onItemClick()-> " +
                 "workflowName: ${model.workflowName}, " +
                 "workflowID: ${model.workflowID}")
         navigateToJobFragment(model)
     }
 
-    private fun navigateToJobFragment(workflowModel: WorkflowModel) {
+    private fun navigateToJobFragment(workflowModel: Workflow) {
         Navigation.findNavController(viewBinder.root)
             .navigate(DashboardFragmentDirections
-                .actionDashboardFragmentToJobFragment(workflowModel))
+                .actionDashboardFragmentToJobFragment(workflowModel.workflowID))
     }
 
     override fun onDestroyView() {

@@ -192,8 +192,8 @@
         tools:layout="@layout/fragment_job">
 
         <argument
-            android:name="workflow_object"
-            app:argType="com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel" />
+            android:name="workflow_id"
+            app:argType="string" />
         <action
             android:id="@+id/action_jobFragment_to_jobRunFragment"
             app:destination="@id/jobRunFragment"
@@ -210,8 +210,8 @@
         android:label="fragment_job_run"
         tools:layout="@layout/fragment_job_run">
         <argument
-            android:name="workflow_object"
-            app:argType="com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel" />
+            android:name="run_object"
+            app:argType="com.arm.peliondevicemanagement.components.models.workflow.device.DeviceRun" />
     </fragment>
 
 </navigation>

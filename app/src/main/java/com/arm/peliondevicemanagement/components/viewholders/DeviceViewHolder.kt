@@ -20,20 +20,17 @@ package com.arm.peliondevicemanagement.components.viewholders
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.R
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowDeviceModel
+import com.arm.peliondevicemanagement.components.models.workflow.device.WorkflowDevice
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_COMPLETED
-import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_CONNECTING
-import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_DISCONNECTED
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_FAILED
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_PENDING
-import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_RUNNING
 import kotlinx.android.synthetic.main.layout_item_device.view.*
 
 class DeviceViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
 
-    private lateinit var workflowDeviceModel: WorkflowDeviceModel
+    private lateinit var workflowDeviceModel: WorkflowDevice
 
-    internal fun bind(model: WorkflowDeviceModel) {
+    internal fun bind(model: WorkflowDevice) {
         this.workflowDeviceModel = model
         itemView.apply {
             tvName.text = model.deviceName

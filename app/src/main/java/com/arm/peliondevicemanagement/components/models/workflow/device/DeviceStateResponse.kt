@@ -15,16 +15,11 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.constants
+package com.arm.peliondevicemanagement.components.models.workflow.device
 
-enum class DeviceState {
-    CONNECTING,
-    CONNECTED,
-    VERIFY,
-    RUNNING,
-    COMMAND_COMPLETED,
-    COMMAND_FAILED,
-    COMPLETED,
-    DISCONNECTED,
-    FAILED
-}
+import com.arm.peliondevicemanagement.constants.state.DeviceState
+
+data class DeviceStateResponse(
+    val state: DeviceState,
+    val deviceIdentifier: String
+)

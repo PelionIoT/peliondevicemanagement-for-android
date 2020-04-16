@@ -45,6 +45,9 @@
     <string name="pending_text">Pending</string>
     <string name="running_text">Running</string>
     <string name="stopped_text">Stopped</string>
+    <string name="ongoing_text">Ongoing</string>
+    <string name="connecting_text">Connecting</string>
+    <string name="failed_text">Failed</string>
     <string name="secure_text">Secure Device Access</string>
     <string name="refresh">Refresh</string>
     <string name="na">Not available</string>
@@ -62,6 +65,8 @@
     <string name="total_tasks_format">Total Tasks: <xliff:g id="view">%1$s</xliff:g></string>
     <string name="active_format">Active till: <xliff:g id="view">%1$s</xliff:g></string>
     <string name="expired_format">Expired on: <xliff:g id="view">%1$s</xliff:g></string>
+    <string name="failed_device_format">Unable to connect <xliff:g id="view">%1$s</xliff:g> device</string>
+    <string name="failed_devices_format">Unable to connect <xliff:g id="view">%1$s</xliff:g> devices</string>
     <string name="elapsed_time_text">Time Elapsed:</string>
 
     <string name="hello_blank_fragment">Hello</string>

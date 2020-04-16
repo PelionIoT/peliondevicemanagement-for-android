@@ -34,7 +34,9 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionManager
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.adapters.WorkflowDeviceAdapter
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
+import com.arm.peliondevicemanagement.components.models.workflow.device.DeviceRun
+import com.arm.peliondevicemanagement.components.models.workflow.device.WorkflowDevice
+import com.arm.peliondevicemanagement.components.models.workflow.Workflow
 import com.arm.peliondevicemanagement.components.viewmodels.WorkflowViewModel
 import com.arm.peliondevicemanagement.constants.AppConstants.DEFAULT_TIME_FORMAT
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_COMPLETED
@@ -42,9 +44,7 @@ import com.arm.peliondevicemanagement.databinding.FragmentJobBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.screens.activities.HostActivity
 import com.arm.peliondevicemanagement.utils.PlatformUtils.checkForLocationPermission
-import com.arm.peliondevicemanagement.utils.PlatformUtils.enableBluetooth
 import com.arm.peliondevicemanagement.utils.PlatformUtils.fetchAttributeDrawable
-import com.arm.peliondevicemanagement.utils.PlatformUtils.isBluetoothEnabled
 import com.arm.peliondevicemanagement.utils.PlatformUtils.isLocationServiceEnabled
 import com.arm.peliondevicemanagement.utils.PlatformUtils.openLocationServiceSettings
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.getPermissionScopeFromTasks
@@ -67,7 +67,8 @@ class JobFragment : Fragment() {
     private val args: JobFragmentArgs by navArgs()
 
     private lateinit var workflowViewModel: WorkflowViewModel
-    private lateinit var workflowModel: WorkflowModel
+    private lateinit var workflowModel: Workflow
+    private lateinit var workflowID: String
     private lateinit var workflowDeviceAdapter: WorkflowDeviceAdapter
 
     private var totalDevicesCompleted: Int = 0
@@ -87,18 +88,21 @@ class JobFragment : Fragment() {
     }
 
     private fun init() {
-        workflowModel = args.workflowObject
-        LogHelper.debug(TAG, "selectedJob: $workflowModel")
-
+        workflowID = args.workflowId
         setupData()
-        setupViews()
-        setupListeners()
     }
 
     private fun setupData() {
         workflowViewModel = ViewModelProvider(this).get(WorkflowViewModel::class.java)
-        workflowDeviceAdapter = WorkflowDeviceAdapter(workflowModel.workflowDevices!!)
-        fetchCompletedDevicesCount()
+        workflowViewModel.fetchWorkflow(workflowID)
+        workflowViewModel.getWorkflow().observe(viewLifecycleOwner, Observer { workflow ->
+            LogHelper.debug(TAG, "Fetched from localCache of $workflowID")
+            workflowModel = workflow
+            workflowDeviceAdapter = WorkflowDeviceAdapter(workflowModel.workflowDevices!!)
+            fetchCompletedDevicesCount()
+            setupViews()
+            setupListeners()
+        })
     }
 
     private fun setupViews() {
@@ -131,8 +135,9 @@ class JobFragment : Fragment() {
     }
 
     private fun setupListeners() {
+
         workflowViewModel.getRefreshedSDAToken().observe(viewLifecycleOwner, Observer { tokenResponse ->
-            if(tokenResponse != null){
+            if(tokenResponse != null && !isSDATokenValid){
                 workflowModel.sdaToken = tokenResponse
                 workflowViewModel.updateLocalSDAToken(
                     workflowModel.workflowID, tokenResponse)
@@ -164,7 +169,7 @@ class JobFragment : Fragment() {
 
         viewBinder.runJobButton.setOnClickListener {
             if(isSDATokenValid){
-                navigateToJobRunFragment()
+                processNavigation()
             } else {
                 showSnackbar("Refreshing secure-access, hang-on")
                 refreshSDAToken()
@@ -292,26 +297,51 @@ class JobFragment : Fragment() {
             .show()
     }
 
-    private fun navigateToJobRunFragment() {
+    private fun processNavigation() {
         /*if(!isBluetoothEnabled()){
             enableBluetooth(requireContext())
             return
         }*/
         if(checkForLocationPermission(requireActivity())){
             if(isLocationServiceEnabled(requireContext())){
-                Navigation.findNavController(viewBinder.root)
-                    .navigate(JobFragmentDirections
-                        .actionJobFragmentToJobRunFragment(workflowModel))
+                navigateToJobRunFragment()
             } else {
                 showLocationServicesDialog(requireContext())
             }
         }
     }
 
+    private fun navigateToJobRunFragment() {
+        // Construct listOf<Devices> which are pending or failed
+        val pendingDevices = arrayListOf<WorkflowDevice>()
+        workflowModel.workflowDevices?.forEach { device ->
+            if(device.deviceState != DEVICE_STATE_COMPLETED){
+                pendingDevices.add(device)
+            }
+        }
+
+        LogHelper.debug(TAG, "Found ${pendingDevices.size} device, " +
+                "building device-run-bundle")
+
+        // Construct run-bundle
+        val deviceRunBundle =
+            DeviceRun(
+                workflowModel.workflowID,
+                workflowModel.workflowName,
+                workflowModel.workflowTasks,
+                pendingDevices,
+                workflowModel.sdaToken!!.accessToken
+            )
+        // Move to device-run
+        Navigation.findNavController(viewBinder.root)
+            .navigate(JobFragmentDirections
+                .actionJobFragmentToJobRunFragment(deviceRunBundle))
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
-        _viewBinder = null
         workflowViewModel.cancelAllRequests()
+        _viewBinder = null
     }
 
 }

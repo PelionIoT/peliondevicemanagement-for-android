@@ -15,15 +15,11 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.services.data
+package com.arm.peliondevicemanagement.components.models.workflow.task
 
-import com.google.gson.annotations.SerializedName
+import com.arm.peliondevicemanagement.transport.sda.DeviceCommand
 
-data class ErrorResponse(
-    @SerializedName("code")
-    var errorCode: Int,
-    @SerializedName("type")
-    var errorType: String,
-    @SerializedName("message")
-    var errorMessage: String
+data class TaskDeviceCommand(
+    val taskID: String,
+    val deviceCommand: DeviceCommand
 )

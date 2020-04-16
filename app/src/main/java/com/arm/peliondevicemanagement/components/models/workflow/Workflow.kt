@@ -21,6 +21,8 @@ import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
+import com.arm.peliondevicemanagement.components.models.workflow.device.WorkflowDevice
+import com.arm.peliondevicemanagement.components.models.workflow.task.WorkflowTask
 import com.arm.peliondevicemanagement.helpers.converters.SDATokenResponseConverter
 import com.arm.peliondevicemanagement.helpers.converters.WDevicesListConverter
 import com.arm.peliondevicemanagement.helpers.converters.WAudsListConverter
@@ -35,15 +37,16 @@ import kotlinx.android.parcel.Parcelize
     WDevicesListConverter::class,
     WTasksListConverter::class,
     SDATokenResponseConverter::class)
-data class WorkflowModel(
-    @PrimaryKey @field:SerializedName("id") val workflowID: String,
+data class Workflow(
+    @PrimaryKey(autoGenerate = true) val pKey: Int = 0,
+    @field:SerializedName("id") val workflowID: String,
     @field:SerializedName("name") val workflowName: String,
     @field:SerializedName("description") val workflowDescription: String?,
     @field:SerializedName("status") var workflowStatus: String,
     @field:SerializedName("location") val workflowLocation: String,
     @field:SerializedName("aud") val workflowAUDs: List<String>,
-    @field:SerializedName("device") var workflowDevices: ArrayList<WorkflowDeviceModel>?,
-    @field:SerializedName("tasks") val workflowTasks: List<WorkflowTaskModel>,
+    @field:SerializedName("device") var workflowDevices: ArrayList<WorkflowDevice>?,
+    @field:SerializedName("tasks") val workflowTasks: List<WorkflowTask>,
     @field:SerializedName("created_at") val workflowCreatedAt: String,
     @field:SerializedName("execution_time") val workflowExecutedAt: String,
     @field:SerializedName("assignee") val assigneeID: String?,
@@ -54,7 +57,7 @@ data class WorkflowModel(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as WorkflowModel
+        other as Workflow
 
         if (workflowID != other.workflowID) return false
         if (workflowName != other.workflowName) return false

@@ -17,7 +17,8 @@
 
 package com.arm.peliondevicemanagement.services.cache
 
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
+import com.arm.peliondevicemanagement.components.models.workflow.device.WorkflowDevice
+import com.arm.peliondevicemanagement.components.models.workflow.Workflow
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.services.data.SDATokenResponse
@@ -32,7 +33,8 @@ class LocalCache(
         private val TAG: String = LocalCache::class.java.simpleName
     }
 
-    fun insertWorkflows(workflows: List<WorkflowModel>, insertFinished: () -> Unit) {
+    fun insertWorkflows(workflows: List<Workflow>,
+                        insertFinished: () -> Unit) {
         ioExecutor.execute {
             LogHelper.debug(TAG, "Storing ${workflows.size} workflows")
             workflowDao.insertWorkflows(workflows)
@@ -40,7 +42,9 @@ class LocalCache(
         }
     }
 
-    fun updateSDAToken(workflowID: String, sdaToken: SDATokenResponse?, updateFinished: () -> Unit) {
+    fun updateSDAToken(workflowID: String,
+                       sdaToken: SDATokenResponse?,
+                       updateFinished: () -> Unit) {
         ioExecutor.execute {
             LogHelper.debug(TAG, "Updating SDA-Token of workflow: $workflowID")
             workflowDao.updateWorkflowSDAToken(workflowID, sdaToken)
@@ -48,20 +52,35 @@ class LocalCache(
         }
     }
 
-    fun fetchWorkflows(limit: Int? = null, after: String? = null): List<WorkflowModel> {
-        LogHelper.debug(TAG, "fetchWorkflows()")
-        //val assigneeID = SharedPrefHelper.getSelectedUserID()!!
-        val accountID = SharedPrefHelper.getSelectedAccountID()!!
-        return if(limit != null && after != null){
-            workflowDao.fetchWorkflows(accountID, limit, after)
-        } else if(limit != null && after == null) {
-            workflowDao.fetchWorkflows(accountID, limit)
-        } else {
-            workflowDao.fetchWorkflows()
+    fun updateWorkflowDevices(workflowID: String,
+                              devices: ArrayList<WorkflowDevice>,
+                              updateFinished: () -> Unit) {
+        ioExecutor.execute {
+            LogHelper.debug(TAG, "Updating ${devices.size} of workflow: $workflowID")
+            workflowDao.updateWorkflowDevices(workflowID, devices)
+            updateFinished()
         }
     }
 
-    fun deleteAllWorkflows(accountID: String, deleteComplete: () -> Unit) {
+    fun fetchWorkflows(limit: Int,
+                       after: String? = null): List<Workflow> {
+        LogHelper.debug(TAG, "fetchWorkflows()")
+        //val assigneeID = SharedPrefHelper.getSelectedUserID()!!
+        val accountID = SharedPrefHelper.getSelectedAccountID()!!
+        return if(after != null){
+            workflowDao.fetchWorkflows(accountID, limit, after)
+        } else {
+            workflowDao.fetchWorkflows(accountID, limit)
+        }
+    }
+
+    fun fetchWorkflow(workflowID: String): Workflow {
+        val accountID = SharedPrefHelper.getSelectedAccountID()!!
+        return workflowDao.fetchWorkflow(accountID, workflowID)
+    }
+
+    fun deleteAllWorkflows(accountID: String,
+                           deleteComplete: () -> Unit) {
         ioExecutor.execute {
             LogHelper.debug(TAG, "Deleting workflows of account: $accountID")
             workflowDao.deleteAllWorkflows(accountID)

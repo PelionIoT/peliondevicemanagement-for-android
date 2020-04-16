@@ -23,8 +23,9 @@ import androidx.lifecycle.ViewModel
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import com.arm.peliondevicemanagement.AppController
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
-import com.arm.peliondevicemanagement.constants.LoadState
+import com.arm.peliondevicemanagement.components.models.workflow.device.WorkflowDevice
+import com.arm.peliondevicemanagement.components.models.workflow.Workflow
+import com.arm.peliondevicemanagement.constants.state.LoadState
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.services.CloudRepository
 import com.arm.peliondevicemanagement.services.LocalRepository
@@ -53,11 +54,13 @@ class WorkflowViewModel : ViewModel() {
     private val workflowDB: WorkflowDB = AppController.getWorkflowDB()
     private var localCache: LocalCache
 
-    private var workflowLiveData: LiveData<PagedList<WorkflowModel>>
+    private lateinit var workflowsLiveData: LiveData<PagedList<Workflow>>
     private val refreshStateLiveData = MutableLiveData<LoadState>()
     private val refreshedSDATokenLiveData = MutableLiveData<SDATokenResponse>()
+    private val workflowLiveData = MutableLiveData<Workflow>()
 
-    private val boundaryCallback = object: PagedList.BoundaryCallback<WorkflowModel>() {
+
+    private val boundaryCallback = object: PagedList.BoundaryCallback<Workflow>() {
         override fun onZeroItemsLoaded() {
             super.onZeroItemsLoaded()
             // Handle empty initial load here
@@ -65,14 +68,14 @@ class WorkflowViewModel : ViewModel() {
             refreshStateLiveData.postValue(LoadState.EMPTY)
         }
 
-        override fun onItemAtEndLoaded(itemAtEnd: WorkflowModel) {
+        override fun onItemAtEndLoaded(itemAtEnd: Workflow) {
             super.onItemAtEndLoaded(itemAtEnd)
             // Here you can listen to last item on list
             LogHelper.debug(TAG, "BoundaryCallback()->onItemAtEndLoaded")
             refreshStateLiveData.postValue(LoadState.LOADED)
         }
 
-        override fun onItemAtFrontLoaded(itemAtFront: WorkflowModel) {
+        override fun onItemAtFrontLoaded(itemAtFront: Workflow) {
             super.onItemAtFrontLoaded(itemAtFront)
             // Here you can listen to first item on list
             LogHelper.debug(TAG, "BoundaryCallback()->onItemAtFrontLoaded")
@@ -83,15 +86,20 @@ class WorkflowViewModel : ViewModel() {
     init {
         localCache = LocalCache(workflowDB.workflowsDao(), Executors.newSingleThreadExecutor())
         localRepository = LocalRepository(scope, cloudRepository, localCache)
-        workflowLiveData = getWorkflowsLiveData()
     }
 
-    fun getWorkflows(): LiveData<PagedList<WorkflowModel>> = workflowLiveData
+    fun initWorkflowLiveData() {
+        workflowsLiveData = getWorkflowsLiveData()
+    }
+
+    fun getWorkflows(): LiveData<PagedList<Workflow>> = workflowsLiveData
+
+    fun getWorkflow(): LiveData<Workflow> = workflowLiveData
 
     fun getRefreshState(): LiveData<LoadState> = refreshStateLiveData
 
     fun refresh() {
-        workflowLiveData.value?.dataSource?.invalidate()
+        workflowsLiveData.value?.dataSource?.invalidate()
     }
 
     fun refreshSDAToken(permissionScope: String, audienceList: List<String>) {
@@ -114,9 +122,22 @@ class WorkflowViewModel : ViewModel() {
         }
     }
 
+    fun fetchWorkflow(workflowID: String) {
+        scope.launch {
+            val workflow = localCache.fetchWorkflow(workflowID)
+            workflowLiveData.postValue(workflow)
+        }
+    }
+
+    fun updateWorkflowDevices(workflowID: String, devices: ArrayList<WorkflowDevice>) {
+        localCache.updateWorkflowDevices(workflowID, devices) {
+            LogHelper.debug(TAG, "Devices updated.")
+        }
+    }
+
     fun getRefreshedSDAToken(): LiveData<SDATokenResponse> = refreshedSDATokenLiveData
 
-    private fun getWorkflowsLiveData(): LiveData<PagedList<WorkflowModel>> {
+    private fun getWorkflowsLiveData(): LiveData<PagedList<Workflow>> {
         val pageConfig = PagedList.Config.Builder()
             .setPageSize(5)
             .setInitialLoadSizeHint(10)

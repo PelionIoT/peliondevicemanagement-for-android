@@ -15,15 +15,15 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.services.data
+package com.arm.peliondevicemanagement.components.models.workflow.task
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import kotlinx.android.parcel.Parcelize
 
-data class ErrorResponse(
-    @SerializedName("code")
-    var errorCode: Int,
-    @SerializedName("type")
-    var errorType: String,
-    @SerializedName("message")
-    var errorMessage: String
-)
+@Parcelize
+data class TaskRunParam(
+    @SerializedName("name") val paramName: String,
+    @SerializedName("type") val paramType: String,
+    @SerializedName("value") val paramValue: String
+): Parcelable

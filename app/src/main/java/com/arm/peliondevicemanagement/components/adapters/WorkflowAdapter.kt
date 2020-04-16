@@ -23,18 +23,18 @@ import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
-import com.arm.peliondevicemanagement.components.models.workflow.WorkflowModel
+import com.arm.peliondevicemanagement.components.models.workflow.Workflow
 import com.arm.peliondevicemanagement.components.viewholders.WorkflowViewHolder
 
 class WorkflowAdapter(private val itemClickListener: RecyclerItemClickListener):
-    PagedListAdapter<WorkflowModel, WorkflowViewHolder>(WORKFLOW_COMPARATOR){
+    PagedListAdapter<Workflow, WorkflowViewHolder>(WORKFLOW_COMPARATOR){
 
     companion object {
-        private val WORKFLOW_COMPARATOR = object : DiffUtil.ItemCallback<WorkflowModel>() {
-            override fun areItemsTheSame(oldItem: WorkflowModel, newItem: WorkflowModel): Boolean =
+        private val WORKFLOW_COMPARATOR = object : DiffUtil.ItemCallback<Workflow>() {
+            override fun areItemsTheSame(oldItem: Workflow, newItem: Workflow): Boolean =
                 oldItem.workflowID == newItem.workflowID
 
-            override fun areContentsTheSame(oldItem: WorkflowModel, newItem: WorkflowModel): Boolean =
+            override fun areContentsTheSame(oldItem: Workflow, newItem: Workflow): Boolean =
                 oldItem == newItem
         }
     }

@@ -15,26 +15,10 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.components.models.workflow
+package com.arm.peliondevicemanagement.constants.state
 
-import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
-
-@Parcelize
-data class WorkflowDeviceModel(
-    val deviceName: String,
-    var deviceState: String
-): Parcelable {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as WorkflowDeviceModel
-        if(deviceName != other.deviceName) return false
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return  deviceName.hashCode()
-    }
+enum class DeviceScanState {
+    ONGOING,
+    FAILED,
+    CONNECTING
 }

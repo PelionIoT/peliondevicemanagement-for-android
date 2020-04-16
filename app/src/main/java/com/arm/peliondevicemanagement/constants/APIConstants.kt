@@ -71,5 +71,6 @@ object APIConstants {
     const val KEY_OTP_TOKEN = "otp"
     const val KEY_ACCOUNT = "account"
     const val KEY_ACCOUNT_ID = "account_id"
+    const val KEY_ERROR_CODE = "error_code"
 
 }

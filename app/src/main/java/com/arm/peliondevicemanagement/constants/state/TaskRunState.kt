@@ -15,17 +15,10 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.components.models.workflow
+package com.arm.peliondevicemanagement.constants.state
 
-import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
-
-@Parcelize
-data class WorkflowDeviceRunModel(
-    val jobID: String,
-    val jobName: String,
-    var jobStatus: String,
-    val jobTasks: List<WorkflowTaskModel>,
-    var jobDevices: List<WorkflowDeviceModel>,
-    val jobSDAToken: String
-): Parcelable
+enum class TaskRunState {
+    SKIPPED,
+    SUCCEEDED,
+    FAILED
+}

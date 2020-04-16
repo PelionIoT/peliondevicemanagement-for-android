@@ -15,15 +15,10 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.services.data
+package com.arm.peliondevicemanagement.constants.state
 
-import com.google.gson.annotations.SerializedName
-
-data class ErrorResponse(
-    @SerializedName("code")
-    var errorCode: Int,
-    @SerializedName("type")
-    var errorType: String,
-    @SerializedName("message")
-    var errorMessage: String
-)
+enum class TaskTypeState {
+    STRING,
+    NUMBER,
+    FILE
+}
