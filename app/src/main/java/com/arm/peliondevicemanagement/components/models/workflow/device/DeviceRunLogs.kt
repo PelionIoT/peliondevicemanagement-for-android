@@ -26,9 +26,9 @@ import kotlinx.android.parcel.Parcelize
 data class DeviceRunLogs(
     @SerializedName("workflow_id") val workflowID: String,
     @SerializedName("device_id") val deviceID: String,
-    @SerializedName("status") val deviceStatus: String,
+    @SerializedName("status") var deviceStatus: String,
     @SerializedName("location") val deviceLocation: String,
     @SerializedName("execution_time") val deviceLog: String,
     @SerializedName("log") val deviceExecutionTime: String,
-    @SerializedName("task_runs") val deviceTaskRuns: List<TaskRun>
+    @SerializedName("task_runs") val deviceTaskRuns: ArrayList<TaskRun>
 ): Parcelable

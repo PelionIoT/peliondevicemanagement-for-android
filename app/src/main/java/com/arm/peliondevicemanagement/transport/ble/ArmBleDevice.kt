@@ -44,13 +44,13 @@ import kotlin.coroutines.suspendCoroutine
 
 @ExperimentalCoroutinesApi
 class ArmBleDevice(private val context: Context, private val deviceMAC: String):
-    AbstractDevice(), ISerialDataSink {
+    AbstractBleDevice(), ISerialDataSink {
 
     companion object{
         private val TAG = ArmBleDevice::class.java.simpleName
         const val MTU_SIZE: Int = 244
         // Should always be 4 bytes less than the MTU
-        private const val TMSN_MTU_SIZE: Int = MTU_SIZE - 4
+        private const val TMSN_MTU_SIZE: Int = 230
     }
 
     private var mBleManager: BleManager? = null
@@ -65,7 +65,7 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
     private var isAckReceived: Boolean = false
     private var isFinalResponseReceived: Boolean = false
 
-    private var bleConnectionCallback: ArmBleConnectionCallback? = null
+    private var bleConnectionCallback: BleConnectionCallback? = null
 
     private val bleGattCallback = object: BleGattConnectCallback {
         override fun onCharacteristicChanged(hexString: String?, byteBuffer: ByteArray, characteristic: BluetoothGattCharacteristic) {
@@ -108,11 +108,11 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
         mBleManager = BleManager.Builder().build()
     }
 
-    fun isConnected(): Boolean {
+    private fun isConnected(): Boolean {
         return mBleManager!!.isGattConnected()
     }
 
-    suspend fun connect(callback: ArmBleConnectionCallback): Boolean = withContext(Dispatchers.IO) {
+    override suspend fun connect(callback: BleConnectionCallback): Boolean = withContext(Dispatchers.IO) {
         return@withContext suspendCoroutine<Boolean> {
             isInvokedByConnect = true
             processController = it
@@ -121,7 +121,7 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
         }
     }
 
-    suspend fun disconnect(): Boolean = withContext(Dispatchers.IO) {
+    override suspend fun disconnect(): Boolean = withContext(Dispatchers.IO) {
         return@withContext suspendCoroutine<Boolean> {
             if(stopNotify()){
                 Log.d(TAG, "->stopNotify() Notifications disabled.")
@@ -147,7 +147,7 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
         return mBleManager!!.stopNotify(SDA_SERVICE, SDA_CHARACTERISTIC)
     }
 
-    suspend fun requestHigherMtu(size: Int): Boolean = withContext(Dispatchers.IO) {
+    override suspend fun requestHigherMtu(size: Int): Boolean = withContext(Dispatchers.IO) {
         if(!isConnected()) return@withContext false
         return@withContext suspendCoroutine<Boolean> {
             mBleManager!!.requestHigherMtu(size, object: BleMtuChangedCallback {
@@ -159,7 +159,7 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
         }
     }
 
-    suspend fun readEndpoint(): String = withContext(Dispatchers.IO) {
+    override suspend fun readEndpoint(): String = withContext(Dispatchers.IO) {
         if(!isConnected()) return@withContext "null"
         return@withContext suspendCoroutine<String> {
             mBleManager!!.read(
@@ -196,7 +196,7 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
 
     private suspend fun doWrite(protocolMessage: ByteArray) = withContext(Dispatchers.IO) {
         // FixME [ Use TMSN_MTU_SIZE here ]
-        val transmissionMtuSize = 200
+        val transmissionMtuSize = TMSN_MTU_SIZE
 
         Log.d(TAG, "->doWrite() MaxTransmissionMTU: $transmissionMtuSize bytes")
         Log.d(TAG, "->doWrite() protocolMessage" +
@@ -264,6 +264,7 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
         Log.d(TAG, "->doWrite() Write complete, now waiting for response.")
 
         while (!isFinalResponseReceived){
+            delay(1000)
             // Wait here for full response
         }
         isFinalResponseReceived = false
@@ -296,7 +297,36 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
                 "\npayloadSize: ${packetReceived.getDataPayload().size}," +
                 "\npayloadContent: ${packetReceived.getDataPayload().contentToString()}")
 
-        if(packetReceived.getPacket().size == 24){
+        val hasMore = PacketFactory.hasMoreFragment(packetReceived.getPacket()[1])
+        if(hasMore){
+            // There's more to the response
+            val payload = packetReceived.getDataPayload()
+            val tempBuffer = ByteArray(operationResponse.size + payload.size)
+            System.arraycopy(operationResponse, 0, tempBuffer, 0, operationResponse.size)
+            System.arraycopy(payload, 0, tempBuffer, operationResponse.size, payload.size)
+            // Assign new buffer to operationResponse
+            operationResponse = tempBuffer
+            LogHelper.debug(TAG, "Waiting for more response, hasMore: true")
+        } else {
+            if(operationResponse.isNotEmpty()){
+                // There's more to the response
+                val payload = packetReceived.getDataPayload()
+                val tempBuffer = ByteArray(operationResponse.size + payload.size)
+                System.arraycopy(operationResponse, 0, tempBuffer, 0, operationResponse.size)
+                System.arraycopy(payload, 0, tempBuffer, operationResponse.size, payload.size)
+                // Assign new buffer to operationResponse
+                operationResponse = tempBuffer
+                LogHelper.debug(TAG, "Final response received, hasMore: false")
+                isFinalResponseReceived = true
+            } else {
+                operationResponse = packetReceived.getDataPayload()
+                LogHelper.debug(TAG, "Final response received")
+                isFinalResponseReceived = true
+            }
+        }
+
+
+        /*if(packetReceived.getPacket().size == 24){
             // Nonce Response
             operationResponse = packetReceived.getDataPayload()
             isFinalResponseReceived = true
@@ -328,7 +358,7 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
                     isFinalResponseReceived = true
                 }
             }
-        }
+        }*/
 
 
         // Append new data with existing data.
@@ -338,9 +368,4 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
         // Assign new buffer to operationResponse
         operationResponse = tempBuffer*/
     }
-
-    interface ArmBleConnectionCallback {
-        fun onDisconnect()
-    }
-
 }

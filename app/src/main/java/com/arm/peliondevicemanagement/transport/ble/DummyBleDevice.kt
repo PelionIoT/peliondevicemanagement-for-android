@@ -18,7 +18,6 @@
 package com.arm.peliondevicemanagement.transport.ble
 
 import android.content.Context
-import com.arm.mbed.sda.proxysdk.devices.AbstractDevice
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.transport.ISerialDataSink
 import com.arm.peliondevicemanagement.transport.sda.SerialMessage
@@ -29,8 +28,8 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 @ExperimentalCoroutinesApi
-class DummyBleDevice(private val context: Context, private val deviceMac: String):
-    AbstractDevice(), ISerialDataSink {
+class DummyBleDevice(private val deviceMac: String):
+    AbstractBleDevice(), ISerialDataSink {
 
     companion object{
         private val TAG = DummyBleDevice::class.java.simpleName
@@ -61,13 +60,13 @@ class DummyBleDevice(private val context: Context, private val deviceMac: String
     private var isAckReceived: Boolean = false
     private var isFinalResponseReceived: Boolean = false
 
-    private var bleConnectionCallback: ArmBleDevice.ArmBleConnectionCallback? = null
+    private var bleConnectionCallback: BleConnectionCallback? = null
 
     private fun ByteArray.toHex(): String {
         return joinToString("") { "%02x".format(it) }
     }
 
-    suspend fun connect(callback: ArmBleDevice.ArmBleConnectionCallback): Boolean = withContext(Dispatchers.IO) {
+    override suspend fun connect(callback: BleConnectionCallback): Boolean = withContext(Dispatchers.IO) {
         delay(200)
         return@withContext suspendCoroutine<Boolean> {
             LogHelper.debug(TAG, "->onConnect() MAC: $deviceMac")
@@ -76,7 +75,7 @@ class DummyBleDevice(private val context: Context, private val deviceMac: String
         }
     }
 
-    suspend fun disconnect(): Boolean = withContext(Dispatchers.IO) {
+    override suspend fun disconnect(): Boolean = withContext(Dispatchers.IO) {
         return@withContext suspendCoroutine<Boolean> {
             totalPacketsToWrite = 0
             currentPosition = 0
@@ -86,7 +85,7 @@ class DummyBleDevice(private val context: Context, private val deviceMac: String
         }
     }
 
-    suspend fun requestHigherMtu(size: Int): Boolean = withContext(Dispatchers.IO) {
+    override suspend fun requestHigherMtu(size: Int): Boolean = withContext(Dispatchers.IO) {
         delay(200)
         return@withContext suspendCoroutine<Boolean> {
             LogHelper.debug(TAG, "->onMtuChanged() size: $size bytes")
@@ -94,11 +93,24 @@ class DummyBleDevice(private val context: Context, private val deviceMac: String
         }
     }
 
-    suspend fun readEndpoint(): String = withContext(Dispatchers.IO) {
+    override suspend fun readEndpoint(): String = withContext(Dispatchers.IO) {
         delay(200)
         return@withContext suspendCoroutine<String> {
-            LogHelper.debug(TAG, "->onReadEndpoint() $DUMMY_ENDPOINT")
-            it.resume(DUMMY_ENDPOINT)
+            val endpoint = when(deviceMac) {
+                "FE:7E:7E:BD:AB:87" -> {
+                    "xFE:7E:7E:BD:AB:87"
+                }
+                "XD:7E:7E:BD:AB:70" -> {
+                    "026eead293eb926ca57ba92703c00000"
+                }
+                "DS:7E:7E:BD:AB:79" -> {
+                    "036eead293eb926ca57ba92703c00000"
+                } else -> {
+                    DUMMY_ENDPOINT
+                }
+            }
+            LogHelper.debug(TAG, "->onReadEndpoint() $endpoint")
+            it.resume(endpoint)
         }
     }
 
@@ -253,9 +265,3 @@ class DummyBleDevice(private val context: Context, private val deviceMac: String
         }
     }
 }
-
-data class DumBleDevice(
-    val deviceName: String,
-    val deviceAddress: String,
-    val deviceRSSI: Int
-)

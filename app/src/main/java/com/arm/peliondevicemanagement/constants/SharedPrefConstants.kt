@@ -51,5 +51,6 @@ object SharedPrefConstants {
 
     // SDA Flags
     const val STORE_SDA_POPPEMPUB_KEY = "sdaPopPemPubKey"
+    const val STORE_SDA_EXECUTION_MODE = "sdaExecutionMode"
 
 }

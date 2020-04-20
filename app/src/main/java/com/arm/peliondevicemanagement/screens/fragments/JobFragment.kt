@@ -304,14 +304,14 @@ class JobFragment : Fragment() {
         }*/
         if(checkForLocationPermission(requireActivity())){
             if(isLocationServiceEnabled(requireContext())){
-                navigateToJobRunFragment()
+                createRunBundle()
             } else {
                 showLocationServicesDialog(requireContext())
             }
         }
     }
 
-    private fun navigateToJobRunFragment() {
+    private fun createRunBundle() {
         // Construct listOf<Devices> which are pending or failed
         val pendingDevices = arrayListOf<WorkflowDevice>()
         workflowModel.workflowDevices?.forEach { device ->
@@ -320,22 +320,50 @@ class JobFragment : Fragment() {
             }
         }
 
-        LogHelper.debug(TAG, "Found ${pendingDevices.size} device, " +
-                "building device-run-bundle")
+        if(pendingDevices.isNotEmpty()){
+            LogHelper.debug(TAG, "Found ${pendingDevices.size} pending-device")
 
+            navigateToRunFragment(pendingDevices)
+        } else {
+            showWorkflowCompleteDialog()
+        }
+    }
+
+    private fun navigateToRunFragment(devices: ArrayList<WorkflowDevice>? = null) {
+        val runDevices: ArrayList<WorkflowDevice> = if(devices.isNullOrEmpty()){
+            ArrayList(workflowModel.workflowDevices!!)
+        } else {
+            devices
+        }
+        LogHelper.debug(TAG, "navigateToRunFragment() Found ${devices?.size} device for run-bundle")
         // Construct run-bundle
         val deviceRunBundle =
             DeviceRun(
                 workflowModel.workflowID,
                 workflowModel.workflowName,
                 workflowModel.workflowTasks,
-                pendingDevices,
+                runDevices,
                 workflowModel.sdaToken!!.accessToken
             )
         // Move to device-run
         Navigation.findNavController(viewBinder.root)
             .navigate(JobFragmentDirections
                 .actionJobFragmentToJobRunFragment(deviceRunBundle))
+    }
+
+    private fun showWorkflowCompleteDialog() {
+        MaterialAlertDialogBuilder(context)
+            .setTitle(resources.getString(R.string.job_completed_text))
+            .setMessage(resources.getString(R.string.job_completed_desc))
+            .setPositiveButton(resources.getString(R.string.re_run_text)) { _, _ ->
+                navigateToRunFragment()
+            }
+            .setNegativeButton(resources.getString(R.string.cancel_text)) { dialogInterface, _ ->
+                dialogInterface.dismiss()
+            }
+            .setCancelable(false)
+            .create()
+            .show()
     }
 
     override fun onDestroyView() {

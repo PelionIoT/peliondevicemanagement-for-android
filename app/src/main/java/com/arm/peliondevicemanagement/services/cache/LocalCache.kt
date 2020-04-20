@@ -56,7 +56,7 @@ class LocalCache(
                               devices: ArrayList<WorkflowDevice>,
                               updateFinished: () -> Unit) {
         ioExecutor.execute {
-            LogHelper.debug(TAG, "Updating ${devices.size} of workflow: $workflowID")
+            LogHelper.debug(TAG, "Updating ${devices.size} device of workflow: $workflowID")
             workflowDao.updateWorkflowDevices(workflowID, devices)
             updateFinished()
         }

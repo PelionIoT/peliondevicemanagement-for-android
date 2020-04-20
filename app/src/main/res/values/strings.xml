@@ -85,5 +85,12 @@
     <string name="deny_text">Deny</string>
     <string name="open_settings_text">Open Settings</string>
 
+    <string name="job_completed_text">Job Completed</string>
+    <string name="job_completed_desc">This job is already completed\nYou\'re good to go!</string>
+    <string name="re_run_text">Re-Run</string>
+    <string name="job_cancel_text">You\'re about to cancel a running job,\nAre you sure?</string>
+    <string name="yes_stop_text">Yes, Stop</string>
+    <string name="no_text">No</string>
+
 
 </resources>

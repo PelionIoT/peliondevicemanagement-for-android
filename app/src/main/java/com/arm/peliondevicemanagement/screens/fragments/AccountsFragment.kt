@@ -185,10 +185,10 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
             val username = SharedPrefHelper.getUserName()
             val password = SharedPrefHelper.getUserPassword()
 
-            LogHelper.debug(TAG, "onHandleLogin(): " +
+            /*LogHelper.debug(TAG, "onHandleLogin(): " +
                     "email: $username, " +
                     "password: $password, " +
-                    "accountID: $accountID")
+                    "accountID: $accountID")*/
 
             loginViewModel.doLogin(username, password!!, accountID)
         } else {

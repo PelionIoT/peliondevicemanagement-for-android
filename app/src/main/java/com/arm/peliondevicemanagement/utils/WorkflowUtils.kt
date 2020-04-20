@@ -36,6 +36,7 @@ import com.arm.peliondevicemanagement.constants.AppConstants.TASK_NAME_FILEPATH
 import com.arm.peliondevicemanagement.constants.AppConstants.TASK_TYPE_FILE
 import com.arm.peliondevicemanagement.constants.AppConstants.TASK_TYPE_STRING
 import com.arm.peliondevicemanagement.constants.AppConstants.WRITE_TASK
+import com.arm.peliondevicemanagement.constants.ExecutionMode
 import com.arm.peliondevicemanagement.constants.state.DeviceRunState
 import com.arm.peliondevicemanagement.constants.state.TaskRunState
 import com.arm.peliondevicemanagement.constants.state.TaskTypeState
@@ -300,7 +301,7 @@ object WorkflowUtils {
                 outputParamsList.add(
                     TaskRunParam(KEY_ERROR_CODE, TaskTypeState.NUMBER.name, "-1")
                 )
-                return TaskRun(taskID, DeviceRunState.HAS_FAILURES.name, outputParamsList)
+                return TaskRun(taskID, TaskRunState.FAILED.name, outputParamsList)
             }
             TaskRunState.SKIPPED -> {
                 return TaskRun(taskID, TaskRunState.SKIPPED.name, null)
@@ -310,9 +311,9 @@ object WorkflowUtils {
 
     fun createDeviceRunLog(workflowID: String, deviceID: String,
                            location: String, executionTime: String,
-                           log: String, taskRuns: List<TaskRun>,
-                           failedCount: Int? = null): DeviceRunLogs {
-        return if(failedCount != null){
+                           log: String, taskRuns: ArrayList<TaskRun>,
+                           failedCount: Int = 0): DeviceRunLogs {
+        return if(failedCount > 0){
             DeviceRunLogs(
                 workflowID, deviceID,
                 DeviceRunState.HAS_FAILURES.name, location,
@@ -324,6 +325,23 @@ object WorkflowUtils {
                 DeviceRunState.SUCCEEDED.name, location,
                 executionTime, log, taskRuns
             )
+        }
+    }
+
+    fun getSDAExecutionMode(): ExecutionMode {
+        return when {
+            SharedPrefHelper.getSDAExecutionMode().isEmpty() -> {
+                SharedPrefHelper.storeSDAExecutionMode(ExecutionMode.PHYSICAL.name)
+                ExecutionMode.PHYSICAL
+            }
+            SharedPrefHelper.getSDAExecutionMode() == ExecutionMode.PHYSICAL.name -> {
+                SharedPrefHelper.storeSDAExecutionMode(ExecutionMode.PHYSICAL.name)
+                ExecutionMode.PHYSICAL
+            }
+            else -> {
+                SharedPrefHelper.storeSDAExecutionMode(ExecutionMode.VIRTUAL.name)
+                ExecutionMode.VIRTUAL
+            }
         }
     }
 
