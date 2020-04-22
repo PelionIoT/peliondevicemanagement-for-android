@@ -29,28 +29,38 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionManager
+import com.arm.peliondevicemanagement.BuildConfig
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.adapters.WorkflowDeviceAdapter
+import com.arm.peliondevicemanagement.components.listeners.RecyclerItemSwipeListener
+import com.arm.peliondevicemanagement.components.listeners.SwipeDragControllerListener
 import com.arm.peliondevicemanagement.components.models.workflow.device.DeviceRun
 import com.arm.peliondevicemanagement.components.models.workflow.device.WorkflowDevice
 import com.arm.peliondevicemanagement.components.models.workflow.Workflow
 import com.arm.peliondevicemanagement.components.viewmodels.WorkflowViewModel
 import com.arm.peliondevicemanagement.constants.AppConstants.DEFAULT_TIME_FORMAT
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_COMPLETED
+import com.arm.peliondevicemanagement.constants.ExecutionMode
+import com.arm.peliondevicemanagement.constants.state.WorkflowState
 import com.arm.peliondevicemanagement.databinding.FragmentJobBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.screens.activities.HostActivity
 import com.arm.peliondevicemanagement.utils.PlatformUtils.checkForLocationPermission
+import com.arm.peliondevicemanagement.utils.PlatformUtils.enableBluetooth
+import com.arm.peliondevicemanagement.utils.PlatformUtils.fetchAttributeColor
 import com.arm.peliondevicemanagement.utils.PlatformUtils.fetchAttributeDrawable
+import com.arm.peliondevicemanagement.utils.PlatformUtils.isBluetoothEnabled
 import com.arm.peliondevicemanagement.utils.PlatformUtils.isLocationServiceEnabled
 import com.arm.peliondevicemanagement.utils.PlatformUtils.openLocationServiceSettings
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.getPermissionScopeFromTasks
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.isValidSDAToken
 import com.arm.peliondevicemanagement.utils.PlatformUtils.parseJSONTimeIntoTimeAgo
 import com.arm.peliondevicemanagement.utils.PlatformUtils.parseJSONTimeString
+import com.arm.peliondevicemanagement.utils.WorkflowUtils
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.getAudienceListFromDevices
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.fragment_job.*
@@ -73,6 +83,23 @@ class JobFragment : Fragment() {
 
     private var totalDevicesCompleted: Int = 0
     private var isSDATokenValid: Boolean = false
+
+    private val swipeListener = object: RecyclerItemSwipeListener {
+        override fun onSwipedLeft(position: Int) {
+            LogHelper.debug(TAG, "Item swiped-left: $position")
+            workflowDeviceAdapter.notifyItemChanged(position)
+            verifyAndRunJob(position)
+        }
+        override fun onSwipedRight(position: Int) {
+            LogHelper.debug(TAG, "Item swiped-right: $position")
+        }
+    }
+
+    enum class RunBundleState {
+        PENDING_DEVICES,
+        ALL_DEVICES,
+        SPECIFIC_DEVICE
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -131,6 +158,17 @@ class JobFragment : Fragment() {
             adapter = workflowDeviceAdapter
         }
 
+        // Add swipe-gesture to devices list
+        val itemTouchHelper = ItemTouchHelper(
+            SwipeDragControllerListener(
+                resources.getDrawable(R.drawable.ic_play_light),
+                fetchAttributeColor(context!!, R.attr.colorAccent), swipeListener,
+                ItemTouchHelper.LEFT
+            )
+        )
+
+        itemTouchHelper.attachToRecyclerView(viewBinder.rvDevices)
+
         verifySDAToken()
     }
 
@@ -168,12 +206,24 @@ class JobFragment : Fragment() {
         })
 
         viewBinder.runJobButton.setOnClickListener {
-            if(isSDATokenValid){
-                processNavigation()
+            verifyAndRunJob()
+        }
+    }
+
+    private fun verifyAndRunJob(position: Int? = null) {
+        if(isSDATokenValid){
+            if(verifyBLEAndLocationPermissions()){
+                if(position != null){
+                    initiateSpecificDeviceRun(position)
+                } else {
+                    initiateJobRun()
+                }
             } else {
-                showSnackbar("Refreshing secure-access, hang-on")
-                refreshSDAToken()
+                showSnackbar("Failed to run job")
             }
+        } else {
+            showSnackbar("Refreshing secure-access, hang-on")
+            refreshSDAToken()
         }
     }
 
@@ -297,21 +347,77 @@ class JobFragment : Fragment() {
             .show()
     }
 
-    private fun processNavigation() {
-        /*if(!isBluetoothEnabled()){
-            enableBluetooth(requireContext())
-            return
-        }*/
-        if(checkForLocationPermission(requireActivity())){
+    private fun verifyBLEAndLocationPermissions(): Boolean {
+        // Enable feature-flag, if debug-build
+        if(BuildConfig.DEBUG){
+            val executionMode = WorkflowUtils.getSDAExecutionMode()
+            if(executionMode == ExecutionMode.PHYSICAL){
+                if(!isBluetoothEnabled()){
+                    enableBluetooth(requireContext())
+                    return false
+                }
+            }
+        } else {
+            if(!isBluetoothEnabled()){
+                enableBluetooth(requireContext())
+                return false
+            }
+        }
+        // Check for permissions
+        return if(checkForLocationPermission(requireActivity())){
             if(isLocationServiceEnabled(requireContext())){
-                createRunBundle()
+                true
             } else {
                 showLocationServicesDialog(requireContext())
+                false
+            }
+        } else {
+            false
+        }
+    }
+
+    private fun initiateJobRun() {
+        if(checkPendingDevices()){
+            initiatePendingDevicesRun()
+        } else {
+            showWorkflowCompleteDialog()
+        }
+    }
+
+    private fun initiatePendingDevicesRun() {
+        val runBundle = createRunBundle(RunBundleState.PENDING_DEVICES)
+        navigateToRunFragment(runBundle)
+    }
+
+    private fun initiateAllDevicesRun() {
+        val runBundle = createRunBundle(RunBundleState.ALL_DEVICES)
+        navigateToRunFragment(runBundle)
+    }
+
+    private fun initiateSpecificDeviceRun(position: Int) {
+        val runBundle = createRunBundle(RunBundleState.SPECIFIC_DEVICE, position)
+        navigateToRunFragment(runBundle)
+    }
+
+    private fun createRunBundle(state: RunBundleState, position: Int? = null): DeviceRun {
+        return when(state){
+            RunBundleState.PENDING_DEVICES -> {
+                createBundleForPendingDevices()
+            }
+            RunBundleState.ALL_DEVICES -> {
+                createBundleForAllDevices()
+            }
+            RunBundleState.SPECIFIC_DEVICE -> {
+                createBundleForSpecificDevice(position!!)
             }
         }
     }
 
-    private fun createRunBundle() {
+    private fun checkPendingDevices(): Boolean {
+        return workflowModel.workflowStatus != WorkflowState.COMPLETED.name
+    }
+
+    private fun createBundleForPendingDevices(): DeviceRun {
         // Construct listOf<Devices> which are pending or failed
         val pendingDevices = arrayListOf<WorkflowDevice>()
         workflowModel.workflowDevices?.forEach { device ->
@@ -320,35 +426,46 @@ class JobFragment : Fragment() {
             }
         }
 
-        if(pendingDevices.isNotEmpty()){
-            LogHelper.debug(TAG, "Found ${pendingDevices.size} pending-device")
+        LogHelper.debug(TAG, "createBundleForPendingDevices() " +
+                "Found ${pendingDevices.size} pending-device")
 
-            navigateToRunFragment(pendingDevices)
-        } else {
-            showWorkflowCompleteDialog()
-        }
+        return DeviceRun(
+            workflowModel.workflowID,
+            workflowModel.workflowName,
+            workflowModel.workflowTasks, pendingDevices,
+            workflowModel.sdaToken!!.accessToken
+        )
     }
 
-    private fun navigateToRunFragment(devices: ArrayList<WorkflowDevice>? = null) {
-        val runDevices: ArrayList<WorkflowDevice> = if(devices.isNullOrEmpty()){
-            ArrayList(workflowModel.workflowDevices!!)
-        } else {
-            devices
-        }
-        LogHelper.debug(TAG, "navigateToRunFragment() Found ${devices?.size} device for run-bundle")
-        // Construct run-bundle
-        val deviceRunBundle =
-            DeviceRun(
-                workflowModel.workflowID,
-                workflowModel.workflowName,
-                workflowModel.workflowTasks,
-                runDevices,
-                workflowModel.sdaToken!!.accessToken
-            )
+    private fun createBundleForAllDevices(): DeviceRun {
+        val allDevices = ArrayList<WorkflowDevice>(workflowModel.workflowDevices!!)
+        LogHelper.debug(TAG, "createRunBundleForAllDevices() " +
+                "Found ${allDevices.size} device for run-bundle")
+
+        return DeviceRun(
+            workflowModel.workflowID,
+            workflowModel.workflowName,
+            workflowModel.workflowTasks, allDevices,
+            workflowModel.sdaToken!!.accessToken
+        )
+    }
+
+    private fun createBundleForSpecificDevice(position: Int): DeviceRun {
+        val device = workflowModel.workflowDevices?.get(position)
+        LogHelper.debug(TAG, "createBundleForSpecificDevice() $device")
+        return DeviceRun(
+            workflowModel.workflowID,
+            workflowModel.workflowName,
+            workflowModel.workflowTasks, arrayListOf(device!!),
+            workflowModel.sdaToken!!.accessToken
+        )
+    }
+
+    private fun navigateToRunFragment(runBundle: DeviceRun) {
         // Move to device-run
         Navigation.findNavController(viewBinder.root)
             .navigate(JobFragmentDirections
-                .actionJobFragmentToJobRunFragment(deviceRunBundle))
+                .actionJobFragmentToJobRunFragment(runBundle))
     }
 
     private fun showWorkflowCompleteDialog() {
@@ -356,7 +473,7 @@ class JobFragment : Fragment() {
             .setTitle(resources.getString(R.string.job_completed_text))
             .setMessage(resources.getString(R.string.job_completed_desc))
             .setPositiveButton(resources.getString(R.string.re_run_text)) { _, _ ->
-                navigateToRunFragment()
+                initiateAllDevicesRun()
             }
             .setNegativeButton(resources.getString(R.string.cancel_text)) { dialogInterface, _ ->
                 dialogInterface.dismiss()

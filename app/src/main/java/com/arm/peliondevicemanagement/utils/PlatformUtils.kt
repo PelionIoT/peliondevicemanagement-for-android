@@ -23,6 +23,7 @@ import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
@@ -67,6 +68,14 @@ object PlatformUtils {
         val attr = context.obtainStyledAttributes(intArrayOf(attrID))
         val attrResId = attr.getResourceId(0,0)
         val drawable = context.resources.getDrawable(attrResId)
+        attr.recycle()
+        return drawable
+    }
+
+    fun fetchAttributeColor(context: Context, attrID: Int): ColorDrawable {
+        val attr = context.obtainStyledAttributes(intArrayOf(attrID))
+        val attrResId = attr.getResourceId(0,0)
+        val drawable = ColorDrawable(context.resources.getColor(attrResId))
         attr.recycle()
         return drawable
     }
