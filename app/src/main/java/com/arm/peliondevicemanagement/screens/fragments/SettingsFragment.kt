@@ -24,6 +24,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.RadioGroup
 import androidx.navigation.Navigation
+import com.arm.peliondevicemanagement.BuildConfig
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.databinding.FragmentSettingsBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
@@ -38,6 +39,9 @@ class SettingsFragment : Fragment() {
 
     private var _viewBinder: FragmentSettingsBinding? = null
     private val viewBinder get() = _viewBinder!!
+
+    private var initiatedDModeMs: Long = 0
+    private var developerModeStepCounter: Int = 5
 
     private val checkedChangeListener: RadioGroup.OnCheckedChangeListener = RadioGroup.OnCheckedChangeListener { group, checkedId ->
         when (checkedId) {
@@ -70,6 +74,16 @@ class SettingsFragment : Fragment() {
         if(SharedPrefHelper.isDarkThemeEnabled()){
             viewBinder.rbThemeDark.isChecked = true
         }
+
+        // If debug-build, enable feature-flag
+        if(BuildConfig.DEBUG){
+            viewBinder.tvVersion.text = (activity as HostActivity).getAppVersion()
+            viewBinder.buildInfoCard.visibility = View.VISIBLE
+
+            if(SharedPrefHelper.getDeveloperOptions().isDeveloperModeEnabled()) {
+                viewBinder.developerModeCard.visibility = View.VISIBLE
+            }
+        }
     }
 
     private fun setupListeners() {
@@ -81,6 +95,18 @@ class SettingsFragment : Fragment() {
 
         viewBinder.helpSupportButton.setOnClickListener {
             navigateToHelpAndSupportFragment()
+        }
+
+        viewBinder.buildInfoCard.setOnClickListener {
+            if(SharedPrefHelper.getDeveloperOptions().isDeveloperModeEnabled()){
+                showToast(resources.getString(R.string.developer_mode_already_enabled_text))
+            } else {
+                initiateDeveloperMode()
+            }
+        }
+
+        viewBinder.developerModeCard.setOnClickListener {
+            navigateToDeveloperModeFragment()
         }
     }
 
@@ -94,6 +120,25 @@ class SettingsFragment : Fragment() {
         (activity as HostActivity).recreate()
     }
 
+    private fun initiateDeveloperMode() = if((System.currentTimeMillis() - initiatedDModeMs < 2000) && developerModeStepCounter < 1) {
+        enableDeveloperMode()
+    } else {
+        developerModeStepCounter--
+        initiatedDModeMs = System.currentTimeMillis()
+        showToast(resources.getString(R.string.developer_mode_format, developerModeStepCounter.toString()))
+    }
+
+    private fun enableDeveloperMode() {
+        showToast(resources.getString(R.string.developer_mode_enabled_text))
+        LogHelper.debug(TAG, "->Developer-Mode: Enabled")
+        SharedPrefHelper.getDeveloperOptions().setDeveloperModeStatus(true)
+        viewBinder.developerModeCard.visibility = View.VISIBLE
+    }
+
+    private fun showToast(message: String){
+        (activity as HostActivity).showToast(message)
+    }
+
     private fun navigateToActivityInfoFragment() {
         Navigation.findNavController(viewBinder.root)
             .navigate(SettingsFragmentDirections.actionSettingsFragmentToActivityInfoFragment())
@@ -102,5 +147,10 @@ class SettingsFragment : Fragment() {
     private fun navigateToHelpAndSupportFragment() {
         Navigation.findNavController(viewBinder.root)
             .navigate(SettingsFragmentDirections.actionSettingsFragmentToHelpAndSupportFragment())
+    }
+
+    private fun navigateToDeveloperModeFragment() {
+        Navigation.findNavController(viewBinder.root)
+            .navigate(SettingsFragmentDirections.actionSettingsFragmentToDeveloperOptionsFragment())
     }
 }

@@ -59,6 +59,7 @@
         <attr name="iconShieldRed" format="reference"/>
         <attr name="iconRefresh" format="reference" />
         <attr name="iconStop" format="reference"/>
+        <attr name="iconDeveloper" format="reference"/>
 
     </declare-styleable>
 </resources>

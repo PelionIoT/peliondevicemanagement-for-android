@@ -330,16 +330,15 @@ object WorkflowUtils {
 
     fun getSDAExecutionMode(): ExecutionMode {
         return when {
-            SharedPrefHelper.getSDAExecutionMode().isEmpty() -> {
-                SharedPrefHelper.storeSDAExecutionMode(ExecutionMode.PHYSICAL.name)
+            SharedPrefHelper.getDeveloperOptions().getSDAExecutionMode().isEmpty() -> {
+                SharedPrefHelper.getDeveloperOptions()
+                    .storeSDAExecutionMode(ExecutionMode.PHYSICAL.name)
                 ExecutionMode.PHYSICAL
             }
-            SharedPrefHelper.getSDAExecutionMode() == ExecutionMode.PHYSICAL.name -> {
-                SharedPrefHelper.storeSDAExecutionMode(ExecutionMode.PHYSICAL.name)
+            SharedPrefHelper.getDeveloperOptions().getSDAExecutionMode() == ExecutionMode.PHYSICAL.name -> {
                 ExecutionMode.PHYSICAL
             }
             else -> {
-                SharedPrefHelper.storeSDAExecutionMode(ExecutionMode.VIRTUAL.name)
                 ExecutionMode.VIRTUAL
             }
         }

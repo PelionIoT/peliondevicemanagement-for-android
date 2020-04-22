@@ -309,6 +309,9 @@ class JobRunFragment : Fragment() {
 
     private fun processSDAResponse(deviceResponse: DeviceResponse) {
         val taskRunLog: TaskRun = if(deviceResponse.operationResponse != null){
+            if(deviceResponse.operationResponse.blob != null){
+                LogHelper.debug(TAG, "SDA_Response ${deviceResponse.operationResponse.blob!!.contentToString()}")
+            }
             // Create run-log
             createTaskRunLog(
                 deviceResponse.taskID!!, TaskRunState.SUCCEEDED, "undefined"

@@ -23,6 +23,11 @@ import com.arm.peliondevicemanagement.utils.SharedPrefManager
 
 object SharedPrefHelper {
 
+    private val developerOptions = DeveloperOptionsHelper
+
+    // API to access developer-options storage
+    internal fun getDeveloperOptions() = developerOptions
+
     // Get APIs
     internal fun getUserName(): String =
         SharedPrefManager.with(context = AppController.appController!!)!!
@@ -63,10 +68,6 @@ object SharedPrefHelper {
     internal fun getSDAPopPemPubKey(): String =
         SharedPrefManager.with(context = AppController.appController!!)!!
             .getString(SharedPrefConstants.STORE_SDA_POPPEMPUB_KEY, "")!!
-
-    internal fun getSDAExecutionMode(): String =
-        SharedPrefManager.with(context = AppController.appController!!)!!
-            .getString(SharedPrefConstants.STORE_SDA_EXECUTION_MODE, "")!!
 
     internal fun isMultiAccountSupported(): Boolean =
         SharedPrefManager.with(context = AppController.appController!!)!!
@@ -129,11 +130,6 @@ object SharedPrefHelper {
             .putString(SharedPrefConstants.STORE_SDA_POPPEMPUB_KEY, popPemPubKey)
             .apply()
 
-    internal fun storeSDAExecutionMode(mode: String) =
-        SharedPrefManager.with(context = AppController.appController!!)!!.edit()
-            .putString(SharedPrefConstants.STORE_SDA_EXECUTION_MODE, mode)
-            .apply()
-
     internal fun setDarkThemeStatus(enabled: Boolean) =
         SharedPrefManager.with(context = AppController.appController!!)!!.edit()
             .putBoolean(SharedPrefConstants.STORE_DARK_THEME_STATUS, enabled)
@@ -164,6 +160,8 @@ object SharedPrefHelper {
     }
 
     internal fun clearEverything() {
+        // Reset developer-options
+        developerOptions.resetOptions()
         val editor = SharedPrefManager.with(context = AppController.appController!!)!!.edit()
         editor.remove(SharedPrefConstants.STORE_USER_NAME)
         editor.remove(SharedPrefConstants.STORE_USER_PASSWORD)
@@ -175,7 +173,6 @@ object SharedPrefHelper {
         editor.remove(SharedPrefConstants.STORE_SELECTED_ACCOUNT_ID)
         editor.remove(SharedPrefConstants.STORE_SELECTED_ACCOUNT_NAME)
         editor.remove(SharedPrefConstants.STORE_SDA_POPPEMPUB_KEY)
-        editor.remove(SharedPrefConstants.STORE_SDA_EXECUTION_MODE)
         editor.apply()
     }
 }

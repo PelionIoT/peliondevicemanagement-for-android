@@ -23,6 +23,7 @@ abstract class AbstractBleDevice: AbstractDevice() {
 
     abstract suspend fun connect(callback: BleConnectionCallback): Boolean
     abstract suspend fun disconnect(): Boolean
+    abstract suspend fun releaseLocks()
 
     abstract suspend fun requestHigherMtu(size: Int): Boolean
     abstract suspend fun readEndpoint(): String

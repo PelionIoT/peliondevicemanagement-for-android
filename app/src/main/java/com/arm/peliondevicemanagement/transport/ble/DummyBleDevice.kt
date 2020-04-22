@@ -17,7 +17,6 @@
 
 package com.arm.peliondevicemanagement.transport.ble
 
-import android.content.Context
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.transport.ISerialDataSink
 import com.arm.peliondevicemanagement.transport.sda.SerialMessage
@@ -50,6 +49,8 @@ class DummyBleDevice(private val deviceMac: String):
                 = byteArrayOf(1, -111, 27, 27, 0, 0, 0, 0, -65, 4,
             83, 70, 105, 108, 101, 32, 87, 114, 105, 116, 101, 32,
             67, 111, 109, 112, 108, 101, 116, 101, 1, 4, 2, 0, -1, -125)
+
+        private const val TIME_OUT_MILLISECONDS: Long= 5000
     }
 
     private lateinit var operationResponse: ByteArray
@@ -66,17 +67,17 @@ class DummyBleDevice(private val deviceMac: String):
         return joinToString("") { "%02x".format(it) }
     }
 
-    override suspend fun connect(callback: BleConnectionCallback): Boolean = withContext(Dispatchers.IO) {
+    override suspend fun connect(callback: BleConnectionCallback): Boolean {
         delay(200)
-        return@withContext suspendCoroutine<Boolean> {
+        return suspendCoroutine {
             LogHelper.debug(TAG, "->onConnect() MAC: $deviceMac")
             bleConnectionCallback = callback
             it.resume(true)
         }
     }
 
-    override suspend fun disconnect(): Boolean = withContext(Dispatchers.IO) {
-        return@withContext suspendCoroutine<Boolean> {
+    override suspend fun disconnect(): Boolean {
+        return suspendCoroutine {
             totalPacketsToWrite = 0
             currentPosition = 0
             LogHelper.debug(TAG, "->onDisconnect()")
@@ -85,17 +86,22 @@ class DummyBleDevice(private val deviceMac: String):
         }
     }
 
-    override suspend fun requestHigherMtu(size: Int): Boolean = withContext(Dispatchers.IO) {
+    override suspend fun releaseLocks() {
+        isFinalResponseReceived = true
+        disconnect()
+    }
+
+    override suspend fun requestHigherMtu(size: Int): Boolean {
         delay(200)
-        return@withContext suspendCoroutine<Boolean> {
+        return suspendCoroutine<Boolean> {
             LogHelper.debug(TAG, "->onMtuChanged() size: $size bytes")
             it.resume(true)
         }
     }
 
-    override suspend fun readEndpoint(): String = withContext(Dispatchers.IO) {
+    override suspend fun readEndpoint(): String {
         delay(200)
-        return@withContext suspendCoroutine<String> {
+        return suspendCoroutine {
             val endpoint = when(deviceMac) {
                 "FE:7E:7E:BD:AB:87" -> {
                     "xFE:7E:7E:BD:AB:87"
@@ -123,7 +129,7 @@ class DummyBleDevice(private val deviceMac: String):
         }
     }
 
-    private suspend fun doWrite(protocolMessage: ByteArray) = withContext(Dispatchers.IO) {
+    private suspend fun doWrite(protocolMessage: ByteArray) {
         val transmissionMtuSize = TMSN_MTU_SIZE
 
         LogHelper.debug(TAG, "->doWrite() MaxTransmissionMTU: $transmissionMtuSize bytes")
@@ -190,13 +196,15 @@ class DummyBleDevice(private val deviceMac: String):
 
         // Now wait for final response
         LogHelper.debug(TAG, "->doWrite() Write complete, now waiting for response.")
-        while (!isFinalResponseReceived){
-            // Wait for 2 seconds here then send the response
-            delay(2000)
-            if(protocolMessage.size == 46){
-                onNewData(DUMMY_NONCE_RESPONSE)
-            } else {
-                onNewData(DUMMY_OPERATION_RESPONSE)
+        withTimeoutOrNull(TIME_OUT_MILLISECONDS){
+            while (!isFinalResponseReceived){
+                // Wait for 2 seconds here then send the response
+                delay(2000)
+                if(protocolMessage.size == 46){
+                    onNewData(DUMMY_NONCE_RESPONSE)
+                } else {
+                    onNewData(DUMMY_OPERATION_RESPONSE)
+                }
             }
         }
         isFinalResponseReceived = false

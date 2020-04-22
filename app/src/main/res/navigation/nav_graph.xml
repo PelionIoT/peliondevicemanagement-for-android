@@ -97,6 +97,13 @@
             app:exitAnim="@anim/right_out"
             app:popEnterAnim="@anim/left_in"
             app:popExitAnim="@anim/left_out"/>
+        <action
+            android:id="@+id/action_settingsFragment_to_developerOptionsFragment"
+            app:destination="@id/developerOptionsFragment"
+            app:enterAnim="@anim/right_in"
+            app:exitAnim="@anim/right_out"
+            app:popEnterAnim="@anim/left_in"
+            app:popExitAnim="@anim/left_out"/>
     </fragment>
 
     <fragment
@@ -201,6 +208,7 @@
             app:exitAnim="@anim/right_out"
             app:popEnterAnim="@anim/left_in"
             app:popExitAnim="@anim/left_out"
+            app:launchSingleTop="true"
             />
 
     </fragment>
@@ -213,5 +221,10 @@
             android:name="run_object"
             app:argType="com.arm.peliondevicemanagement.components.models.workflow.device.DeviceRun" />
     </fragment>
+    <fragment
+        android:id="@+id/developerOptionsFragment"
+        android:name="com.arm.peliondevicemanagement.screens.fragments.DeveloperOptionsFragment"
+        android:label="fragment_developer_options"
+        tools:layout="@layout/fragment_developer_options" />
 
 </navigation>

@@ -18,6 +18,7 @@
 package com.arm.peliondevicemanagement.components.viewmodels
 
 import android.content.Context
+import android.os.CountDownTimer
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.arm.mbed.sda.proxysdk.SecuredDeviceAccess
@@ -32,6 +33,8 @@ import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.transport.ble.*
 import com.arm.peliondevicemanagement.transport.sda.DeviceCommand
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.TickerMode
+import kotlinx.coroutines.channels.ticker
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
@@ -96,6 +99,7 @@ class SDAViewModel : ViewModel() {
                     isActiveDeviceDisconnected = false
                     activeDeviceIdentifier = deviceMAC
                     deviceStateLiveData.postValue(DeviceStateResponse(DeviceState.CONNECTING, activeDeviceIdentifier))
+                    bleDevice = null
                     bleDevice = when(executionMode){
                         ExecutionMode.PHYSICAL -> {
                             // Real-device operation
@@ -173,11 +177,13 @@ class SDAViewModel : ViewModel() {
             accessToken = sdaToken
             jobCommands = commands
             devices.forEach { device ->
-                LogHelper.debug(TAG, "Connecting device-> Name: ${device.deviceName}, " +
-                        "MAC: ${device.deviceAddress}, RSSI: ${device.deviceRSSI}")
-                // Now connect to the device
-                connectToDevice(context, device.deviceAddress)
-                LogHelper.debug(TAG, "DeviceLock released, now moving to next device")
+                if(isActive){
+                    LogHelper.debug(TAG, "Connecting device-> Name: ${device.deviceName}, " +
+                            "MAC: ${device.deviceAddress}, RSSI: ${device.deviceRSSI}")
+                    // Now connect to the device
+                    connectToDevice(context, device.deviceAddress)
+                    LogHelper.debug(TAG, "DeviceLock released, now moving to next device")
+                }
             }
             // Signal all-devices completed
             responseLiveData.postValue(DeviceResponse(
@@ -191,9 +197,11 @@ class SDAViewModel : ViewModel() {
             LogHelper.debug(TAG, "runJob() All Done, now RUNNNN")
             // [ Showdown Time ]
             jobCommands?.forEach { taskDeviceCommand ->
-                LogHelper.debug(TAG, "Sending command [ ${taskDeviceCommand.deviceCommand.command} ] to device")
-                setCommandLock(locked = true)
-                sendToDevice(taskDeviceCommand.taskID, taskDeviceCommand.deviceCommand)
+                if(isActive){
+                    LogHelper.debug(TAG, "Sending command [ ${taskDeviceCommand.deviceCommand.command} ] to device")
+                    setCommandLock(locked = true)
+                    sendToDevice(taskDeviceCommand.taskID, taskDeviceCommand.deviceCommand)
+                }
             }
             // Move to final stage
             LogHelper.debug(TAG, "All commands completed, exit")
@@ -238,8 +246,20 @@ class SDAViewModel : ViewModel() {
     }
 
     fun cancelAllRequests() {
+        LogHelper.debug(TAG, "->cancelAllRequests()")
+        if(bleDevice != null){
+            scope.launch {
+                bleDevice?.releaseLocks()
+                LogHelper.debug(TAG, "Abrupt operation-cancellation")
+            }
+        }
         scope.cancel()
         coroutineContext.cancel()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        LogHelper.debug(TAG, "All subscriptions cancelled")
     }
 
 }

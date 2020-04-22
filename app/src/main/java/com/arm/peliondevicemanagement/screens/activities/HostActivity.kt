@@ -158,6 +158,11 @@ class HostActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                     updateToolbarTitle("Libraries we use")
                     enableDisableDrawer(false)
                 }
+                R.id.developerOptionsFragment -> {
+                    showHideToolbar(true)
+                    updateToolbarTitle("Developer Options")
+                    enableDisableDrawer(false)
+                }
             }
         }
     }

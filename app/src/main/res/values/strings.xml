@@ -92,5 +92,24 @@
     <string name="yes_stop_text">Yes, Stop</string>
     <string name="no_text">No</string>
 
+    <!-- Developer Options strings -->
+    <string name="build_info_text">Build Info</string>
+    <string name="developer_mode_format">You are now <xliff:g id="view">%1$s</xliff:g> step away from being a developer</string>
+    <string name="developer_mode_enabled_text">Developer mode enabled</string>
+    <string name="developer_mode_already_enabled_text">Developer mode already enabled</string>
+    <string name="developer_options_text">Developer Options</string>
+
+    <string name="feature_flags_text">Feature Flags</string>
+    <string name="feature_flags_desc_text">Warning these flags are for development-use only, app may crash also, try at your own risk</string>
+    <string name="auth_flags_text">Authentication</string>
+    <string name="sda_flags_text">Secure Device Access</string>
+    <string name="job_flags_text">Jobs &amp; Workflow</string>
+    <string name="auth_disable_reauth_text">Disable Re-Auth</string>
+    <string name="sda_virtual_mode_text">Virtual Device Mode</string>
+    <string name="sda_disable_max_mtu_text">Disable Max MTU</string>
+    <string name="job_disable_local_cache_text">Disable local-caching</string>
+    <string name="job_disable_asset_download_text">Disable asset-download</string>
+    <string name="job_sda_token_download_text">Disable SDA-Token download</string>
+
 
 </resources>

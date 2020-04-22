@@ -29,6 +29,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
+import com.arm.peliondevicemanagement.BuildConfig
 import com.arm.peliondevicemanagement.components.models.user.Account
 import com.arm.peliondevicemanagement.components.models.user.AccountProfileModel
 import com.arm.peliondevicemanagement.components.models.user.UserProfile
@@ -236,14 +237,28 @@ class LoginFragment : Fragment() {
         // In-case of single account, re-auth will not work for now
         if(!SharedPrefHelper.getSelectedAccountID().isNullOrBlank()){
             showHideLoginView(false)
-            viewBinder.emailInputTxt.setText(SharedPrefHelper.getUserName())
-            showHideProgressbar(true, "Re-Authenticating")
-
-            LogHelper.debug(TAG, "onUserLoggedIn()->doReAuth()")
-            loginViewModel.doImpersonate(SharedPrefHelper.getSelectedAccountID()!!)
+            // Enable feature-flag if debug-build
+            if(BuildConfig.DEBUG){
+                if(!SharedPrefHelper.getDeveloperOptions().isReAuthDisabled()){
+                    doReAuth()
+                } else {
+                    LogHelper.debug(TAG, "DeveloperOptions() ReAuth->Disabled")
+                    navigateToDashboardFragment()
+                }
+            } else {
+                doReAuth()
+            }
         } else {
             viewBinder.loginView.visibility = View.VISIBLE
         }
+    }
+
+    private fun doReAuth() {
+        viewBinder.emailInputTxt.setText(SharedPrefHelper.getUserName())
+        showHideProgressbar(true, "Re-Authenticating")
+
+        LogHelper.debug(TAG, "onUserLoggedIn()->doReAuth()")
+        loginViewModel.doImpersonate(SharedPrefHelper.getSelectedAccountID()!!)
     }
 
     private fun performLogin() {
