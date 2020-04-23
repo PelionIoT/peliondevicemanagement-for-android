@@ -92,6 +92,10 @@
     <string name="yes_stop_text">Yes, Stop</string>
     <string name="no_text">No</string>
 
+    <string name="cloud_down_text">Cloud connectivity down</string>
+    <string name="no_internet_text">No network connection</string>
+    <string name="check_connection_text">Check your Internet connection</string>
+
     <!-- Developer Options strings -->
     <string name="build_info_text">Build Info</string>
     <string name="developer_mode_format">You are now <xliff:g id="view">%1$s</xliff:g> step away from being a developer</string>

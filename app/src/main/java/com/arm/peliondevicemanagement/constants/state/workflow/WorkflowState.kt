@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.constants.state
+package com.arm.peliondevicemanagement.constants.state.workflow
 
-enum class TaskRunState {
-    SKIPPED,
-    SUCCEEDED,
-    FAILED
+enum class WorkflowState {
+    PENDING,
+    SYNCED,
+    REASSIGNED,
+    COMPLETED
 }

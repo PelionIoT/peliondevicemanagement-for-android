@@ -18,7 +18,7 @@
 package com.arm.peliondevicemanagement.components.models.workflow.device
 
 import com.arm.mbed.sda.proxysdk.protocol.OperationResponse
-import com.arm.peliondevicemanagement.constants.state.DeviceResponseState
+import com.arm.peliondevicemanagement.constants.state.workflow.device.DeviceResponseState
 
 data class DeviceResponse(
     val responseState: DeviceResponseState,

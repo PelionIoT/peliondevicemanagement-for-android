@@ -46,7 +46,10 @@ import com.arm.peliondevicemanagement.components.viewmodels.SDAViewModel
 import com.arm.peliondevicemanagement.components.viewmodels.WorkflowViewModel
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_COMPLETED
 import com.arm.peliondevicemanagement.constants.ExecutionMode
-import com.arm.peliondevicemanagement.constants.state.*
+import com.arm.peliondevicemanagement.constants.state.workflow.device.DeviceResponseState
+import com.arm.peliondevicemanagement.constants.state.workflow.device.DeviceScanState
+import com.arm.peliondevicemanagement.constants.state.workflow.device.DeviceState
+import com.arm.peliondevicemanagement.constants.state.workflow.task.TaskRunState
 import com.arm.peliondevicemanagement.databinding.FragmentJobRunBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.utils.PlatformUtils
@@ -310,7 +313,10 @@ class JobRunFragment : Fragment() {
     private fun processSDAResponse(deviceResponse: DeviceResponse) {
         val taskRunLog: TaskRun = if(deviceResponse.operationResponse != null){
             if(deviceResponse.operationResponse.blob != null){
-                LogHelper.debug(TAG, "SDA_Response ${deviceResponse.operationResponse.blob!!.contentToString()}")
+                val outputResponse = deviceResponse.operationResponse.blob!!
+                LogHelper.debug(TAG, "SDA_Response ${outputResponse.contentToString()}")
+                workflowViewModel.saveWorkflowTaskOutputAssets(deviceRunModel.workflowID,
+                    deviceResponse.taskID!!, outputResponse)
             }
             // Create run-log
             createTaskRunLog(
@@ -359,7 +365,7 @@ class JobRunFragment : Fragment() {
         val devicePosition = getItemPosition(deviceID)
         deviceRunModel.workflowDevices[devicePosition].deviceRunLogs = deviceRunLog
         LogHelper.debug(TAG, "DeviceRunLog: ${deviceRunModel.workflowDevices[devicePosition].deviceRunLogs}")
-        LogHelper.debug(TAG, "Run-log saved successfully")
+        LogHelper.debug(TAG, "Run-log created successfully")
     }
 
     private fun addTemporaryDeviceItemInList(deviceText: String, deviceState: DeviceScanState, failedCount: Int? = null){
@@ -465,12 +471,12 @@ class JobRunFragment : Fragment() {
         isScanCompleted = true
 
         // Add dummy-devices to workflowDevices-list
-        deviceRunModel.workflowDevices.add(
+        /*deviceRunModel.workflowDevices.add(
             WorkflowDevice("026eead293eb926ca57ba92703c00000", "Pending")
         )
         deviceRunModel.workflowDevices.add(
             WorkflowDevice("036eead293eb926ca57ba92703c00000", "Pending")
-        )
+        )*/
 
         // Add dummy-devices data to mScannedDevices-list
         mScannedDevices = arrayListOf()
@@ -480,12 +486,12 @@ class JobRunFragment : Fragment() {
         //mScannedDevices.add(
         //   GenericBleDevice("TestDev2", "FE:7E:7E:BD:AB:87", 25)
         //)
-        mScannedDevices.add(
+        /*mScannedDevices.add(
             GenericBleDevice("TestDev3", "XD:7E:7E:BD:AB:70", 20)
         )
         mScannedDevices.add(
             GenericBleDevice("TestDev4", "DS:7E:7E:BD:AB:79", 20)
-        )
+        )*/
 
         // Now initiate workflow-run
         connectDevices()

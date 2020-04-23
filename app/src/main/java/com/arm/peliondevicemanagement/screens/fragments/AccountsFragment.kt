@@ -30,6 +30,7 @@ import androidx.navigation.Navigation
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.arm.peliondevicemanagement.R
 
 import com.arm.peliondevicemanagement.components.adapters.AccountAdapter
 import com.arm.peliondevicemanagement.databinding.FragmentAccountsBinding
@@ -41,6 +42,9 @@ import com.arm.peliondevicemanagement.components.models.user.UserProfile
 import com.arm.peliondevicemanagement.components.viewmodels.LoginViewModel
 import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
 import com.arm.peliondevicemanagement.components.models.user.AccountProfileModel
+import com.arm.peliondevicemanagement.constants.state.LoginState
+import com.arm.peliondevicemanagement.utils.PlatformUtils
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
@@ -57,6 +61,10 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
 
     private var accountAdapter: AccountAdapter? = null
     private var accountModelsList = arrayListOf<Account>()
+
+    private lateinit var activeAccountModel: Account
+    private lateinit var errorBottomSheetDialog: BottomSheetDialog
+    private lateinit var retryButtonClickListener: View.OnClickListener
 
     private val onBackPressedCallback = object: OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
@@ -113,39 +121,36 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
     }
 
     private fun setupListeners() {
+        retryButtonClickListener = View.OnClickListener {
+            errorBottomSheetDialog.dismiss()
+            processSelectedAccount(activeAccountModel)
+        }
+
         viewBinder.searchBar.searchTextBox.setOnQueryTextListener(queryTextListener)
 
         loginViewModel.getLoginActionLiveData().observe(viewLifecycleOwner, Observer { response ->
-            if(response != null){
-                LogHelper.debug(TAG, "onLoginSuccess(): $response")
-                processSingleAccountData(response.accessToken)
-            } else {
-                showHideProgressbar(false)
-                showHideAccountList(true)
-                (activity as HostActivity).showSnackbar(viewBinder.root ,"Failed to authenticate")
-            }
+            LogHelper.debug(TAG, "onLoginSuccess(): $response")
+            processSingleAccountData(response.accessToken)
         })
 
         loginViewModel.getUserProfileLiveData().observe(viewLifecycleOwner, Observer { response ->
-            if(response != null){
-                processUserProfileData(response)
-            } else {
-                showHideProgressbar(false)
-                showHideAccountList(true)
-                (activity as HostActivity).showSnackbar(viewBinder.root, "Failed to authenticate")
-            }
+            processUserProfileData(response)
         })
 
         loginViewModel.getAccountProfileLiveData().observe(viewLifecycleOwner, Observer { response ->
-            if(response != null){
-                processUserAccountProfileData(response)
-                navigateToDashboardFragment()
-            } else {
-                showHideProgressbar(false)
-                showHideAccountList(true)
-                (activity as HostActivity).showSnackbar(viewBinder.root, "Failed to authenticate")
-            }
+            processUserAccountProfileData(response)
+            navigateToDashboardFragment()
         })
+
+        loginViewModel.getErrorResponseLiveData().observe(viewLifecycleOwner, Observer {
+            processErrorResponse()
+        })
+    }
+
+    private fun processErrorResponse() {
+        showHideProgressbar(false)
+        showHideAccountList(true)
+        (activity as HostActivity).showSnackbar(viewBinder.root, "Failed to authenticate")
     }
 
     private fun showHideProgressbar(visibility: Boolean, text: String = ""){
@@ -172,12 +177,27 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
                 "accountName: ${model.accountName}, " +
                 "accountID: ${model.accountID}")
 
-        showHideAccountList(false)
-        showHideProgressbar(true)
+        activeAccountModel = model
+        processSelectedAccount(model)
+    }
 
-        SharedPrefHelper.storeSelectedAccountID(model.accountID)
-        SharedPrefHelper.storeSelectedAccountName(model.accountName)
-        handleLoginORGoImpersonate(model.accountID)
+    private fun processSelectedAccount(account: Account) {
+        if(SharedPrefHelper.getSelectedAccountID().isNotEmpty()
+            && account.accountID == SharedPrefHelper.getSelectedAccountID()){
+            navigateToDashboardFragment()
+        } else {
+            if(!PlatformUtils.isNetworkAvailable(requireContext())){
+                showNoInternetDialog()
+                return
+            }
+
+            showHideAccountList(false)
+            showHideProgressbar(true)
+
+            SharedPrefHelper.storeSelectedAccountID(account.accountID)
+            SharedPrefHelper.storeSelectedAccountName(account.accountName)
+            handleLoginORGoImpersonate(account.accountID)
+        }
     }
 
     private fun handleLoginORGoImpersonate(accountID: String) {
@@ -229,6 +249,16 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
     private fun navigateToDashboardFragment() {
         Navigation.findNavController(viewBinder.root)
             .navigate(AccountsFragmentDirections.actionAccountsFragmentToDashboardFragment())
+    }
+
+    private fun showNoInternetDialog() {
+        errorBottomSheetDialog = PlatformUtils.buildErrorBottomSheetDialog(
+            requireActivity(),
+            resources.getString(R.string.no_internet_text),
+            resources.getString(R.string.check_connection_text),
+            retryButtonClickListener
+        )
+        errorBottomSheetDialog.show()
     }
 
     private fun resetSearchText() =

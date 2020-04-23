@@ -17,7 +17,9 @@
 
 package com.arm.peliondevicemanagement.transport.ble
 
+import com.arm.peliondevicemanagement.BuildConfig
 import com.arm.peliondevicemanagement.helpers.LogHelper
+import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.transport.ISerialDataSink
 import com.arm.peliondevicemanagement.transport.sda.SerialMessage
 import com.arm.peliondevicemanagement.utils.ByteFactory
@@ -93,7 +95,7 @@ class DummyBleDevice(private val deviceMac: String):
 
     override suspend fun requestHigherMtu(size: Int): Boolean {
         delay(200)
-        return suspendCoroutine<Boolean> {
+        return suspendCoroutine {
             LogHelper.debug(TAG, "->onMtuChanged() size: $size bytes")
             it.resume(true)
         }
@@ -130,7 +132,16 @@ class DummyBleDevice(private val deviceMac: String):
     }
 
     private suspend fun doWrite(protocolMessage: ByteArray) {
-        val transmissionMtuSize = TMSN_MTU_SIZE
+        // Enable feature-flag, if debug-build
+        val transmissionMtuSize: Int = if(BuildConfig.DEBUG){
+            if(SharedPrefHelper.getDeveloperOptions().isMaxMTUDisabled()){
+                20
+            } else {
+                TMSN_MTU_SIZE
+            }
+        } else {
+            TMSN_MTU_SIZE
+        }
 
         LogHelper.debug(TAG, "->doWrite() MaxTransmissionMTU: $transmissionMtuSize bytes")
         LogHelper.debug(TAG, "->doWrite() protocolMessage" +
@@ -186,6 +197,11 @@ class DummyBleDevice(private val deviceMac: String):
         isAckReceived = true
 
         while (dataOutQueue.size > 0){
+            // Terminate if operation aborted
+            if(isFinalResponseReceived){
+                LogHelper.debug(TAG, "->doWrite() Aborting write-operation")
+                break
+            }
             if(isAckReceived){
                 isAckReceived = false
                 delay(200)

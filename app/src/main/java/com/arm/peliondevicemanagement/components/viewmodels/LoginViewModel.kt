@@ -25,7 +25,9 @@ import com.arm.peliondevicemanagement.components.models.user.AccountProfileModel
 import com.arm.peliondevicemanagement.components.models.user.UserProfile
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.services.CloudRepository
+import com.arm.peliondevicemanagement.services.data.ErrorResponse
 import com.arm.peliondevicemanagement.services.data.LoginResponse
+import com.arm.peliondevicemanagement.utils.PlatformUtils.parseErrorResponseFromJson
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
@@ -42,24 +44,27 @@ class LoginViewModel : ViewModel() {
     private val scope = CoroutineScope(coroutineContext)
     private val cloudRepository: CloudRepository = AppController.getCloudRepository()
 
-    private val userAccountLiveData = MutableLiveData<LoginResponse>()
-    private val userProfileLiveData = MutableLiveData<UserProfile>()
-    private val userAccountProfileLiveData = MutableLiveData<AccountProfileModel>()
+    private val _userAccountLiveData = MutableLiveData<LoginResponse>()
+    private val _userProfileLiveData = MutableLiveData<UserProfile>()
+    private val _userAccountProfileLiveData = MutableLiveData<AccountProfileModel>()
+    private val _errorResponseLiveData = MutableLiveData<ErrorResponse>()
 
     // LiveData APIs
-    fun getLoginActionLiveData(): LiveData<LoginResponse> = userAccountLiveData
-    fun getUserProfileLiveData(): LiveData<UserProfile> = userProfileLiveData
-    fun getAccountProfileLiveData(): LiveData<AccountProfileModel> = userAccountProfileLiveData
+    fun getLoginActionLiveData(): LiveData<LoginResponse> = _userAccountLiveData
+    fun getUserProfileLiveData(): LiveData<UserProfile> = _userProfileLiveData
+    fun getAccountProfileLiveData(): LiveData<AccountProfileModel> = _userAccountProfileLiveData
+    fun getErrorResponseLiveData(): LiveData<ErrorResponse> = _errorResponseLiveData
 
     // GET & POST APIs
     fun doLogin(username: String, password: String, accountID: String = "") {
         scope.launch {
             try {
                 val userAccountResponse = cloudRepository.doAuth(username, password, accountID)
-                userAccountLiveData.postValue(userAccountResponse)
+                _userAccountLiveData.postValue(userAccountResponse)
             } catch (e: Throwable){
                 LogHelper.debug(TAG, "Exception occurred: ${e.message}")
-                userAccountLiveData.postValue(null)
+                val errorResponse = parseErrorResponseFromJson(e.message!!)
+                _errorResponseLiveData.postValue(errorResponse)
             }
         }
     }
@@ -68,10 +73,11 @@ class LoginViewModel : ViewModel() {
         scope.launch {
             try {
                 val userAccountResponse = cloudRepository.doImpersonate(accountID)
-                userAccountLiveData.postValue(userAccountResponse)
+                _userAccountLiveData.postValue(userAccountResponse)
             } catch (e: Throwable) {
                 LogHelper.debug(TAG, "Exception occurred: ${e.message}")
-                userAccountLiveData.postValue(null)
+                val errorResponse = parseErrorResponseFromJson(e.message!!)
+                _errorResponseLiveData.postValue(errorResponse)
             }
         }
     }
@@ -80,10 +86,11 @@ class LoginViewModel : ViewModel() {
         scope.launch {
             try {
                 val userProfileResponse = cloudRepository.getUserProfile()
-                userProfileLiveData.postValue(userProfileResponse)
+                _userProfileLiveData.postValue(userProfileResponse)
             } catch (e: Throwable) {
                 LogHelper.debug(TAG, "Exception occurred: ${e.message}")
-                userProfileLiveData.postValue(null)
+                val errorResponse = parseErrorResponseFromJson(e.message!!)
+                _errorResponseLiveData.postValue(errorResponse)
             }
         }
     }
@@ -92,10 +99,11 @@ class LoginViewModel : ViewModel() {
         scope.launch {
             try {
                 val userAccountProfileResponse = cloudRepository.getAccountProfile()
-                userAccountProfileLiveData.postValue(userAccountProfileResponse)
+                _userAccountProfileLiveData.postValue(userAccountProfileResponse)
             } catch (e: Throwable) {
                 LogHelper.debug(TAG, "Exception occurred: ${e.message}")
-                userAccountProfileLiveData.postValue(null)
+                val errorResponse = parseErrorResponseFromJson(e.message!!)
+                _errorResponseLiveData.postValue(errorResponse)
             }
         }
     }

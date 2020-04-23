@@ -21,7 +21,6 @@ import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import retrofit2.Response
-import java.io.IOException
 
 open class BaseRepository{
 
@@ -33,7 +32,7 @@ open class BaseRepository{
             is Result.Success ->
                 data = result.data
             is Result.Error -> {
-                LogHelper.debug("RepositoryError", "Exception - ${result.exception}")
+                throw Exception(result.error)
             }
         }
         return data
@@ -60,7 +59,9 @@ open class BaseRepository{
             errorResponse.errorType = "bad_request"
             errorResponse.errorMessage = "Invalid request"
         }
-
-        return Result.Error(IOException("ERROR- $errorResponse"))
+        // Convert it to JSON to be parsed later
+        val error = gson.toJson(errorResponse, type)
+        // Now return error
+        return Result.Error(error)
     }
 }

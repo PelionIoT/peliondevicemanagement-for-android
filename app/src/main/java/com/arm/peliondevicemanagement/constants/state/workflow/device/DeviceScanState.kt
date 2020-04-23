@@ -15,11 +15,10 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.constants.state
+package com.arm.peliondevicemanagement.constants.state.workflow.device
 
-enum class WorkflowState {
-    PENDING,
-    SYNCED,
-    REASSIGNED,
-    COMPLETED
+enum class DeviceScanState {
+    ONGOING,
+    FAILED,
+    CONNECTING
 }

@@ -18,23 +18,22 @@
 package com.arm.peliondevicemanagement.components.viewmodels
 
 import android.content.Context
-import android.os.CountDownTimer
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.arm.mbed.sda.proxysdk.SecuredDeviceAccess
+import com.arm.peliondevicemanagement.BuildConfig
 import com.arm.peliondevicemanagement.components.models.GenericBleDevice
 import com.arm.peliondevicemanagement.components.models.workflow.device.DeviceResponse
 import com.arm.peliondevicemanagement.components.models.workflow.device.DeviceStateResponse
 import com.arm.peliondevicemanagement.components.models.workflow.task.TaskDeviceCommand
 import com.arm.peliondevicemanagement.constants.ExecutionMode
-import com.arm.peliondevicemanagement.constants.state.DeviceResponseState
-import com.arm.peliondevicemanagement.constants.state.DeviceState
+import com.arm.peliondevicemanagement.constants.state.workflow.device.DeviceResponseState
+import com.arm.peliondevicemanagement.constants.state.workflow.device.DeviceState
 import com.arm.peliondevicemanagement.helpers.LogHelper
+import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.transport.ble.*
 import com.arm.peliondevicemanagement.transport.sda.DeviceCommand
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.TickerMode
-import kotlinx.coroutines.channels.ticker
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
@@ -112,14 +111,31 @@ class SDAViewModel : ViewModel() {
                     }
                     if(bleDevice!!.connect(bleConnectionCallback)){
                         delay(20)
-                        if(bleDevice!!.requestHigherMtu(ArmBleDevice.MTU_SIZE)){
-                            //delay(500)
-                            fetchDeviceEndpoint()
-                            deviceStateLiveData.postValue(DeviceStateResponse(DeviceState.CONNECTED, activeDeviceIdentifier))
+                        if(BuildConfig.DEBUG){
+                            if(SharedPrefHelper.getDeveloperOptions().isMaxMTUDisabled()){
+                                fetchDeviceEndpoint()
+                                deviceStateLiveData.postValue(DeviceStateResponse(DeviceState.CONNECTED, activeDeviceIdentifier))
+                            } else {
+                                if(bleDevice!!.requestHigherMtu(ArmBleDevice.MTU_SIZE)){
+                                    //delay(500)
+                                    fetchDeviceEndpoint()
+                                    deviceStateLiveData.postValue(DeviceStateResponse(DeviceState.CONNECTED, activeDeviceIdentifier))
+                                } else {
+                                    bleDevice = null
+                                    deviceStateLiveData.postValue(DeviceStateResponse(DeviceState.FAILED, activeDeviceIdentifier))
+                                    it.resume(true)
+                                }
+                            }
                         } else {
-                            bleDevice = null
-                            deviceStateLiveData.postValue(DeviceStateResponse(DeviceState.FAILED, activeDeviceIdentifier))
-                            it.resume(true)
+                            if(bleDevice!!.requestHigherMtu(ArmBleDevice.MTU_SIZE)){
+                                //delay(500)
+                                fetchDeviceEndpoint()
+                                deviceStateLiveData.postValue(DeviceStateResponse(DeviceState.CONNECTED, activeDeviceIdentifier))
+                            } else {
+                                bleDevice = null
+                                deviceStateLiveData.postValue(DeviceStateResponse(DeviceState.FAILED, activeDeviceIdentifier))
+                                it.resume(true)
+                            }
                         }
                     } else {
                         bleDevice = null
@@ -247,8 +263,8 @@ class SDAViewModel : ViewModel() {
 
     fun cancelAllRequests() {
         LogHelper.debug(TAG, "->cancelAllRequests()")
-        if(bleDevice != null){
-            scope.launch {
+        runBlocking {
+            if(bleDevice != null){
                 bleDevice?.releaseLocks()
                 LogHelper.debug(TAG, "Abrupt operation-cancellation")
             }

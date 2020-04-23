@@ -15,11 +15,10 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.components.models.workflow.device
+package com.arm.peliondevicemanagement.constants.state.workflow.task
 
-import com.arm.peliondevicemanagement.constants.state.workflow.device.DeviceState
-
-data class DeviceStateResponse(
-    val state: DeviceState,
-    val deviceIdentifier: String
-)
+enum class TaskRunState {
+    SKIPPED,
+    SUCCEEDED,
+    FAILED
+}

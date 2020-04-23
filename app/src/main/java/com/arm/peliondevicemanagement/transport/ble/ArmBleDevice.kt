@@ -23,9 +23,11 @@ import android.bluetooth.BluetoothGattService
 import android.content.Context
 import android.util.Log
 import com.arm.mbed.sda.proxysdk.devices.AbstractDevice
+import com.arm.peliondevicemanagement.BuildConfig
 import com.arm.peliondevicemanagement.constants.AppConstants.SDA_CHARACTERISTIC
 import com.arm.peliondevicemanagement.constants.AppConstants.SDA_SERVICE
 import com.arm.peliondevicemanagement.helpers.LogHelper
+import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.transport.ISerialDataSink
 import com.arm.peliondevicemanagement.transport.sda.SerialMessage
 import com.arm.pelionmobiletransportsdk.ble.callbacks.BleGattConnectCallback
@@ -51,7 +53,7 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
         const val MTU_SIZE: Int = 244
         // Should always be 4 bytes less than the MTU
         private const val TMSN_MTU_SIZE: Int = 230
-        private const val TIME_OUT_MILLISECONDS: Long= 30000
+        private const val TIME_OUT_MILLISECONDS: Long= 20000
     }
 
     private var mBleManager: BleManager? = null
@@ -205,8 +207,16 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
     }
 
     private suspend fun doWrite(protocolMessage: ByteArray) {
-        // FixME [ Use TMSN_MTU_SIZE here ]
-        val transmissionMtuSize = TMSN_MTU_SIZE
+        // Enable feature-flag, if debug-build
+        val transmissionMtuSize: Int = if(BuildConfig.DEBUG){
+            if(SharedPrefHelper.getDeveloperOptions().isMaxMTUDisabled()){
+                20
+            } else {
+                TMSN_MTU_SIZE
+            }
+        } else {
+            TMSN_MTU_SIZE
+        }
 
         Log.d(TAG, "->doWrite() MaxTransmissionMTU: $transmissionMtuSize bytes")
         /*Log.d(TAG, "->doWrite() protocolMessage" +
@@ -262,6 +272,11 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
         isAckReceived = true
 
         while (dataOutQueue.size > 0){
+            // Terminate if operation aborted
+            if(isFinalResponseReceived){
+                LogHelper.debug(TAG, "->doWrite() Aborting write-operation")
+                break
+            }
             if(isAckReceived){
                 isAckReceived = false
                 delay(200)

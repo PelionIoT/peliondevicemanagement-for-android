@@ -45,10 +45,11 @@ import com.arm.peliondevicemanagement.components.viewmodels.WorkflowViewModel
 import com.arm.peliondevicemanagement.constants.AppConstants.DEFAULT_TIME_FORMAT
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_COMPLETED
 import com.arm.peliondevicemanagement.constants.ExecutionMode
-import com.arm.peliondevicemanagement.constants.state.WorkflowState
+import com.arm.peliondevicemanagement.constants.state.workflow.WorkflowState
 import com.arm.peliondevicemanagement.databinding.FragmentJobBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.screens.activities.HostActivity
+import com.arm.peliondevicemanagement.utils.PlatformUtils
 import com.arm.peliondevicemanagement.utils.PlatformUtils.checkForLocationPermission
 import com.arm.peliondevicemanagement.utils.PlatformUtils.enableBluetooth
 import com.arm.peliondevicemanagement.utils.PlatformUtils.fetchAttributeColor
@@ -62,6 +63,7 @@ import com.arm.peliondevicemanagement.utils.PlatformUtils.parseJSONTimeIntoTimeA
 import com.arm.peliondevicemanagement.utils.PlatformUtils.parseJSONTimeString
 import com.arm.peliondevicemanagement.utils.WorkflowUtils
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.getAudienceListFromDevices
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.fragment_job.*
 
@@ -83,6 +85,9 @@ class JobFragment : Fragment() {
 
     private var totalDevicesCompleted: Int = 0
     private var isSDATokenValid: Boolean = false
+
+    private lateinit var errorBottomSheetDialog: BottomSheetDialog
+    private lateinit var retryButtonClickListener: View.OnClickListener
 
     private val swipeListener = object: RecyclerItemSwipeListener {
         override fun onSwipedLeft(position: Int) {
@@ -174,6 +179,11 @@ class JobFragment : Fragment() {
 
     private fun setupListeners() {
 
+        retryButtonClickListener = View.OnClickListener {
+            errorBottomSheetDialog.dismiss()
+            refreshSDAToken()
+        }
+
         workflowViewModel.getRefreshedSDAToken().observe(viewLifecycleOwner, Observer { tokenResponse ->
             if(tokenResponse != null && !isSDATokenValid){
                 workflowModel.sdaToken = tokenResponse
@@ -244,6 +254,11 @@ class JobFragment : Fragment() {
     }
 
     private fun refreshSDAToken() {
+        if(!PlatformUtils.isNetworkAvailable(requireContext())){
+            showNoInternetDialog()
+            return
+        }
+
         showHideRefreshTokenButton(false)
         showHideSDAProgressbar(true)
         // Fetch permission-scope
@@ -481,6 +496,16 @@ class JobFragment : Fragment() {
             .setCancelable(false)
             .create()
             .show()
+    }
+
+    private fun showNoInternetDialog() {
+        errorBottomSheetDialog = PlatformUtils.buildErrorBottomSheetDialog(
+            requireActivity(),
+            resources.getString(R.string.no_internet_text),
+            resources.getString(R.string.check_connection_text),
+            retryButtonClickListener
+        )
+        errorBottomSheetDialog.show()
     }
 
     override fun onDestroyView() {

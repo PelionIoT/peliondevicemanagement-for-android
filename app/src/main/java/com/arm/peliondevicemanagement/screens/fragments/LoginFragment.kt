@@ -30,15 +30,19 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import com.arm.peliondevicemanagement.BuildConfig
+import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.models.user.Account
 import com.arm.peliondevicemanagement.components.models.user.AccountProfileModel
 import com.arm.peliondevicemanagement.components.models.user.UserProfile
 import com.arm.peliondevicemanagement.components.viewmodels.LoginViewModel
+import com.arm.peliondevicemanagement.constants.state.LoginState
 import com.arm.peliondevicemanagement.databinding.FragmentLoginBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.screens.activities.HostActivity
-import com.arm.peliondevicemanagement.utils.WorkflowFileUtils
+import com.arm.peliondevicemanagement.utils.PlatformUtils.buildErrorBottomSheetDialog
+import com.arm.peliondevicemanagement.utils.PlatformUtils.isNetworkAvailable
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.layout_version.*
 
@@ -55,6 +59,11 @@ class LoginFragment : Fragment() {
 
     private lateinit var userEmail: String
     private lateinit var userPassword: String
+
+    private var activeLoginActionState: LoginState = LoginState.ACTION_LOGIN
+
+    private lateinit var errorBottomSheetDialog: BottomSheetDialog
+    private lateinit var retryButtonClickListener: View.OnClickListener
 
     private val onBackPressedCallback = object: OnBackPressedCallback(true){
         override fun handleOnBackPressed() {
@@ -100,46 +109,41 @@ class LoginFragment : Fragment() {
             performLogin()
         }
 
+        retryButtonClickListener = View.OnClickListener {
+            errorBottomSheetDialog.dismiss()
+            performLogin()
+        }
+
         loginViewModel.getLoginActionLiveData().observe(viewLifecycleOwner, Observer { response ->
-            if(response != null){
-                if(!response.accounts.isNullOrEmpty()){
-                    processMultiAccountData(response.accounts)
-                    navigateToAccountsFragment()
-                } else {
-                    processSingleAccountData(response.accessToken)
-                }
+            if(!response.accounts.isNullOrEmpty()){
+                processMultiAccountData(response.accounts)
+                navigateToAccountsFragment()
             } else {
-                (activity as HostActivity).showSnackbar(viewBinder.root, "Failed to authenticate")
-                clearPasswordTextBox()
-                showHideProgressbar(false)
-                showHideLoginView(true)
+                processSingleAccountData(response.accessToken)
             }
         })
 
         loginViewModel.getUserProfileLiveData().observe(viewLifecycleOwner, Observer { response ->
-            if(response != null){
-                processUserProfileData(response)
-            } else {
-                SharedPrefHelper.removePassword()
-                SharedPrefHelper.removeAccessToken()
-                (activity as HostActivity).showSnackbar(viewBinder.root, "Failed to authenticate")
-                clearPasswordTextBox()
-                showHideProgressbar(false)
-                showHideLoginView(true)
-            }
+            processUserProfileData(response)
         })
 
         loginViewModel.getAccountProfileLiveData().observe(viewLifecycleOwner, Observer { response ->
-            if(response != null){
-                processUserAccountProfileData(response)
-                navigateToDashboardFragment()
-            } else {
-                SharedPrefHelper.removePassword()
-                SharedPrefHelper.removeAccessToken()
-                (activity as HostActivity).showSnackbar(viewBinder.root, "Failed to authenticate")
-                clearPasswordTextBox()
-                showHideProgressbar(false)
-                showHideLoginView(true)
+            processUserAccountProfileData(response)
+            navigateToDashboardFragment()
+        })
+
+        loginViewModel.getErrorResponseLiveData().observe(viewLifecycleOwner, Observer {
+            //LogHelper.debug(TAG, "error: $error")
+            when(activeLoginActionState){
+                LoginState.ACTION_LOGIN -> {
+                    processLoginError()
+                }
+                LoginState.ACTION_USER_PROFILE -> {
+                    processUserProfileORAccountProfileError()
+                }
+                LoginState.ACTION_USER_ACCOUNT_PROFILE -> {
+                    processUserProfileORAccountProfileError()
+                }
             }
         })
     }
@@ -235,7 +239,7 @@ class LoginFragment : Fragment() {
 
     private fun doReAuthIfPossible() {
         // In-case of single account, re-auth will not work for now
-        if(!SharedPrefHelper.getSelectedAccountID().isNullOrBlank()){
+        if(SharedPrefHelper.getSelectedAccountID().isNotEmpty()){
             showHideLoginView(false)
             // Enable feature-flag if debug-build
             if(BuildConfig.DEBUG){
@@ -249,21 +253,34 @@ class LoginFragment : Fragment() {
                 doReAuth()
             }
         } else {
-            viewBinder.loginView.visibility = View.VISIBLE
+            showHideLoginView(true)
         }
     }
 
     private fun doReAuth() {
         viewBinder.emailInputTxt.setText(SharedPrefHelper.getUserName())
+
+        if(!isNetworkAvailable(requireContext())){
+            LogHelper.debug(TAG, "Network not-available, go-offline")
+            navigateToDashboardFragment()
+            return
+        }
+
         showHideProgressbar(true, "Re-Authenticating")
 
+        setLoginActionState(LoginState.ACTION_LOGIN)
         LogHelper.debug(TAG, "onUserLoggedIn()->doReAuth()")
-        loginViewModel.doImpersonate(SharedPrefHelper.getSelectedAccountID()!!)
+        loginViewModel.doImpersonate(SharedPrefHelper.getSelectedAccountID())
     }
 
     private fun performLogin() {
         if (!validateForm())
             return
+
+        if(!isNetworkAvailable(requireContext())){
+            showNoInternetDialog()
+            return
+        }
 
         showHideLoginView(false)
         showHideProgressbar(true, "Authenticating")
@@ -272,7 +289,17 @@ class LoginFragment : Fragment() {
         userPassword = viewBinder.passwordInputTxt.text.toString()
 
         SharedPrefHelper.removeCredentials(true)
+        setLoginActionState(LoginState.ACTION_LOGIN)
         loginViewModel.doLogin(userEmail, userPassword)
+    }
+
+    private fun showNoInternetDialog() {
+        errorBottomSheetDialog = buildErrorBottomSheetDialog(
+            requireActivity(),
+            resources.getString(R.string.no_internet_text),
+            resources.getString(R.string.check_connection_text),
+            retryButtonClickListener)
+        errorBottomSheetDialog.show()
     }
 
     private fun processMultiAccountData(accounts: List<Account>) {
@@ -297,6 +324,7 @@ class LoginFragment : Fragment() {
             SharedPrefHelper.storeMultiAccountStatus(false)
         }
         // Fetch user-profile
+        setLoginActionState(LoginState.ACTION_USER_PROFILE)
         loginViewModel.fetchUserProfile()
     }
 
@@ -307,6 +335,7 @@ class LoginFragment : Fragment() {
         SharedPrefHelper.storeUserProfile(profileJSON)
         SharedPrefHelper.storeSelectedUserID(userProfile.userID)
         // Now fetch selected account's profile
+        setLoginActionState(LoginState.ACTION_USER_ACCOUNT_PROFILE)
         loginViewModel.fetchAccountProfile()
     }
 
@@ -325,6 +354,26 @@ class LoginFragment : Fragment() {
     private fun navigateToDashboardFragment() {
         Navigation.findNavController(viewBinder.root)
             .navigate(LoginFragmentDirections.actionLoginFragmentToDashboardFragment())
+    }
+
+    private fun processLoginError() {
+        (activity as HostActivity).showSnackbar(viewBinder.root, "Failed to authenticate")
+        clearPasswordTextBox()
+        showHideProgressbar(false)
+        showHideLoginView(true)
+    }
+
+    private fun processUserProfileORAccountProfileError() {
+        SharedPrefHelper.removePassword()
+        SharedPrefHelper.removeAccessToken()
+        (activity as HostActivity).showSnackbar(viewBinder.root, "Failed to authenticate")
+        clearPasswordTextBox()
+        showHideProgressbar(false)
+        showHideLoginView(true)
+    }
+
+    private fun setLoginActionState(state: LoginState){
+        activeLoginActionState = state
     }
 
     override fun onDestroyView() {

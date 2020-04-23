@@ -37,9 +37,9 @@ import com.arm.peliondevicemanagement.constants.AppConstants.TASK_TYPE_FILE
 import com.arm.peliondevicemanagement.constants.AppConstants.TASK_TYPE_STRING
 import com.arm.peliondevicemanagement.constants.AppConstants.WRITE_TASK
 import com.arm.peliondevicemanagement.constants.ExecutionMode
-import com.arm.peliondevicemanagement.constants.state.DeviceRunState
-import com.arm.peliondevicemanagement.constants.state.TaskRunState
-import com.arm.peliondevicemanagement.constants.state.TaskTypeState
+import com.arm.peliondevicemanagement.constants.state.workflow.device.DeviceRunState
+import com.arm.peliondevicemanagement.constants.state.workflow.task.TaskRunState
+import com.arm.peliondevicemanagement.constants.state.workflow.task.TaskTypeState
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.services.CloudRepository
@@ -48,6 +48,7 @@ import com.arm.peliondevicemanagement.services.data.SDATokenResponse
 import com.arm.peliondevicemanagement.transport.sda.CommandConstants
 import com.arm.peliondevicemanagement.transport.sda.DeviceCommand
 import com.arm.peliondevicemanagement.utils.WorkflowFileUtils.readWorkflowAssetFile
+import com.arm.peliondevicemanagement.utils.WorkflowFileUtils.writeWorkflowAssetFile
 import java.util.*
 import java.util.concurrent.Executors
 import kotlin.collections.ArrayList
@@ -341,6 +342,21 @@ object WorkflowUtils {
             else -> {
                 ExecutionMode.VIRTUAL
             }
+        }
+    }
+
+    fun saveWorkflowTaskOutputAsset(workflowID: String,
+                                    taskID: String,
+                                    fileContent: ByteArray,
+                                    saveFinished: (status: Boolean) -> Unit){
+        val userID = SharedPrefHelper.getSelectedUserID()
+        val accountID = SharedPrefHelper.getSelectedAccountID()
+        val filePath = "$userID/$accountID/$workflowID/$taskID"
+
+        val ioExecutor = Executors.newSingleThreadExecutor()
+        ioExecutor.execute {
+            val isSuccessful = writeWorkflowAssetFile(filePath, "output.txt", fileContent)
+            saveFinished(isSuccessful)
         }
     }
 

@@ -33,6 +33,7 @@ import com.arm.peliondevicemanagement.services.cache.LocalCache
 import com.arm.peliondevicemanagement.services.cache.WorkflowDB
 import com.arm.peliondevicemanagement.services.data.SDATokenResponse
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.fetchSDAToken
+import com.arm.peliondevicemanagement.utils.WorkflowUtils.saveWorkflowTaskOutputAsset
 import kotlinx.coroutines.*
 import java.util.concurrent.Executors
 import kotlin.coroutines.CoroutineContext
@@ -132,6 +133,16 @@ class WorkflowViewModel : ViewModel() {
     fun updateWorkflowDevices(workflowID: String, devices: ArrayList<WorkflowDevice>) {
         localCache.updateWorkflowDevices(workflowID, devices) {
             LogHelper.debug(TAG, "Devices updated.")
+        }
+    }
+
+    fun saveWorkflowTaskOutputAssets(workflowID: String, taskID: String, fileContent: ByteArray) {
+        saveWorkflowTaskOutputAsset(workflowID, taskID, fileContent){ success ->
+            if(success){
+                LogHelper.debug(TAG, "Output asset saved for task: $taskID")
+            } else {
+                LogHelper.debug(TAG, "Failed to save output asset for task: $taskID")
+            }
         }
     }
 

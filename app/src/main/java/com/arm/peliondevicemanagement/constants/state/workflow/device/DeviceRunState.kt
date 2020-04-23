@@ -15,10 +15,9 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.constants.state
+package com.arm.peliondevicemanagement.constants.state.workflow.device
 
-enum class DeviceResponseState {
-    SDA,
-    ENDPOINT,
-    JOB_COMPLETED
+enum class DeviceRunState {
+    SUCCEEDED,
+    HAS_FAILURES
 }

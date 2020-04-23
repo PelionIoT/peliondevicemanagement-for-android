@@ -18,6 +18,8 @@
 package com.arm.peliondevicemanagement.utils
 
 import android.Manifest
+import android.R.attr.host
+import android.R.attr.port
 import android.app.Activity
 import android.bluetooth.le.ScanSettings
 import android.content.Context
@@ -25,28 +27,114 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import android.view.View
+import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.startActivity
 import com.arm.peliondevicemanagement.AppController
+import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.constants.AppConstants.SDA_SERVICE
-import com.arm.peliondevicemanagement.constants.AppConstants.WORKFLOW_ASSETS_DIRECTORY
-import com.arm.peliondevicemanagement.helpers.LogHelper
+import com.arm.peliondevicemanagement.services.data.ErrorResponse
 import com.arm.pelionmobiletransportsdk.TransportManager
-import com.arm.pelionmobiletransportsdk.ble.commons.GattAttributes
 import com.arm.pelionmobiletransportsdk.ble.scanner.BleManager
-import java.io.*
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.button.MaterialButton
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.IOException
+import java.io.InputStream
+import java.net.InetSocketAddress
+import java.net.Socket
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat
 import java.util.*
+
 
 object PlatformUtils {
 
     private val TAG: String = PlatformUtils::class.java.simpleName
     const val REQUEST_PERMISSION = 9040
+
+    fun isNetworkAvailable(context: Context): Boolean {
+        var result = false
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val networkCapabilities = connectivityManager.activeNetwork ?: return false
+            val actNw =
+                connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return false
+            result = when {
+                actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+                actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+                actNw.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
+                else -> false
+            }
+        } else {
+            connectivityManager.run {
+                @Suppress("DEPRECATION")
+                connectivityManager.activeNetworkInfo?.run {
+                    result = when (type) {
+                        ConnectivityManager.TYPE_WIFI -> true
+                        ConnectivityManager.TYPE_MOBILE -> true
+                        ConnectivityManager.TYPE_ETHERNET -> true
+                        else -> false
+                    }
+
+                }
+            }
+        }
+
+        return result
+    }
+
+    suspend fun isInternetAvailable(): Boolean = withContext(Dispatchers.IO) {
+        try {
+            Socket().use { socket ->
+                socket.connect(
+                    InetSocketAddress("www.google.com", 80)
+                    , 2000
+                )
+                return@withContext true
+            }
+        } catch (e: IOException) {
+            // Either we have a timeout or unreachable host or failed DNS lookup
+            return@withContext false
+        }
+    }
+
+    fun buildErrorBottomSheetDialog(context: Activity,
+                                    title: String,
+                                    description: String,
+                                    clickListener: View.OnClickListener): BottomSheetDialog {
+        val bottomSheetDialog = BottomSheetDialog(context, R.style.TransparentSheetDialog)
+        // Inflate-view
+        val sheetView = context.layoutInflater.inflate(R.layout.layout_error_dialog, null)
+        val titleText = sheetView.findViewById<TextView>(R.id.tvTitle)
+        val descriptionText = sheetView.findViewById<TextView>(R.id.tvDescription)
+        titleText.text = title
+        descriptionText.text = description
+        // Set On-Click on the retry-button
+        val retryButton = sheetView.findViewById<MaterialButton>(R.id.retryButton)
+        retryButton.setOnClickListener(clickListener)
+        bottomSheetDialog.setContentView(sheetView)
+        return bottomSheetDialog
+    }
+
+    fun parseErrorResponseFromJson(json: String): ErrorResponse? {
+        return if(json.startsWith("{") && json.endsWith("}")){
+            val type = object : TypeToken<ErrorResponse>() {}.type
+            Gson().fromJson(json, type)
+        } else {
+            null
+        }
+    }
 
     fun getJsonFromAssets(context: Context, fileName: String): String? {
         val jsonString: String

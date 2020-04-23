@@ -57,7 +57,7 @@ object SharedPrefHelper {
         SharedPrefManager.with(context = AppController.appController!!)!!
             .getString(SharedPrefConstants.STORE_ACCOUNTS, "")!!
 
-    internal fun getSelectedAccountID(): String? =
+    internal fun getSelectedAccountID(): String =
         SharedPrefManager.with(context = AppController.appController!!)!!
             .getString(SharedPrefConstants.STORE_SELECTED_ACCOUNT_ID, "")!!
 

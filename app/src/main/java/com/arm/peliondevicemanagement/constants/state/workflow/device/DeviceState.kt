@@ -15,10 +15,15 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.constants.state
+package com.arm.peliondevicemanagement.constants.state.workflow.device
 
-enum class TaskTypeState {
-    STRING,
-    NUMBER,
-    FILE
+enum class DeviceState {
+    CONNECTING,
+    CONNECTED,
+    RUNNING,
+    COMMAND_COMPLETED,
+    COMMAND_FAILED,
+    COMPLETED,
+    DISCONNECTED,
+    FAILED
 }

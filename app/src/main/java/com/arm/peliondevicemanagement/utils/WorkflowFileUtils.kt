@@ -58,13 +58,44 @@ object WorkflowFileUtils {
             return null
         }
 
-        LogHelper.debug(TAG, "Reading file from $locationPath")
+        //LogHelper.debug(TAG, "Reading file from $locationPath")
 
         val fileInputStream = FileInputStream(file)
         fileInputStream.bufferedReader().useLines { lines ->
             return lines.fold("") { some, text ->
                 "$some$text"
             }
+        }
+    }
+
+    fun writeWorkflowAssetFile(locationPath: String,
+                               fileName: String,
+                               fileContent: ByteArray): Boolean {
+        val context = AppController.appController!!.applicationContext
+        val subDirPath = getWorkflowAssetsDirectory(context) +
+                File.separator + locationPath
+
+        val subDir = File(subDirPath)
+        if(!subDir.exists()){
+            return false
+        }
+
+        val filePath = subDirPath + File.separator + fileName
+        val file = File(filePath)
+        //LogHelper.debug(TAG, "Writing file to $locationPath")
+
+        return try {
+            val fileOutputStream = FileOutputStream(file)
+            fileOutputStream.use { outputStream ->
+                outputStream.write(fileContent)
+                LogHelper.debug(TAG, "File write successful, wrote ${fileContent.size} bytes")
+                outputStream.flush()
+            }
+            fileOutputStream.close()
+            true
+        } catch (e: IOException){
+            LogHelper.debug(TAG, "Exception occurred: ${e.message}")
+            false
         }
     }
 

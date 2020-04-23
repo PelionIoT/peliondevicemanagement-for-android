@@ -17,8 +17,8 @@
 
 package com.arm.peliondevicemanagement.constants.state
 
-enum class DeviceScanState {
-    ONGOING,
-    FAILED,
-    CONNECTING
+enum class LoginState {
+    ACTION_LOGIN,
+    ACTION_USER_PROFILE,
+    ACTION_USER_ACCOUNT_PROFILE
 }
