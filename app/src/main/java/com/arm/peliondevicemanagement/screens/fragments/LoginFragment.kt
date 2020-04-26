@@ -39,7 +39,7 @@ import com.arm.peliondevicemanagement.constants.state.LoginState
 import com.arm.peliondevicemanagement.databinding.FragmentLoginBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
-import com.arm.peliondevicemanagement.screens.activities.HostActivity
+import com.arm.peliondevicemanagement.screens.activities.AuthActivity
 import com.arm.peliondevicemanagement.utils.PlatformUtils.buildErrorBottomSheetDialog
 import com.arm.peliondevicemanagement.utils.PlatformUtils.isNetworkAvailable
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -67,7 +67,7 @@ class LoginFragment : Fragment() {
 
     private val onBackPressedCallback = object: OnBackPressedCallback(true){
         override fun handleOnBackPressed() {
-            (activity as HostActivity).callCloseApp()
+            (activity as AuthActivity).callCloseApp()
         }
     }
 
@@ -178,7 +178,7 @@ class LoginFragment : Fragment() {
 
     private fun setVersionName(){
         tvVersion.setTextColor(resources.getColor(android.R.color.white))
-        tvVersion.text = (activity as HostActivity).getAppVersion()
+        tvVersion.text = (activity as AuthActivity).getAppVersion()
     }
 
     private fun clearPasswordTextBox() {
@@ -290,6 +290,7 @@ class LoginFragment : Fragment() {
 
         SharedPrefHelper.removeCredentials(true)
         setLoginActionState(LoginState.ACTION_LOGIN)
+        SharedPrefHelper.storeSelectedUserName(userEmail)
         loginViewModel.doLogin(userEmail, userPassword)
     }
 
@@ -352,12 +353,11 @@ class LoginFragment : Fragment() {
     }
 
     private fun navigateToDashboardFragment() {
-        Navigation.findNavController(viewBinder.root)
-            .navigate(LoginFragmentDirections.actionLoginFragmentToDashboardFragment())
+        (requireActivity() as AuthActivity).launchHomeActivity()
     }
 
     private fun processLoginError() {
-        (activity as HostActivity).showSnackbar(viewBinder.root, "Failed to authenticate")
+        (activity as AuthActivity).showSnackbar(viewBinder.root, "Failed to authenticate")
         clearPasswordTextBox()
         showHideProgressbar(false)
         showHideLoginView(true)
@@ -366,7 +366,7 @@ class LoginFragment : Fragment() {
     private fun processUserProfileORAccountProfileError() {
         SharedPrefHelper.removePassword()
         SharedPrefHelper.removeAccessToken()
-        (activity as HostActivity).showSnackbar(viewBinder.root, "Failed to authenticate")
+        (activity as AuthActivity).showSnackbar(viewBinder.root, "Failed to authenticate")
         clearPasswordTextBox()
         showHideProgressbar(false)
         showHideLoginView(true)

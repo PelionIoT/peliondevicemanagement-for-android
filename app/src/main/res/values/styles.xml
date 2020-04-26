@@ -151,4 +151,10 @@
         <item name="android:windowIsFloating">true</item>
     </style>
 
+    <style name="TabTextAppearance" parent="TextAppearance.Design.Tab">
+        <item name="textAllCaps">false</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">@font/lato_bold</item>
+    </style>
+
 </resources>

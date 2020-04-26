@@ -26,23 +26,20 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.Navigation
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.R
-
 import com.arm.peliondevicemanagement.components.adapters.AccountAdapter
 import com.arm.peliondevicemanagement.databinding.FragmentAccountsBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
-import com.arm.peliondevicemanagement.screens.activities.HostActivity
 import com.arm.peliondevicemanagement.components.models.user.Account
 import com.arm.peliondevicemanagement.components.models.user.UserProfile
 import com.arm.peliondevicemanagement.components.viewmodels.LoginViewModel
 import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
 import com.arm.peliondevicemanagement.components.models.user.AccountProfileModel
-import com.arm.peliondevicemanagement.constants.state.LoginState
+import com.arm.peliondevicemanagement.screens.activities.AuthActivity
 import com.arm.peliondevicemanagement.utils.PlatformUtils
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.Gson
@@ -68,7 +65,7 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
 
     private val onBackPressedCallback = object: OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
-            (activity as HostActivity).callCloseApp()
+            (activity as AuthActivity).callCloseApp()
         }
     }
 
@@ -150,7 +147,7 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
     private fun processErrorResponse() {
         showHideProgressbar(false)
         showHideAccountList(true)
-        (activity as HostActivity).showSnackbar(viewBinder.root, "Failed to authenticate")
+        (activity as AuthActivity).showSnackbar(viewBinder.root, "Failed to authenticate")
     }
 
     private fun showHideProgressbar(visibility: Boolean, text: String = ""){
@@ -247,8 +244,7 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
     }
 
     private fun navigateToDashboardFragment() {
-        Navigation.findNavController(viewBinder.root)
-            .navigate(AccountsFragmentDirections.actionAccountsFragmentToDashboardFragment())
+        (requireActivity() as AuthActivity).launchHomeActivity()
     }
 
     private fun showNoInternetDialog() {

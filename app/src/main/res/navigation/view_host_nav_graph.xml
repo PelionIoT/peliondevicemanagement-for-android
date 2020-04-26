@@ -19,64 +19,8 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/nav_graph"
-    app:startDestination="@id/loginFragment">
-
-    <fragment
-        android:id="@+id/loginFragment"
-        android:name="com.arm.peliondevicemanagement.screens.fragments.LoginFragment"
-        android:label="LoginFragment">
-        <action
-            android:id="@+id/action_loginFragment_to_accountsFragment"
-            app:destination="@id/accountsFragment"
-            app:popUpTo="@id/loginFragment"
-            app:popUpToInclusive="true"
-            />
-        <action
-            android:id="@+id/action_loginFragment_to_twoFactorAuthFragment2"
-            app:destination="@id/twoFactorAuthFragment" />
-        <action
-            android:id="@+id/action_loginFragment_to_dashboardFragment"
-            app:destination="@id/dashboardFragment"
-            app:popUpTo="@id/loginFragment"
-            app:popUpToInclusive="true"/>
-    </fragment>
-
-    <fragment
-        android:id="@+id/accountsFragment"
-        android:name="com.arm.peliondevicemanagement.screens.fragments.AccountsFragment"
-        android:label="fragment_accounts"
-        tools:layout="@layout/fragment_accounts" >
-        <action
-            android:id="@+id/action_accountsFragment_to_dashboardFragment"
-            app:destination="@id/dashboardFragment"
-            app:enterAnim="@anim/right_in"
-            app:exitAnim="@anim/right_out"
-            app:popEnterAnim="@anim/left_in"
-            app:popExitAnim="@anim/left_out"
-            app:popUpTo="@id/accountsFragment"
-            app:popUpToInclusive="true"/>
-        <action
-            android:id="@+id/action_accountsFragment_to_loginFragment"
-            app:destination="@id/loginFragment"
-            app:enterAnim="@anim/left_in"
-            app:exitAnim="@anim/left_out"
-            app:popEnterAnim="@anim/right_in"
-            app:popExitAnim="@anim/right_out"
-            app:popUpTo="@id/accountsFragment"
-            app:popUpToInclusive="true"
-            />
-    </fragment>
-
-    <fragment
-        android:id="@+id/twoFactorAuthFragment"
-        android:name="com.arm.peliondevicemanagement.screens.fragments.TwoFactorAuthFragment"
-        android:label="fragment_two_factor_auth"
-        tools:layout="@layout/fragment_two_factor_auth" >
-        <action
-            android:id="@+id/action_twoFactorAuthFragment_to_accountsFragment"
-            app:destination="@id/accountsFragment" />
-    </fragment>
+    android:id="@+id/view_host_nav_graph"
+    app:startDestination="@id/settingsFragment">
 
     <fragment
         android:id="@+id/settingsFragment"
@@ -100,45 +44,6 @@
         <action
             android:id="@+id/action_settingsFragment_to_developerOptionsFragment"
             app:destination="@id/developerOptionsFragment"
-            app:enterAnim="@anim/right_in"
-            app:exitAnim="@anim/right_out"
-            app:popEnterAnim="@anim/left_in"
-            app:popExitAnim="@anim/left_out"/>
-    </fragment>
-
-    <fragment
-        android:id="@+id/dashboardFragment"
-        android:name="com.arm.peliondevicemanagement.screens.fragments.DashboardFragment"
-        android:label="fragment_dashboard"
-        tools:layout="@layout/fragment_dashboard" >
-        <action
-            android:id="@+id/action_dashboardFragment_to_settingsFragment"
-            app:destination="@id/settingsFragment"
-            app:enterAnim="@anim/right_in"
-            app:exitAnim="@anim/right_out"
-            app:popEnterAnim="@anim/left_in"
-            app:popExitAnim="@anim/left_out"/>
-        <action
-            android:id="@+id/action_dashboardFragment_to_accountsFragment"
-            app:destination="@id/accountsFragment"
-            app:enterAnim="@anim/left_in"
-            app:exitAnim="@anim/left_out"
-            app:popEnterAnim="@anim/right_in"
-            app:popExitAnim="@anim/right_out"
-            app:popUpTo="@id/dashboardFragment"
-            app:popUpToInclusive="true"/>
-        <action
-            android:id="@+id/action_dashboardFragment_to_loginFragment"
-            app:destination="@id/loginFragment"
-            app:enterAnim="@anim/left_in"
-            app:exitAnim="@anim/left_out"
-            app:popEnterAnim="@anim/right_in"
-            app:popExitAnim="@anim/right_out"
-            app:popUpTo="@id/dashboardFragment"
-            app:popUpToInclusive="true"/>
-        <action
-            android:id="@+id/action_dashboardFragment_to_jobFragment"
-            app:destination="@id/jobFragment"
             app:enterAnim="@anim/right_in"
             app:exitAnim="@anim/right_out"
             app:popEnterAnim="@anim/left_in"
@@ -212,6 +117,7 @@
             />
 
     </fragment>
+
     <fragment
         android:id="@+id/jobRunFragment"
         android:name="com.arm.peliondevicemanagement.screens.fragments.JobRunFragment"
@@ -221,6 +127,7 @@
             android:name="run_object"
             app:argType="com.arm.peliondevicemanagement.components.models.workflow.device.DeviceRun" />
     </fragment>
+
     <fragment
         android:id="@+id/developerOptionsFragment"
         android:name="com.arm.peliondevicemanagement.screens.fragments.DeveloperOptionsFragment"

@@ -29,7 +29,7 @@ import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.databinding.FragmentSettingsBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
-import com.arm.peliondevicemanagement.screens.activities.HostActivity
+import com.arm.peliondevicemanagement.screens.activities.ViewHostActivity
 
 class SettingsFragment : Fragment() {
 
@@ -77,7 +77,7 @@ class SettingsFragment : Fragment() {
 
         // If debug-build, enable feature-flag
         if(BuildConfig.DEBUG){
-            viewBinder.tvVersion.text = (activity as HostActivity).getAppVersion()
+            viewBinder.tvVersion.text = (activity as ViewHostActivity).getAppVersion()
             viewBinder.buildInfoCard.visibility = View.VISIBLE
 
             if(SharedPrefHelper.getDeveloperOptions().isDeveloperModeEnabled()) {
@@ -116,8 +116,8 @@ class SettingsFragment : Fragment() {
         } else
             SharedPrefHelper.setDarkThemeStatus(false)
 
-        (activity as HostActivity).setAppTheme(true)
-        (activity as HostActivity).recreate()
+        //(activity as HostActivity).setAppTheme(true)
+        (activity as ViewHostActivity).recreate()
     }
 
     private fun initiateDeveloperMode() = if((System.currentTimeMillis() - initiatedDModeMs < 2000) && developerModeStepCounter < 1) {
@@ -136,7 +136,7 @@ class SettingsFragment : Fragment() {
     }
 
     private fun showToast(message: String){
-        (activity as HostActivity).showToast(message)
+        (activity as ViewHostActivity).showToast(message)
     }
 
     private fun navigateToActivityInfoFragment() {

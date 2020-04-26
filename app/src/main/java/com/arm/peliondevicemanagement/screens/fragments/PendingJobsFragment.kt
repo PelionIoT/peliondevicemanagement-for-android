@@ -17,6 +17,7 @@
 
 package com.arm.peliondevicemanagement.screens.fragments
 
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -33,27 +34,29 @@ import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.components.adapters.WorkflowAdapter
 import com.arm.peliondevicemanagement.components.models.workflow.Workflow
 import com.arm.peliondevicemanagement.components.viewmodels.WorkflowViewModel
-import com.arm.peliondevicemanagement.databinding.FragmentDashboardBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
 import com.arm.peliondevicemanagement.constants.state.LoadState
-import com.arm.peliondevicemanagement.screens.activities.HostActivity
+import com.arm.peliondevicemanagement.databinding.FragmentPendingJobsBinding
+import com.arm.peliondevicemanagement.screens.activities.HomeActivity
 
-class DashboardFragment : Fragment(), RecyclerItemClickListener {
+class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
 
     companion object {
-        private val TAG: String = DashboardFragment::class.java.simpleName
+        private val TAG: String = PendingJobsFragment::class.java.simpleName
     }
 
-    private var _viewBinder: FragmentDashboardBinding? = null
+    private var _viewBinder: FragmentPendingJobsBinding? = null
     private val viewBinder get() = _viewBinder!!
 
     private lateinit var workflowViewModel: WorkflowViewModel
     private var workflowAdapter = WorkflowAdapter(this)
 
+    private lateinit var itemClickListener: RecyclerItemClickListener
+
     private val onBackPressedCallback = object: OnBackPressedCallback(true){
         override fun handleOnBackPressed() {
-            (activity as HostActivity).callCloseApp()
+            (activity as HomeActivity).callCloseApp()
         }
     }
 
@@ -74,7 +77,7 @@ class DashboardFragment : Fragment(), RecyclerItemClickListener {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _viewBinder = FragmentDashboardBinding.inflate(inflater, container, false)
+        _viewBinder = FragmentPendingJobsBinding.inflate(inflater, container, false)
         return viewBinder.root
     }
 
@@ -86,6 +89,11 @@ class DashboardFragment : Fragment(), RecyclerItemClickListener {
         showHideSearchBar(false)
         showHide404View(false)
         setSwipeRefreshStatus(true)
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        itemClickListener = context as RecyclerItemClickListener
     }
 
     private fun init() {
@@ -199,13 +207,8 @@ class DashboardFragment : Fragment(), RecyclerItemClickListener {
         LogHelper.debug(TAG, "onItemClick()-> " +
                 "workflowName: ${model.workflowName}, " +
                 "workflowID: ${model.workflowID}")
-        navigateToJobFragment(model)
-    }
-
-    private fun navigateToJobFragment(workflowModel: Workflow) {
-        Navigation.findNavController(viewBinder.root)
-            .navigate(DashboardFragmentDirections
-                .actionDashboardFragmentToJobFragment(workflowModel.workflowID))
+        // Pass it to Home-Activity for launch
+        itemClickListener.onItemClick(model.workflowID)
     }
 
     override fun onDestroyView() {

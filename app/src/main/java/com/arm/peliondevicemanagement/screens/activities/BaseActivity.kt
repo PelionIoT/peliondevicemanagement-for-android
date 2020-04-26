@@ -22,9 +22,11 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.widget.Toolbar
 import com.arm.peliondevicemanagement.BuildConfig
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.helpers.LogHelper
+import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.google.android.material.snackbar.Snackbar
 
 open class BaseActivity : AppCompatActivity() {
@@ -50,6 +52,35 @@ open class BaseActivity : AppCompatActivity() {
             var versionName = BuildConfig.VERSION_NAME
             versionName = versionName.substringBeforeLast(".")
             versionName
+        }
+    }
+
+    internal fun initTheme(isLauncher: Boolean = false) {
+        if(SharedPrefHelper.isDarkThemeEnabled()){
+            setAppTheme(true, isLauncher)
+        } else {
+            setAppTheme(false, isLauncher)
+        }
+    }
+
+    internal fun setupToolbar(toolbar: Toolbar, toolbarTitle: String) {
+        setSupportActionBar(toolbar)
+        supportActionBar?.apply {
+            title = toolbarTitle
+            setDisplayShowHomeEnabled(true)
+            setDisplayHomeAsUpEnabled(true)
+        }
+    }
+
+    private fun setAppTheme(dark: Boolean, isLauncher: Boolean = false) {
+        if(isLauncher && dark){
+            setTheme(R.style.AppThemeDark_Launcher)
+        } else if(!isLauncher && dark){
+            setTheme(R.style.AppThemeDark)
+        } else if(isLauncher && !dark){
+            setTheme(R.style.AppTheme_Launcher)
+        } else if(!isLauncher && !dark){
+            setTheme(R.style.AppTheme)
         }
     }
 
@@ -83,13 +114,6 @@ open class BaseActivity : AppCompatActivity() {
         else
             overridePendingTransition(R.anim.left_in, R.anim.left_out)
         finish()
-    }
-
-    internal fun callNewLoginWithFinish() {
-        //SharedPrefHelper.clearUserData(removeCredentials = true, removeAccountId = true)
-        fireIntentWithFinish(
-            intent = Intent(this@BaseActivity, HostActivity::class.java),
-            isForward = false)
     }
 
     internal fun callCloseApp() = if(System.currentTimeMillis() - initiatedCloseMs < 2000){

@@ -61,7 +61,7 @@ object SharedPrefHelper {
         SharedPrefManager.with(context = AppController.appController!!)!!
             .getString(SharedPrefConstants.STORE_SELECTED_ACCOUNT_ID, "")!!
 
-    internal fun getSelectedAccountName(): String? =
+    internal fun getSelectedAccountName(): String =
         SharedPrefManager.with(context = AppController.appController!!)!!
             .getString(SharedPrefConstants.STORE_SELECTED_ACCOUNT_NAME, "")!!
 
@@ -88,6 +88,11 @@ object SharedPrefHelper {
         SharedPrefManager.with(context = AppController.appController!!)!!.edit()
             .putString(SharedPrefConstants.STORE_USER_NAME, userName)
             .putString(SharedPrefConstants.STORE_USER_PASSWORD, userPassword)
+            .apply()
+
+    internal fun storeSelectedUserName(userName: String) =
+        SharedPrefManager.with(context = AppController.appController!!)!!.edit()
+            .putString(SharedPrefConstants.STORE_USER_NAME, userName)
             .apply()
 
     internal fun storeSelectedUserID(userID: String?) =

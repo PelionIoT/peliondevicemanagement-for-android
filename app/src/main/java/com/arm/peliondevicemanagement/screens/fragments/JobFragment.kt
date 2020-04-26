@@ -48,7 +48,7 @@ import com.arm.peliondevicemanagement.constants.ExecutionMode
 import com.arm.peliondevicemanagement.constants.state.workflow.WorkflowState
 import com.arm.peliondevicemanagement.databinding.FragmentJobBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
-import com.arm.peliondevicemanagement.screens.activities.HostActivity
+import com.arm.peliondevicemanagement.screens.activities.ViewHostActivity
 import com.arm.peliondevicemanagement.utils.PlatformUtils
 import com.arm.peliondevicemanagement.utils.PlatformUtils.checkForLocationPermission
 import com.arm.peliondevicemanagement.utils.PlatformUtils.enableBluetooth
@@ -238,7 +238,7 @@ class JobFragment : Fragment() {
     }
 
     private fun showSnackbar(message: String) {
-        (activity as HostActivity).showSnackbar(
+        (activity as ViewHostActivity).showSnackbar(
             viewBinder.root,message)
     }
 

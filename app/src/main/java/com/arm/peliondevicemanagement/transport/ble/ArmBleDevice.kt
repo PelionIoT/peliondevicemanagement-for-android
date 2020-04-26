@@ -210,7 +210,7 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
         // Enable feature-flag, if debug-build
         val transmissionMtuSize: Int = if(BuildConfig.DEBUG){
             if(SharedPrefHelper.getDeveloperOptions().isMaxMTUDisabled()){
-                20
+                18
             } else {
                 TMSN_MTU_SIZE
             }

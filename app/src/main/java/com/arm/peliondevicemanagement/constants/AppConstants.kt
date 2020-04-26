@@ -22,6 +22,12 @@ object AppConstants {
     // About & Licenses
     const val ABOUT_JSON_FILE = "about.json"
 
+    // Navigation-action constants
+    const val IS_ACCOUNT_GRAPH = "isAccountGraph"
+    const val VIEW_HOST_LAUNCH_GRAPH = "viewHostLaunchGraph"
+    const val WORKFLOW_ID_ARG = "workflow_id"
+    val viewHostLaunchActionList = listOf("Job", "Settings")
+
     // Local-Cache constants
     const val WORKFLOW_DATABASE_NAME = "Workflow.db"
     const val DATABASE_PAGE_SIZE = 20
