@@ -25,6 +25,7 @@ import androidx.paging.PagedList
 import com.arm.peliondevicemanagement.AppController
 import com.arm.peliondevicemanagement.components.models.workflow.device.WorkflowDevice
 import com.arm.peliondevicemanagement.components.models.workflow.Workflow
+import com.arm.peliondevicemanagement.components.models.workflow.task.WorkflowTask
 import com.arm.peliondevicemanagement.constants.state.LoadState
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.services.CloudRepository
@@ -32,7 +33,9 @@ import com.arm.peliondevicemanagement.services.LocalRepository
 import com.arm.peliondevicemanagement.services.cache.LocalCache
 import com.arm.peliondevicemanagement.services.cache.WorkflowDB
 import com.arm.peliondevicemanagement.services.data.SDATokenResponse
+import com.arm.peliondevicemanagement.utils.WorkflowUtils.downloadTaskAssets
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.fetchSDAToken
+import com.arm.peliondevicemanagement.utils.WorkflowUtils.isWorkflowAssetsDownloaded
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.saveWorkflowTaskOutputAsset
 import kotlinx.coroutines.*
 import java.util.concurrent.Executors
@@ -57,31 +60,31 @@ class WorkflowViewModel : ViewModel() {
 
     private lateinit var _pendingWorkflowsLiveData: LiveData<PagedList<Workflow>>
     private lateinit var _completedWorkflowsLiveData: LiveData<PagedList<Workflow>>
-    private val refreshStateLiveData = MutableLiveData<LoadState>()
-    private val refreshedSDATokenLiveData = MutableLiveData<SDATokenResponse>()
-    private val workflowLiveData = MutableLiveData<Workflow>()
-
+    private val _refreshStateLiveData = MutableLiveData<LoadState>()
+    private val _refreshedSDATokenLiveData = MutableLiveData<SDATokenResponse>()
+    private val _pendingWorkflowLiveData = MutableLiveData<Workflow>()
+    private val _assetAvailableLiveData = MutableLiveData<Boolean>()
 
     private val boundaryCallback = object: PagedList.BoundaryCallback<Workflow>() {
         override fun onZeroItemsLoaded() {
             super.onZeroItemsLoaded()
             // Handle empty initial load here
             LogHelper.debug(TAG, "BoundaryCallback()->onZeroItemsLoaded")
-            refreshStateLiveData.postValue(LoadState.EMPTY)
+            _refreshStateLiveData.postValue(LoadState.EMPTY)
         }
 
         override fun onItemAtEndLoaded(itemAtEnd: Workflow) {
             super.onItemAtEndLoaded(itemAtEnd)
             // Here you can listen to last item on list
             LogHelper.debug(TAG, "BoundaryCallback()->onItemAtEndLoaded")
-            refreshStateLiveData.postValue(LoadState.LOADED)
+            _refreshStateLiveData.postValue(LoadState.LOADED)
         }
 
         override fun onItemAtFrontLoaded(itemAtFront: Workflow) {
             super.onItemAtFrontLoaded(itemAtFront)
             // Here you can listen to first item on list
             LogHelper.debug(TAG, "BoundaryCallback()->onItemAtFrontLoaded")
-            refreshStateLiveData.postValue(LoadState.LOADED)
+            _refreshStateLiveData.postValue(LoadState.LOADED)
         }
     }
 
@@ -102,9 +105,11 @@ class WorkflowViewModel : ViewModel() {
 
     fun getCompletedWorkflows(): LiveData<PagedList<Workflow>> = _completedWorkflowsLiveData
 
-    fun getWorkflow(): LiveData<Workflow> = workflowLiveData
+    fun getWorkflow(): LiveData<Workflow> = _pendingWorkflowLiveData
 
-    fun getRefreshState(): LiveData<LoadState> = refreshStateLiveData
+    fun getRefreshState(): LiveData<LoadState> = _refreshStateLiveData
+
+    fun getAssetAvailabilityStatus(): LiveData<Boolean> = _assetAvailableLiveData
 
     fun refreshPendingWorkflows() {
         _pendingWorkflowsLiveData.value?.dataSource?.invalidate()
@@ -121,9 +126,9 @@ class WorkflowViewModel : ViewModel() {
                 permissionScope,
                 audienceList)
             if(tokenResponse != null){
-                refreshedSDATokenLiveData.postValue(tokenResponse)
+                _refreshedSDATokenLiveData.postValue(tokenResponse)
             } else {
-                refreshedSDATokenLiveData.postValue(null)
+                _refreshedSDATokenLiveData.postValue(null)
             }
         }
     }
@@ -143,7 +148,7 @@ class WorkflowViewModel : ViewModel() {
     fun fetchWorkflow(workflowID: String) {
         scope.launch {
             val workflow = localCache.fetchSingleWorkflow(workflowID)
-            workflowLiveData.postValue(workflow)
+            _pendingWorkflowLiveData.postValue(workflow)
         }
     }
 
@@ -163,7 +168,7 @@ class WorkflowViewModel : ViewModel() {
         }
     }
 
-    fun getRefreshedSDAToken(): LiveData<SDATokenResponse> = refreshedSDATokenLiveData
+    fun getRefreshedSDAToken(): LiveData<SDATokenResponse> = _refreshedSDATokenLiveData
 
     private fun getPendingWorkflowsLiveData(): LiveData<PagedList<Workflow>> {
         val pageConfig = PagedList.Config.Builder()
@@ -173,7 +178,7 @@ class WorkflowViewModel : ViewModel() {
             .build()
 
         // Fetch data from the local-cache and return a factory
-        val dataSourceFactory = localRepository.fetchPendingWorkflowsFactory(refreshStateLiveData)
+        val dataSourceFactory = localRepository.fetchPendingWorkflowsFactory(_refreshStateLiveData)
 
         // Get the paged list
         return LivePagedListBuilder(dataSourceFactory, pageConfig)
@@ -190,12 +195,26 @@ class WorkflowViewModel : ViewModel() {
 
         // Fetch data from the local-cache and return a factory
         val dataSourceFactory = localRepository
-            .fetchCompletedWorkflowsFactory(refreshStateLiveData)
+            .fetchCompletedWorkflowsFactory(_refreshStateLiveData)
 
         // Get the paged list
         return LivePagedListBuilder(dataSourceFactory, pageConfig)
             .setBoundaryCallback(boundaryCallback)
             .build()
+    }
+
+    fun checkForWorkflowAssets(workflowID: String, workflowTasks: List<WorkflowTask>) {
+        scope.launch {
+            val status = isWorkflowAssetsDownloaded(workflowID, workflowTasks)
+            _assetAvailableLiveData.postValue(status)
+        }
+    }
+
+    fun downloadWorkflowAssets(workflowID: String, workflowTasks: List<WorkflowTask>) {
+        scope.launch {
+            downloadTaskAssets(cloudRepository, workflowID, workflowTasks)
+            checkForWorkflowAssets(workflowID, workflowTasks)
+        }
     }
 
     fun cancelAllRequests() = coroutineContext.cancel()

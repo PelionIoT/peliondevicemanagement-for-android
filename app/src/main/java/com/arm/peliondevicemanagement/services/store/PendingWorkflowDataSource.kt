@@ -19,6 +19,7 @@ package com.arm.peliondevicemanagement.services.store
 
 import androidx.lifecycle.MutableLiveData
 import androidx.paging.PageKeyedDataSource
+import com.arm.peliondevicemanagement.BuildConfig
 import com.arm.peliondevicemanagement.components.models.workflow.device.WorkflowDevice
 import com.arm.peliondevicemanagement.components.models.workflow.Workflow
 import com.arm.peliondevicemanagement.constants.AppConstants
@@ -178,14 +179,34 @@ class PendingWorkflowDataSource(
                         )
                     )
                 }
+
                 // Fetch SDA_token
-                val sdaTokenResponse = fetchAndSaveSDAToken(workflow)
-                if(sdaTokenResponse != null){
-                    workflow.sdaToken = sdaTokenResponse
+                // Enable feature-flag, if debug-build
+                if(BuildConfig.DEBUG){
+                    if(!SharedPrefHelper.getDeveloperOptions().isSDATokenDownloadDisabled()){
+                        val sdaTokenResponse = fetchAndSaveSDAToken(workflow)
+                        if(sdaTokenResponse != null){
+                            workflow.sdaToken = sdaTokenResponse
+                        }
+                    }
+                } else {
+                    val sdaTokenResponse = fetchAndSaveSDAToken(workflow)
+                    if(sdaTokenResponse != null){
+                        workflow.sdaToken = sdaTokenResponse
+                    }
                 }
+
                 // Download Task Assets
-                downloadTaskAssets(cloudRepository,
-                    workflow.workflowID, workflow.workflowTasks)
+                // Enable feature-flag, if debug-build
+                if(BuildConfig.DEBUG){
+                    if(!SharedPrefHelper.getDeveloperOptions().isAssetDownloadDisabled()){
+                        downloadTaskAssets(cloudRepository,
+                            workflow.workflowID, workflow.workflowTasks)
+                    }
+                } else {
+                    downloadTaskAssets(cloudRepository,
+                        workflow.workflowID, workflow.workflowTasks)
+                }
 
                 // FixME
                 // Sync workflow

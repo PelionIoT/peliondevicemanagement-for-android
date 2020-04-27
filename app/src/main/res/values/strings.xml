@@ -98,6 +98,12 @@
     <string name="no_internet_text">No network connection</string>
     <string name="check_connection_text">Check your Internet connection</string>
 
+    <!-- Workflow asset strings-->
+    <string name="asset_downloading_text">Downloading assets</string>
+    <string name="asset_downloaded_text">Assets available</string>
+    <string name="asset_checking_text">Looking for downloaded assets</string>
+    <string name="asset_not_found_text">No assets downloaded</string>
+
     <!-- Developer Options strings -->
     <string name="build_info_text">Build Info</string>
     <string name="developer_mode_format">You are now <xliff:g id="view">%1$s</xliff:g> step away from being a developer</string>

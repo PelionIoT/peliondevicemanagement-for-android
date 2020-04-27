@@ -25,286 +25,389 @@
     android:background="?attr/colorBackground"
     tools:context=".screens.fragments.JobFragment">
 
-    <com.google.android.material.card.MaterialCardView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/cardJobRunItem"
-        app:cardBackgroundColor="?attr/cardColor"
-        app:strokeColor="@drawable/stroke_color"
-        app:strokeWidth="1dp"
-        app:cardElevation="0dp">
+        android:layout_height="match_parent">
 
         <RelativeLayout
-            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent">
 
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:id="@+id/iconView"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="14dp"
-                android:src="?attr/iconWidget"/>
-
-            <TextView
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingStart="20dp"
-                android:paddingEnd="16dp"
-                android:paddingBottom="0dp"
-                android:paddingTop="10dp"
-                android:id="@+id/tvName"
-                tools:text="Name"
-                android:layout_toEndOf="@id/iconView"
-                android:fontFamily="@font/lato_regular"
-                android:ellipsize="middle"
-                android:singleLine="true"
-                android:textSize="18sp"
-                />
+                android:id="@+id/cardJobRunItem"
+                app:cardBackgroundColor="?attr/cardColor"
+                app:strokeColor="@drawable/stroke_color"
+                app:strokeWidth="1dp"
+                app:cardElevation="0dp">
 
-            <TextView
+                <RelativeLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:id="@+id/iconView"
+                        android:layout_marginStart="24dp"
+                        android:layout_marginTop="14dp"
+                        android:src="?attr/iconWidget"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="16dp"
+                        android:paddingBottom="0dp"
+                        android:paddingTop="10dp"
+                        android:id="@+id/tvName"
+                        tools:text="Name"
+                        android:layout_toEndOf="@id/iconView"
+                        android:fontFamily="@font/lato_regular"
+                        android:ellipsize="middle"
+                        android:singleLine="true"
+                        android:textSize="18sp"
+                        />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="16dp"
+                        android:paddingBottom="1dp"
+                        android:paddingTop="1dp"
+                        android:id="@+id/tvDescription"
+                        android:layout_below="@id/tvName"
+                        tools:text="Description"
+                        android:layout_toEndOf="@+id/iconView"
+                        android:fontFamily="@font/lato_regular"
+                        android:ellipsize="middle"
+                        android:singleLine="true"
+                        android:textSize="14sp"
+                        />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="?attr/dividerColor"
+                        android:alpha="0.12"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="5dp"
+                        android:id="@+id/divider"
+                        android:layout_below="@+id/tvDescription"
+                        />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="25dp"
+                        android:paddingEnd="16dp"
+                        android:paddingBottom="5dp"
+                        android:paddingTop="5dp"
+                        android:id="@+id/tvStatus"
+                        android:text="@string/status_format"
+                        android:layout_below="@id/divider"
+                        android:fontFamily="@font/lato_regular"
+                        android:ellipsize="middle"
+                        android:singleLine="true"
+                        android:textSize="14sp"
+                        />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="25dp"
+                        android:paddingEnd="16dp"
+                        android:paddingBottom="5dp"
+                        android:paddingTop="5dp"
+                        android:id="@+id/tvLocation"
+                        android:text="@string/location_format"
+                        android:layout_below="@id/tvStatus"
+                        android:fontFamily="@font/lato_regular"
+                        android:ellipsize="middle"
+                        android:singleLine="true"
+                        android:textSize="14sp"
+                        />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="25dp"
+                        android:paddingEnd="16dp"
+                        android:paddingBottom="15dp"
+                        android:paddingTop="5dp"
+                        android:id="@+id/tvCreatedAt"
+                        android:text="@string/created_at_format"
+                        android:layout_below="@id/tvLocation"
+                        android:fontFamily="@font/lato_regular"
+                        android:ellipsize="middle"
+                        android:singleLine="true"
+                        android:textSize="14sp"
+                        />
+
+                </RelativeLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingStart="20dp"
-                android:paddingEnd="16dp"
-                android:paddingBottom="1dp"
-                android:paddingTop="1dp"
-                android:id="@+id/tvDescription"
-                android:layout_below="@id/tvName"
-                tools:text="Description"
-                android:layout_toEndOf="@+id/iconView"
-                android:fontFamily="@font/lato_regular"
-                android:ellipsize="middle"
-                android:singleLine="true"
-                android:textSize="14sp"
-                />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="?attr/dividerColor"
-                android:alpha="0.12"
+                android:id="@+id/cardSecureAccessItem"
+                android:layout_below="@+id/cardJobRunItem"
                 android:layout_marginTop="10dp"
-                android:layout_marginBottom="5dp"
-                android:id="@+id/divider"
-                android:layout_below="@+id/tvDescription"
-                />
+                app:cardBackgroundColor="?attr/cardColor"
+                app:strokeColor="@drawable/stroke_color"
+                app:strokeWidth="1dp"
+                app:cardElevation="0dp">
 
-            <TextView
+                <RelativeLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:id="@+id/secureIconView"
+                        android:layout_marginStart="24dp"
+                        android:layout_marginTop="14dp"
+                        android:src="?attr/iconShieldGreen"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="16dp"
+                        android:paddingBottom="0dp"
+                        android:paddingTop="10dp"
+                        android:id="@+id/tvSecure"
+                        android:text="@string/secure_text"
+                        android:layout_toEndOf="@id/secureIconView"
+                        android:fontFamily="@font/lato_regular"
+                        android:ellipsize="middle"
+                        android:singleLine="true"
+                        android:textSize="16sp"
+                        android:layout_toStartOf="@+id/refreshTokenButton"
+                        />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="10dp"
+                        android:paddingBottom="15dp"
+                        android:paddingTop="1dp"
+                        android:id="@+id/tvValidTill"
+                        android:layout_below="@id/tvSecure"
+                        android:text="@string/active_format"
+                        android:layout_toEndOf="@+id/secureIconView"
+                        android:fontFamily="@font/lato_regular"
+                        android:ellipsize="middle"
+                        android:singleLine="true"
+                        android:textSize="14sp"
+                        android:layout_toStartOf="@+id/refreshTokenButton"
+                        />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="16dp"
+                        android:id="@+id/refreshTokenButton"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        app:strokeColor="?attr/colorAccent"
+                        app:rippleColor="?attr/colorAccent"
+                        app:icon="?attr/iconRefresh"
+                        app:iconTint="?attr/colorAccent"
+                        app:iconPadding="0dp"
+                        android:textColor="?attr/colorAccent"
+                        android:textAllCaps="false"
+                        android:visibility="gone"
+                        tools:visibility="visible"
+                        />
+
+                    <ProgressBar
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginEnd="21dp"
+                        android:id="@+id/sdaProgressbar"
+                        android:visibility="gone"
+                        tools:visibility="visible"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"/>
+
+                </RelativeLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingStart="25dp"
-                android:paddingEnd="16dp"
-                android:paddingBottom="5dp"
-                android:paddingTop="5dp"
-                android:id="@+id/tvStatus"
-                android:text="@string/status_format"
-                android:layout_below="@id/divider"
-                android:fontFamily="@font/lato_regular"
-                android:ellipsize="middle"
-                android:singleLine="true"
-                android:textSize="14sp"
-                />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingStart="25dp"
-                android:paddingEnd="16dp"
-                android:paddingBottom="5dp"
-                android:paddingTop="5dp"
-                android:id="@+id/tvLocation"
-                android:text="@string/location_format"
-                android:layout_below="@id/tvStatus"
-                android:fontFamily="@font/lato_regular"
-                android:ellipsize="middle"
-                android:singleLine="true"
-                android:textSize="14sp"
-                />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingStart="25dp"
-                android:paddingEnd="16dp"
-                android:paddingBottom="15dp"
-                android:paddingTop="5dp"
-                android:id="@+id/tvCreatedAt"
-                android:text="@string/created_at_format"
-                android:layout_below="@id/tvLocation"
-                android:fontFamily="@font/lato_regular"
-                android:ellipsize="middle"
-                android:singleLine="true"
-                android:textSize="14sp"
-                />
-
-        </RelativeLayout>
-    </com.google.android.material.card.MaterialCardView>
-
-    <com.google.android.material.card.MaterialCardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/cardSecureAccessItem"
-        android:layout_below="@+id/cardJobRunItem"
-        android:layout_marginTop="10dp"
-        app:cardBackgroundColor="?attr/cardColor"
-        app:strokeColor="@drawable/stroke_color"
-        app:strokeWidth="1dp"
-        app:cardElevation="0dp">
-
-        <RelativeLayout
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:id="@+id/secureIconView"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="14dp"
-                android:src="?attr/iconShieldGreen"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingStart="20dp"
-                android:paddingEnd="16dp"
-                android:paddingBottom="0dp"
-                android:paddingTop="10dp"
-                android:id="@+id/tvSecure"
-                android:text="@string/secure_text"
-                android:layout_toEndOf="@id/secureIconView"
-                android:fontFamily="@font/lato_regular"
-                android:ellipsize="middle"
-                android:singleLine="true"
-                android:textSize="16sp"
-                android:layout_toStartOf="@+id/refreshTokenButton"
-                />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingStart="20dp"
-                android:paddingEnd="10dp"
-                android:paddingBottom="15dp"
-                android:paddingTop="1dp"
-                android:id="@+id/tvValidTill"
-                android:layout_below="@id/tvSecure"
-                android:text="@string/active_format"
-                android:layout_toEndOf="@+id/secureIconView"
-                android:fontFamily="@font/lato_regular"
-                android:ellipsize="middle"
-                android:singleLine="true"
-                android:textSize="14sp"
-                android:layout_toStartOf="@+id/refreshTokenButton"
-                />
-
-            <com.google.android.material.button.MaterialButton
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="16dp"
-                android:id="@+id/refreshTokenButton"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                app:strokeColor="?attr/colorAccent"
-                app:rippleColor="?attr/colorAccent"
-                app:icon="?attr/iconRefresh"
-                app:iconTint="?attr/colorAccent"
-                app:iconPadding="0dp"
-                android:textColor="?attr/colorAccent"
-                android:textAllCaps="false"
+                android:id="@+id/cardTaskAssetItem"
+                android:layout_below="@+id/cardSecureAccessItem"
+                android:layout_marginTop="10dp"
+                app:cardBackgroundColor="?attr/cardColor"
+                app:strokeColor="@drawable/stroke_color"
                 android:visibility="gone"
                 tools:visibility="visible"
-                />
+                app:strokeWidth="1dp"
+                app:cardElevation="0dp">
 
-            <ProgressBar
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginEnd="21dp"
-                android:id="@+id/sdaProgressbar"
-                android:visibility="gone"
-                tools:visibility="visible"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"/>
+                <RelativeLayout
+                    android:orientation="vertical"
+                    android:padding="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:id="@+id/assetIconView"
+                        android:layout_marginStart="10dp"
+                        android:layout_centerVertical="true"
+                        android:src="?attr/iconAsset"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:id="@+id/tvAssetTitle"
+                        android:paddingStart="19dp"
+                        android:paddingEnd="10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="10dp"
+                        android:text="@string/asset_checking_text"
+                        android:layout_toEndOf="@id/assetIconView"
+                        android:fontFamily="@font/lato_regular"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:textSize="16sp"
+                        android:layout_toStartOf="@+id/downloadProgressbar"
+                        />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="8dp"
+                        android:id="@+id/downloadButton"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        app:strokeColor="?attr/colorAccent"
+                        app:rippleColor="?attr/colorAccent"
+                        app:icon="?attr/iconDownload"
+                        app:iconTint="?attr/colorAccent"
+                        app:iconPadding="0dp"
+                        android:textColor="?attr/colorAccent"
+                        android:textAllCaps="false"
+                        android:visibility="gone"
+                        tools:visibility="visible"
+                        />
+
+                    <ProgressBar
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:layout_marginEnd="15dp"
+                        android:id="@+id/downloadProgressbar"
+                        android:visibility="gone"
+                        tools:visibility="visible"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="10dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"/>
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:id="@+id/assetStatusView"
+                        android:layout_alignParentEnd="true"
+                        android:visibility="gone"
+                        android:contentDescription="@string/logo_description"
+                        android:layout_marginEnd="16dp"
+                        android:layout_centerVertical="true"
+                        android:background="@drawable/ic_status_ok"
+                        android:src="@drawable/ic_check_light"/>
+
+                </RelativeLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/cardJobDevicesItem"
+                android:layout_below="@id/cardTaskAssetItem"
+                android:animateLayoutChanges="true"
+                android:layout_marginTop="10dp"
+                app:cardBackgroundColor="?attr/cardColor"
+                app:strokeColor="@drawable/stroke_color"
+                app:strokeWidth="1dp"
+                app:cardElevation="0dp">
+
+                <RelativeLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:id="@+id/deviceIconView"
+                        android:layout_marginStart="24dp"
+                        android:layout_marginTop="14dp"
+                        android:src="?attr/iconDevice"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="16dp"
+                        android:paddingTop="10dp"
+                        android:id="@+id/tvDeviceHeader"
+                        android:text="@string/devices"
+                        android:layout_toEndOf="@id/deviceIconView"
+                        android:fontFamily="@font/lato_regular"
+                        android:ellipsize="middle"
+                        android:singleLine="true"
+                        android:textSize="18sp"
+                        android:drawableEnd="?attr/iconArrowDown"
+                        />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="16dp"
+                        android:paddingBottom="5dp"
+                        android:layout_marginBottom="10dp"
+                        android:id="@+id/tvCompleted"
+                        android:layout_below="@+id/tvDeviceHeader"
+                        android:text="@string/devices_completed_format"
+                        android:layout_toEndOf="@id/deviceIconView"
+                        android:fontFamily="@font/lato_regular"
+                        android:ellipsize="middle"
+                        android:singleLine="true"
+                        android:textSize="14sp"
+                        />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/rvDevices"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_below="@id/tvCompleted"
+                        android:paddingBottom="10dp"
+                        android:clipToPadding="false"
+                        android:visibility="gone"
+                        />
+
+                </RelativeLayout>
+            </com.google.android.material.card.MaterialCardView>
 
         </RelativeLayout>
-    </com.google.android.material.card.MaterialCardView>
 
-    <com.google.android.material.card.MaterialCardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/cardJobDevicesItem"
-        android:layout_below="@id/cardSecureAccessItem"
-        android:animateLayoutChanges="true"
-        android:layout_marginTop="10dp"
-        app:cardBackgroundColor="?attr/cardColor"
-        app:strokeColor="@drawable/stroke_color"
-        app:strokeWidth="1dp"
-        app:cardElevation="0dp">
-
-        <RelativeLayout
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:id="@+id/deviceIconView"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="14dp"
-                android:src="?attr/iconDevice"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingStart="20dp"
-                android:paddingEnd="16dp"
-                android:paddingTop="10dp"
-                android:id="@+id/tvDeviceHeader"
-                android:text="@string/devices"
-                android:layout_toEndOf="@id/deviceIconView"
-                android:fontFamily="@font/lato_regular"
-                android:ellipsize="middle"
-                android:singleLine="true"
-                android:textSize="18sp"
-                android:drawableEnd="?attr/iconArrowDown"
-                />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingStart="20dp"
-                android:paddingEnd="16dp"
-                android:paddingBottom="5dp"
-                android:layout_marginBottom="10dp"
-                android:id="@+id/tvCompleted"
-                android:layout_below="@+id/tvDeviceHeader"
-                android:text="@string/devices_completed_format"
-                android:layout_toEndOf="@id/deviceIconView"
-                android:fontFamily="@font/lato_regular"
-                android:ellipsize="middle"
-                android:singleLine="true"
-                android:textSize="14sp"
-                />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/rvDevices"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_below="@id/tvCompleted"
-                android:paddingBottom="10dp"
-                android:clipToPadding="false"
-                android:visibility="gone"
-                />
-
-        </RelativeLayout>
-    </com.google.android.material.card.MaterialCardView>
+    </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:layout_width="wrap_content"

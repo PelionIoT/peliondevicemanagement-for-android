@@ -41,6 +41,22 @@ object WorkflowFileUtils {
         return directoryPath
     }
 
+    fun isFileExists(locationPath: String,
+                     fileName: String): Boolean {
+        val context = AppController.appController!!.applicationContext
+        val subDirPath = getWorkflowAssetsDirectory(context) +
+                File.separator + locationPath
+
+        val subDir = File(subDirPath)
+        if(!subDir.exists()){
+            return false
+        }
+
+        val filePath = subDirPath + File.separator + fileName
+        val file = File(filePath)
+        return file.exists()
+    }
+
     fun readWorkflowAssetFile(locationPath: String,
                               fileName: String): String? {
         val context = AppController.appController!!.applicationContext

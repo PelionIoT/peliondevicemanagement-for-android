@@ -64,6 +64,7 @@ import com.arm.peliondevicemanagement.utils.PlatformUtils.parseJSONTimeIntoTimeA
 import com.arm.peliondevicemanagement.utils.PlatformUtils.parseJSONTimeString
 import com.arm.peliondevicemanagement.utils.WorkflowUtils
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.getAudienceListFromDevices
+import com.arm.peliondevicemanagement.utils.WorkflowUtils.isWriteTaskAvailable
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.fragment_job.*
@@ -86,6 +87,7 @@ class JobFragment : Fragment() {
 
     private var totalDevicesCompleted: Int = 0
     private var isSDATokenValid: Boolean = false
+    private var isAssetAvailable: Boolean = false
 
     private lateinit var errorBottomSheetDialog: BottomSheetDialog
     private lateinit var retryButtonClickListener: View.OnClickListener
@@ -105,6 +107,13 @@ class JobFragment : Fragment() {
         PENDING_DEVICES,
         ALL_DEVICES,
         SPECIFIC_DEVICE
+    }
+
+    enum class AssetState {
+        CHECKING,
+        DOWNLOADING,
+        DOWNLOADED,
+        NOT_FOUND
     }
 
     override fun onCreateView(
@@ -127,6 +136,7 @@ class JobFragment : Fragment() {
 
     private fun setupData() {
         workflowViewModel = ViewModelProvider(this).get(WorkflowViewModel::class.java)
+        // Fetch selected-workflow
         workflowViewModel.fetchWorkflow(workflowID)
         workflowViewModel.getWorkflow().observe(viewLifecycleOwner, Observer { workflow ->
             LogHelper.debug(TAG, "Fetched from localCache of $workflowID")
@@ -137,6 +147,17 @@ class JobFragment : Fragment() {
             fetchCompletedDevicesCount()
             setupViews()
             setupListeners()
+
+            // If write-task available, then look for assets
+            if(isWriteTaskAvailable(workflowModel.workflowTasks)){
+                viewBinder.cardTaskAssetItem.visibility = View.VISIBLE
+                updateAssetView(AssetState.CHECKING)
+                // Check for workflow-assets
+                workflowViewModel.checkForWorkflowAssets(workflowID, workflowModel.workflowTasks)
+            } else {
+                // Wanna set this one inorder to proceed for run
+                isAssetAvailable = true
+            }
         })
     }
 
@@ -207,6 +228,16 @@ class JobFragment : Fragment() {
             verifySDAToken()
         })
 
+        workflowViewModel.getAssetAvailabilityStatus().observe(viewLifecycleOwner, Observer { state ->
+            isAssetAvailable = if(state){
+                updateAssetView(AssetState.DOWNLOADED)
+                true
+            } else {
+                updateAssetView(AssetState.NOT_FOUND)
+                false
+            }
+        })
+
         viewBinder.refreshTokenButton.setOnClickListener {
             refreshSDAToken()
         }
@@ -229,22 +260,31 @@ class JobFragment : Fragment() {
         viewBinder.runJobButton.setOnClickListener {
             verifyAndRunJob()
         }
+
+        viewBinder.downloadButton.setOnClickListener {
+            updateAssetView(AssetState.DOWNLOADING)
+            workflowViewModel.downloadWorkflowAssets(workflowID, workflowModel.workflowTasks)
+        }
     }
 
     private fun verifyAndRunJob(position: Int? = null) {
         if(isSDATokenValid){
-            if(verifyBLEAndLocationPermissions()){
-                if(position != null){
-                    initiateSpecificDeviceRun(position)
+            if(isAssetAvailable){
+                if(verifyBLEAndLocationPermissions()){
+                    if(position != null){
+                        initiateSpecificDeviceRun(position)
+                    } else {
+                        initiateJobRun()
+                    }
                 } else {
-                    initiateJobRun()
+                    showSnackbar("Failed to run job")
                 }
             } else {
-                showSnackbar("Failed to run job")
+                showSnackbar("Assets not downloaded")
             }
         } else {
-            showSnackbar("Refreshing secure-access, hang-on")
-            refreshSDAToken()
+            showSnackbar("Secure device access, not available")
+            //refreshSDAToken()
         }
     }
 
@@ -304,10 +344,10 @@ class JobFragment : Fragment() {
                     fetchAttributeDrawable(context!!, R.attr.iconShieldRed))
                 showHideRefreshTokenButton(true)
                 isSDATokenValid = false
-                updateRunJobButtonText(
+                /*updateRunJobButtonText(
                     ContextCompat.getDrawable(requireContext(), R.drawable.ic_refresh_light)!!,
                     resources.getString(R.string.refresh)
-                )
+                )*/
             }
         } else {
             viewBinder.tvValidTill.text = context!!.getString(R.string.na)
@@ -315,10 +355,39 @@ class JobFragment : Fragment() {
                 fetchAttributeDrawable(context!!, R.attr.iconShieldYellow))
             showHideRefreshTokenButton(true)
             isSDATokenValid = false
-            updateRunJobButtonText(
+            /*updateRunJobButtonText(
                 ContextCompat.getDrawable(requireContext(), R.drawable.ic_refresh_light)!!,
                 resources.getString(R.string.refresh)
-            )
+            )*/
+        }
+    }
+
+    private fun updateAssetView(state: AssetState){
+        when(state) {
+            AssetState.CHECKING -> {
+                viewBinder.tvAssetTitle.text = resources.getString(R.string.asset_checking_text)
+                viewBinder.downloadButton.visibility = View.GONE
+                viewBinder.assetStatusView.visibility = View.GONE
+                viewBinder.downloadProgressbar.visibility = View.VISIBLE
+            }
+            AssetState.DOWNLOADED -> {
+                viewBinder.tvAssetTitle.text = resources.getString(R.string.asset_downloaded_text)
+                viewBinder.downloadButton.visibility = View.GONE
+                viewBinder.downloadProgressbar.visibility = View.GONE
+                viewBinder.assetStatusView.visibility = View.VISIBLE
+            }
+            AssetState.DOWNLOADING -> {
+                viewBinder.tvAssetTitle.text = resources.getString(R.string.asset_downloading_text)
+                viewBinder.downloadButton.visibility = View.GONE
+                viewBinder.assetStatusView.visibility = View.GONE
+                viewBinder.downloadProgressbar.visibility = View.VISIBLE
+            }
+            AssetState.NOT_FOUND -> {
+                viewBinder.tvAssetTitle.text = resources.getString(R.string.asset_not_found_text)
+                viewBinder.downloadProgressbar.visibility = View.INVISIBLE
+                viewBinder.assetStatusView.visibility = View.GONE
+                viewBinder.downloadButton.visibility = View.VISIBLE
+            }
         }
     }
 

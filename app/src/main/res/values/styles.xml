@@ -65,6 +65,8 @@
         <item name="iconRefresh">@drawable/ic_refresh_dark</item>
         <item name="iconStop">@drawable/ic_stop_dark</item>
         <item name="iconDeveloper">@drawable/ic_developer_dark</item>
+        <item name="iconDownload">@drawable/ic_download_dark</item>
+        <item name="iconAsset">@drawable/ic_asset_dark</item>
     </style>
 
     <!-- Launch Theme -->
@@ -123,6 +125,8 @@
         <item name="iconRefresh">@drawable/ic_refresh_light</item>
         <item name="iconStop">@drawable/ic_stop_light</item>
         <item name="iconDeveloper">@drawable/ic_developer_light</item>
+        <item name="iconDownload">@drawable/ic_download_light</item>
+        <item name="iconAsset">@drawable/ic_asset_light</item>
     </style>
 
     <style name="AppTheme.Toolbar">

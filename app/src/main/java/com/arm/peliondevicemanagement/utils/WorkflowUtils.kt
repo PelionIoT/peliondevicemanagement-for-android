@@ -47,11 +47,14 @@ import com.arm.peliondevicemanagement.services.cache.LocalCache
 import com.arm.peliondevicemanagement.services.data.SDATokenResponse
 import com.arm.peliondevicemanagement.transport.sda.CommandConstants
 import com.arm.peliondevicemanagement.transport.sda.DeviceCommand
+import com.arm.peliondevicemanagement.utils.WorkflowFileUtils.isFileExists
 import com.arm.peliondevicemanagement.utils.WorkflowFileUtils.readWorkflowAssetFile
 import com.arm.peliondevicemanagement.utils.WorkflowFileUtils.writeWorkflowAssetFile
 import java.util.*
 import java.util.concurrent.Executors
 import kotlin.collections.ArrayList
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 object WorkflowUtils {
 
@@ -137,6 +140,42 @@ object WorkflowUtils {
                 "TokenExpiresOn: $tokenExpiryDateTime")
 
         return tokenStatus
+    }
+
+    suspend fun isWorkflowAssetsDownloaded(workflowID: String, tasks: List<WorkflowTask>): Boolean {
+        return suspendCoroutine {
+            val userID = SharedPrefHelper.getSelectedUserID()
+            val accountID = SharedPrefHelper.getSelectedAccountID()
+            var filePath = "$userID/$accountID/$workflowID"
+
+            LogHelper.debug(TAG, "Looking for downloaded assets")
+            var isAssetDownloaded = false
+            tasks.forEach { task ->
+                if(task.taskName == WRITE_TASK){
+                    task.inputParameters.forEach { inputParam ->
+                        if(inputParam.paramType == TASK_TYPE_FILE &&
+                            inputParam.paramName == TASK_NAME_FILE){
+                            filePath += "/${task.taskID}"
+                            isAssetDownloaded = isFileExists(filePath, inputParam.paramValue)
+                            LogHelper.debug(TAG, "Found write-file task, asset-available: $isAssetDownloaded")
+                        }
+                    }
+                }
+            }
+            LogHelper.debug(TAG, "Workflow assets available: $isAssetDownloaded")
+            it.resume(isAssetDownloaded)
+        }
+    }
+
+    fun isWriteTaskAvailable(tasks: List<WorkflowTask>): Boolean {
+        var status = false
+        tasks.forEach { task->
+            if(task.taskName == WRITE_TASK){
+                status = true
+                return status
+            }
+        }
+        return status
     }
 
     fun getPermissionScopeFromTasks(tasks: List<WorkflowTask>): String {
