@@ -155,7 +155,7 @@ object PlatformUtils {
     fun fetchAttributeDrawable(context: Context, attrID: Int): Drawable {
         val attr = context.obtainStyledAttributes(intArrayOf(attrID))
         val attrResId = attr.getResourceId(0,0)
-        val drawable = context.resources.getDrawable(attrResId)
+        val drawable = ContextCompat.getDrawable(context, attrResId)!!
         attr.recycle()
         return drawable
     }
@@ -163,7 +163,7 @@ object PlatformUtils {
     fun fetchAttributeColor(context: Context, attrID: Int): ColorDrawable {
         val attr = context.obtainStyledAttributes(intArrayOf(attrID))
         val attrResId = attr.getResourceId(0,0)
-        val drawable = ColorDrawable(context.resources.getColor(attrResId))
+        val drawable = ColorDrawable(ContextCompat.getColor(context, attrResId))
         attr.recycle()
         return drawable
     }

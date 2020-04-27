@@ -39,14 +39,23 @@ interface WorkflowDao {
             "ORDER BY pKey ASC LIMIT :limit")
     fun fetchWorkflows(accountID: String, limit: Int, afterID: String): List<Workflow>
 
+    // FixME [ Add assignee field after testing ]
+    @Query("SELECT * FROM workflows WHERE (accountID=:accountID AND workflowStatus=:workflowStatus) ORDER BY pKey ASC LIMIT :limit")
+    fun fetchWorkflowByStatus(accountID: String, limit: Int, workflowStatus: String): List<Workflow>
+
+    @Query("SELECT * FROM workflows WHERE (accountID=:accountID AND workflowStatus=:workflowStatus AND (pKey > " +
+            "(SELECT pKey FROM workflows WHERE workflowID LIKE :afterID))) " +
+            "ORDER BY pKey ASC LIMIT :limit")
+    fun fetchWorkflowByStatus(accountID: String, limit: Int, workflowStatus: String, afterID: String): List<Workflow>
+
     @Query("SELECT * FROM workflows WHERE (accountID=:accountID AND workflowID=:workflowID)")
-    fun fetchWorkflow(accountID: String, workflowID: String): Workflow
+    fun fetchSingleWorkflow(accountID: String, workflowID: String): Workflow?
 
     @Update
     fun updateWorkflow(workflow: Workflow)
 
-    @Query("UPDATE workflows SET workflowStatus=:status WHERE workflowID=:workflowID")
-    fun updateWorkflowStatus(workflowID: String, status: String)
+    @Query("UPDATE workflows SET workflowStatus=:workflowStatus WHERE (accountID=:accountID AND workflowID=:workflowID)")
+    fun updateWorkflowStatus(accountID: String, workflowID: String, workflowStatus: String)
 
     @TypeConverters(SDATokenResponseConverter::class)
     @Query("UPDATE workflows SET sdaToken=:sdaToken WHERE workflowID=:workflowID")

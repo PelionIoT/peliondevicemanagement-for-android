@@ -30,7 +30,6 @@ class PacketFactory(packetNumber: Int, controlFrame: Byte,
     private var isReRequestedPacket: Byte = 0
     private var packetReserved: ByteArray = ByteArray(2)
     private var packetPayload: ByteArray = byteArrayOf()
-    //private var packetCRC: Byte = 0
 
     private var completeByteArray = ByteArray(8)
 
@@ -40,14 +39,12 @@ class PacketFactory(packetNumber: Int, controlFrame: Byte,
         this.packetLength = packetLength.toByte()
         this.totalPayloadSize = bitShifter(totalPayloadSize)
         this.isReRequestedPacket = if(isReRequestedPacket) 1 else 0
-        // Reserving 2bytes fixme
         this.packetReserved[0] = packetReserved[0]
         this.packetReserved[1] = packetReserved[1]
         if(packetPayload.size > 232){
             throw ArrayIndexOutOfBoundsException("Packet Payload Max limit: 231")
         }
         this.packetPayload = packetPayload
-        //this.packetCRC = packetCRC.toByte()
         buildPacket()
     }
 
@@ -63,7 +60,6 @@ class PacketFactory(packetNumber: Int, controlFrame: Byte,
                 ),
                 false, byteArrayOf(0, 0),
                 packetArray.copyOfRange(8, packetArray.size - 1)
-                //packetArray[(packetArray.size - 1)].toInt()
             )
         }
 
@@ -110,7 +106,6 @@ class PacketFactory(packetNumber: Int, controlFrame: Byte,
         completeByteArray[3] = totalPayloadSize[0]
         completeByteArray[4] = totalPayloadSize[1]
         completeByteArray[5] = isReRequestedPacket
-        // fixme
         completeByteArray[6] = packetReserved[0]
         completeByteArray[7] = packetReserved[1]
 
@@ -119,9 +114,6 @@ class PacketFactory(packetNumber: Int, controlFrame: Byte,
         System.arraycopy(completeByteArray, 0, tempBuffer, 0, completeByteArray.size)
         System.arraycopy(packetPayload, 0, tempBuffer, completeByteArray.size, packetPayload.size)
         completeByteArray = tempBuffer
-
-        // Attach packetCRC to main array
-        //completeByteArray += packetCRC
     }
 
     fun getPacket(): ByteArray {

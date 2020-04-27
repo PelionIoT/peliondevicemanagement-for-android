@@ -18,6 +18,7 @@
 package com.arm.peliondevicemanagement.components.viewholders
 
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.models.workflow.device.WorkflowDevice
@@ -40,20 +41,20 @@ class DeviceViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
                 DEVICE_STATE_COMPLETED -> {
                     viewProgressbar.visibility = View.INVISIBLE
                     viewDeviceStatus.visibility = View.VISIBLE
-                    viewDeviceStatus.background = resources.getDrawable(R.drawable.ic_status_ok)
-                    viewDeviceStatus.setImageDrawable(resources.getDrawable(R.drawable.ic_check_light))
+                    viewDeviceStatus.background = ContextCompat.getDrawable(context, R.drawable.ic_status_ok)
+                    viewDeviceStatus.setImageDrawable(ContextCompat.getDrawable(context ,R.drawable.ic_check_light))
                 }
                 DEVICE_STATE_FAILED -> {
                     viewProgressbar.visibility = View.INVISIBLE
                     viewDeviceStatus.visibility = View.VISIBLE
-                    viewDeviceStatus.background = resources.getDrawable(R.drawable.ic_status_failed)
-                    viewDeviceStatus.setImageDrawable(resources.getDrawable(R.drawable.ic_exclamation))
+                    viewDeviceStatus.background = ContextCompat.getDrawable(context, R.drawable.ic_status_failed)
+                    viewDeviceStatus.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_exclamation))
                 }
                 DEVICE_STATE_PENDING -> {
                     viewProgressbar.visibility = View.INVISIBLE
                     viewDeviceStatus.visibility = View.VISIBLE
-                    viewDeviceStatus.background = resources.getDrawable(R.drawable.ic_status_pending)
-                    viewDeviceStatus.setImageDrawable(resources.getDrawable(R.drawable.ic_exclamation))
+                    viewDeviceStatus.background = ContextCompat.getDrawable(context, R.drawable.ic_status_pending)
+                    viewDeviceStatus.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_exclamation))
                 }
                 else -> {
                     viewDeviceStatus.visibility = View.GONE

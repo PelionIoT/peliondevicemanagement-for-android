@@ -27,10 +27,10 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.Navigation
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.adapters.WorkflowAdapter
 import com.arm.peliondevicemanagement.components.models.workflow.Workflow
 import com.arm.peliondevicemanagement.components.viewmodels.WorkflowViewModel
@@ -100,7 +100,7 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
         requireActivity().onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
         workflowViewModel = ViewModelProvider(this).get(WorkflowViewModel::class.java)
 
-        workflowViewModel.initWorkflowLiveData()
+        workflowViewModel.initPendingWorkflowLiveData()
 
         viewBinder.rvWorkflows.apply {
             layoutManager = LinearLayoutManager(context,
@@ -109,6 +109,7 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
             adapter = workflowAdapter
         }
 
+        @Suppress("DEPRECATION")
         viewBinder.syncProgressView.indeterminateDrawable.setColorFilter(
             resources.getColor(android.R.color.black),
             android.graphics.PorterDuff.Mode.MULTIPLY)
@@ -120,7 +121,7 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
         viewBinder.swipeRefreshLayout.setOnRefreshListener(refreshListener)
         viewBinder.searchBar.searchTextBox.setOnQueryTextListener(queryTextListener)
 
-        workflowViewModel.getWorkflows().observe(viewLifecycleOwner, Observer {
+        workflowViewModel.getPendingWorkflows().observe(viewLifecycleOwner, Observer {
             if(it != null && it.isNotEmpty()){
                 setSwipeRefreshStatus(false)
             }
@@ -149,7 +150,7 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
                 else -> {
                     updateSyncView(false)
                     setSwipeRefreshStatus(false)
-                    showHide404View(true, "No jobs assigned")
+                    showHide404View(true)
                 }
             }
         })
@@ -160,7 +161,7 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
 
         showHideSearchBar(false)
         showHide404View(false)
-        workflowViewModel.refresh()
+        workflowViewModel.refreshPendingWorkflows()
     }
 
     private fun updateSyncView(visibility: Boolean, text: String? = null) {
@@ -190,13 +191,11 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
     private fun resetSearchText() =
         viewBinder.searchBar.searchTextBox.setQuery("", false)
 
-    private fun showHide404View(visibility: Boolean, message: String = "") {
+    private fun showHide404View(visibility: Boolean) {
         if (visibility) {
+            viewBinder.notFoundView.viewStatus.visibility = View.GONE
+            viewBinder.notFoundView.errorText.text = resources.getString(R.string.no_jobs_text)
             viewBinder.notFoundView.root.visibility = View.VISIBLE
-
-            if (message.isNotEmpty()) {
-                viewBinder.notFoundView.errorText.text = message
-            }
         } else {
             viewBinder.notFoundView.root.visibility = View.GONE
         }

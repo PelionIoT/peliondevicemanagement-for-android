@@ -23,6 +23,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
@@ -125,9 +126,9 @@ class AuthActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
     private fun setupItemNavViewColors() {
         val colorList: ColorStateList = if(SharedPrefHelper.isDarkThemeEnabled()){
-            ColorStateList.valueOf(resources.getColor(android.R.color.white))
+            ColorStateList.valueOf(ContextCompat.getColor(this, android.R.color.white))
         } else {
-            ColorStateList.valueOf(resources.getColor(android.R.color.black))
+            ColorStateList.valueOf(ContextCompat.getColor(this, android.R.color.black))
         }
         navigationView.itemTextColor = colorList
         navigationView.itemIconTintList = colorList

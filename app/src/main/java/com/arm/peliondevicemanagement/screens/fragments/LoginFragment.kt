@@ -17,6 +17,8 @@
 
 package com.arm.peliondevicemanagement.screens.fragments
 
+import android.graphics.BlendModeColorFilter
+import android.graphics.ColorFilter
 import android.os.Bundle
 import android.os.Handler
 import android.util.DisplayMetrics
@@ -26,6 +28,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import androidx.activity.OnBackPressedCallback
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.BlendModeColorFilterCompat
+import androidx.core.graphics.BlendModeCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
@@ -95,13 +100,14 @@ class LoginFragment : Fragment() {
     }
 
     private fun setupProgressView(){
+        @Suppress("DEPRECATION")
         viewBinder.progressLayout.progressBar
             .indeterminateDrawable.setColorFilter(
             resources.getColor(android.R.color.white),
             android.graphics.PorterDuff.Mode.MULTIPLY)
 
         viewBinder.progressLayout.progressBarText.setTextColor(
-            resources.getColor(android.R.color.white))
+            ContextCompat.getColor(requireContext(), android.R.color.white))
     }
 
     private fun setupListeners() {
@@ -177,7 +183,7 @@ class LoginFragment : Fragment() {
     }
 
     private fun setVersionName(){
-        tvVersion.setTextColor(resources.getColor(android.R.color.white))
+        tvVersion.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
         tvVersion.text = (activity as AuthActivity).getAppVersion()
     }
 

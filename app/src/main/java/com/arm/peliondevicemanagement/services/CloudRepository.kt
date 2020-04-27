@@ -90,14 +90,19 @@ class CloudRepository(private val cloudAPIService: CloudAPIService): BaseReposit
         )
     }
 
-    suspend fun getAssignedWorkflows(itemsPerPage: Int, after: String? = null): WorkflowsResponse? {
+    suspend fun getAssignedWorkflows(itemsPerPage: Int,
+                                     assigneeID: String,
+                                     status: String,
+                                     after: String? = null): WorkflowsResponse? {
         return if(after != null){
             doSafeAPIRequest(
-                call = { cloudAPIService.getAssignedWorkflows(itemsPerPage, after)}
+                call = { cloudAPIService
+                    .getAssignedWorkflows(itemsPerPage, assigneeID, status, after)}
             )
         } else {
             doSafeAPIRequest(
-                call = { cloudAPIService.getAssignedWorkflows(itemsPerPage)}
+                call = { cloudAPIService
+                    .getAssignedWorkflows(itemsPerPage, assigneeID, status)}
             )
         }
     }

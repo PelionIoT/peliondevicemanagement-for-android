@@ -22,10 +22,12 @@ import android.animation.AnimatorListenerAdapter
 import android.bluetooth.le.ScanResult
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.view.ContextMenu
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -46,6 +48,7 @@ import com.arm.peliondevicemanagement.components.viewmodels.SDAViewModel
 import com.arm.peliondevicemanagement.components.viewmodels.WorkflowViewModel
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_COMPLETED
 import com.arm.peliondevicemanagement.constants.ExecutionMode
+import com.arm.peliondevicemanagement.constants.state.workflow.WorkflowState
 import com.arm.peliondevicemanagement.constants.state.workflow.device.DeviceResponseState
 import com.arm.peliondevicemanagement.constants.state.workflow.device.DeviceScanState
 import com.arm.peliondevicemanagement.constants.state.workflow.device.DeviceState
@@ -103,7 +106,7 @@ class JobRunFragment : Fragment() {
             if(mScannedDevices.isNotEmpty()){
                 isScanCompleted = true
                 updateStopButtonText(
-                    resources.getDrawable(R.drawable.ic_stop_light),
+                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_stop_light)!!,
                     resources.getString(R.string.stop_text)
                 )
                 removeTemporaryDeviceItemFromList()
@@ -112,7 +115,7 @@ class JobRunFragment : Fragment() {
                 isScanCompleted = false
                 addTemporaryDeviceItemInList("No devices found", DeviceScanState.FAILED)
                 updateStopButtonText(
-                    resources.getDrawable(R.drawable.ic_refresh_light),
+                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_refresh_light)!!,
                     resources.getString(R.string.retry_text)
                 )
             }
@@ -392,8 +395,8 @@ class JobRunFragment : Fragment() {
                     scanItem.tvName.text = deviceText
                 }
                 scanItem.tvDescription.text = resources.getString(R.string.failed_text)
-                scanItem.viewDeviceStatus.background = resources.getDrawable(R.drawable.ic_status_failed)
-                scanItem.viewDeviceStatus.setImageDrawable(resources.getDrawable(R.drawable.ic_exclamation))
+                scanItem.viewDeviceStatus.background = ContextCompat.getDrawable(requireContext(), R.drawable.ic_status_failed)
+                scanItem.viewDeviceStatus.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_exclamation))
                 scanItem.viewProgressbar.visibility = View.INVISIBLE
                 scanItem.viewDeviceStatus.visibility = View.VISIBLE
             }
@@ -506,7 +509,7 @@ class JobRunFragment : Fragment() {
                 R.attr.iconStop)
         )
         updateStopButtonText(
-            resources.getDrawable(R.drawable.ic_check_light),
+            ContextCompat.getDrawable(requireContext(), R.drawable.ic_check_light)!!,
             resources.getString(R.string.finish_text)
         )
         viewBinder.elapsedTimer.stop()
@@ -521,12 +524,13 @@ class JobRunFragment : Fragment() {
             addTemporaryDeviceItemInList("", DeviceScanState.FAILED, failedCount)
         }
 
-        //saveLogsToDB()
+        saveLogsToDB()
     }
 
     private fun saveLogsToDB() {
         workflowViewModel.updateWorkflowDevices(
             deviceRunModel.workflowID, deviceRunModel.workflowDevices)
+        //workflowViewModel.updateWorkflowStatus(deviceRunModel.workflowID, WorkflowState.COMPLETED.name)
     }
 
     private fun destroyObjects() {

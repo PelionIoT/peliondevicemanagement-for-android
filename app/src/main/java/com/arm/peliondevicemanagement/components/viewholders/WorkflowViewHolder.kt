@@ -18,6 +18,7 @@
 package com.arm.peliondevicemanagement.components.viewholders
 
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
@@ -53,13 +54,13 @@ class WorkflowViewHolder(itemView: View,
             chipLocation.text = model.workflowLocation
             if(model.workflowStatus == WORKFLOW_STATE_SYNCED ||
                 model.workflowStatus == WORKFLOW_STATE_COMPLETED){
-                syncStatusView.setBackgroundColor(resources.getColor(R.color.arm_green))
-                syncStatusCheckView.background = resources.getDrawable(R.drawable.ic_status_ok)
-                syncStatusCheckView.setImageDrawable(resources.getDrawable(R.drawable.ic_check_light))
+                syncStatusView.setBackgroundColor(ContextCompat.getColor(context, R.color.arm_green))
+                syncStatusCheckView.background = ContextCompat.getDrawable(context, R.drawable.ic_status_ok)
+                syncStatusCheckView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check_light))
             } else {
-                syncStatusView.setBackgroundColor(resources.getColor(R.color.arm_yellow))
-                syncStatusCheckView.background = resources.getDrawable(R.drawable.ic_status_pending)
-                syncStatusCheckView.setImageDrawable(resources.getDrawable(R.drawable.ic_exclamation))
+                syncStatusView.setBackgroundColor(ContextCompat.getColor(context, R.color.arm_yellow))
+                syncStatusCheckView.background = ContextCompat.getDrawable(context, R.drawable.ic_status_pending)
+                syncStatusCheckView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_exclamation))
             }
         }
     }

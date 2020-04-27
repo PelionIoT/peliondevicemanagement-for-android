@@ -17,22 +17,180 @@
 
 package com.arm.peliondevicemanagement.screens.fragments
 
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
+import androidx.core.view.setPadding
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
 import com.arm.peliondevicemanagement.R
+import com.arm.peliondevicemanagement.components.adapters.WorkflowAdapter
+import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
+import com.arm.peliondevicemanagement.components.models.workflow.Workflow
+import com.arm.peliondevicemanagement.components.viewmodels.WorkflowViewModel
+import com.arm.peliondevicemanagement.constants.state.LoadState
+import com.arm.peliondevicemanagement.databinding.FragmentCompletedJobsBinding
+import com.arm.peliondevicemanagement.helpers.LogHelper
+import com.arm.peliondevicemanagement.screens.activities.HomeActivity
+import com.arm.peliondevicemanagement.utils.PlatformUtils
 
-class CompletedJobsFragment : Fragment() {
+class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
+
+    companion object {
+        private val TAG: String = CompletedJobsFragment::class.java.simpleName
+    }
+
+    private var _viewBinder: FragmentCompletedJobsBinding? = null
+    private val viewBinder get() = _viewBinder!!
+
+    private lateinit var workflowViewModel: WorkflowViewModel
+    private var workflowAdapter = WorkflowAdapter(this)
+
+    private lateinit var itemClickListener: RecyclerItemClickListener
+
+    private val onBackPressedCallback = object: OnBackPressedCallback(true){
+        override fun handleOnBackPressed() {
+            (activity as HomeActivity).callCloseApp()
+        }
+    }
+
+    private val refreshListener: androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener = androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener {
+        refreshContent()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_completed_jobs, container, false)
+        _viewBinder = FragmentCompletedJobsBinding.inflate(inflater, container, false)
+        return viewBinder.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        init()
+        setupListeners()
+        showHide404View(false)
+        setSwipeRefreshStatus(true)
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        itemClickListener = context as RecyclerItemClickListener
+    }
+
+    private fun init() {
+        requireActivity().onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+        workflowViewModel = ViewModelProvider(this).get(WorkflowViewModel::class.java)
+
+        workflowViewModel.initCompletedWorkflowsLiveData()
+
+        viewBinder.rvWorkflows.apply {
+            layoutManager = LinearLayoutManager(context,
+                RecyclerView.VERTICAL, false)
+            itemAnimator = DefaultItemAnimator()
+            adapter = workflowAdapter
+        }
+
+        @Suppress("DEPRECATION")
+        viewBinder.syncProgressView.indeterminateDrawable.setColorFilter(
+            resources.getColor(android.R.color.black),
+            android.graphics.PorterDuff.Mode.MULTIPLY)
+    }
+
+    private fun setupListeners() {
+        viewBinder.swipeRefreshLayout.setOnRefreshListener(refreshListener)
+
+        workflowViewModel.getCompletedWorkflows().observe(viewLifecycleOwner, Observer {
+            if(it != null && it.isNotEmpty()){
+                setSwipeRefreshStatus(false)
+            }
+            workflowAdapter.submitList(it)
+        })
+
+        workflowViewModel.getRefreshState().observe(viewLifecycleOwner, Observer { state->
+            when (state) {
+                LoadState.LOADING -> {
+                    setSwipeRefreshStatus(true)
+                }
+                LoadState.LOADED -> {
+                    setSwipeRefreshStatus(false)
+                    updateSyncView(false)
+                }
+                LoadState.DOWNLOADING -> {
+                    setSwipeRefreshStatus(false)
+                    updateSyncView(true, "Downloading Assets")
+                }
+                LoadState.DOWNLOADED -> {
+                    updateSyncView(true, "Downloaded successfully")
+                }
+                LoadState.FAILED -> {
+                    updateSyncView(true, "Download failed")
+                }
+                else -> {
+                    updateSyncView(false)
+                    setSwipeRefreshStatus(false)
+                    showHide404View(true)
+                }
+            }
+        })
+    }
+
+    private fun refreshContent() {
+        LogHelper.debug(TAG, "refreshContent()")
+
+        showHide404View(false)
+        workflowViewModel.refreshCompletedWorkflows()
+    }
+
+    private fun updateSyncView(visibility: Boolean, text: String? = null) {
+        if(visibility) {
+            viewBinder.syncView.visibility = View.VISIBLE
+            if(!text.isNullOrEmpty()){
+                viewBinder.syncSubText.visibility = View.VISIBLE
+                viewBinder.syncSubText.text = text
+            } else {
+                viewBinder.syncSubText.visibility = View.GONE
+            }
+        } else {
+            viewBinder.syncView.visibility = View.GONE
+        }
+    }
+
+    private fun setSwipeRefreshStatus(isRefreshing: Boolean) {
+        viewBinder.swipeRefreshLayout.isRefreshing = isRefreshing
+    }
+
+    private fun showHide404View(visibility: Boolean) {
+        if (visibility) {
+            viewBinder.notFoundView.root.visibility = View.VISIBLE
+        } else {
+            viewBinder.notFoundView.root.visibility = View.GONE
+        }
+    }
+
+    override fun onItemClick(data: Any) {
+        val model = data as Workflow
+        LogHelper.debug(TAG, "onItemClick()-> " +
+                "workflowName: ${model.workflowName}, " +
+                "workflowID: ${model.workflowID}")
+        // Pass it to Home-Activity for launch
+        itemClickListener.onItemClick(model.workflowID)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _viewBinder = null
+        workflowViewModel.cancelAllRequests()
     }
 
 }

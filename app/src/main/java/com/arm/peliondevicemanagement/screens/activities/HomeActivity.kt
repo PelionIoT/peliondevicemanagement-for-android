@@ -25,6 +25,7 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
@@ -112,9 +113,9 @@ class HomeActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
     private fun setupItemNavViewColors() {
         val colorList: ColorStateList = if(SharedPrefHelper.isDarkThemeEnabled()){
-            ColorStateList.valueOf(resources.getColor(android.R.color.white))
+            ColorStateList.valueOf(ContextCompat.getColor(this, android.R.color.white))
         } else {
-            ColorStateList.valueOf(resources.getColor(android.R.color.black))
+            ColorStateList.valueOf(ContextCompat.getColor(this, android.R.color.black))
         }
         navigationView.itemTextColor = colorList
         navigationView.itemIconTintList = colorList
@@ -127,14 +128,14 @@ class HomeActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         val selectedColor: Int
         val rippleColor: ColorStateList
         if(SharedPrefHelper.isDarkThemeEnabled()){
-            normalColor = resources.getColor(android.R.color.white)
-            selectedColor = resources.getColor(R.color.colorAccentForDark)
-            rippleColor = ColorStateList.valueOf(resources.getColor(R.color.colorAccentForDark))
+            normalColor = ContextCompat.getColor(this, android.R.color.white)
+            selectedColor = ContextCompat.getColor(this, R.color.colorAccentForDark)
+            rippleColor = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorAccentForDark))
             toolbar.elevation = 0f
         } else {
-            normalColor = resources.getColor(android.R.color.black)
-            selectedColor = resources.getColor(R.color.colorAccentForLight)
-            rippleColor = ColorStateList.valueOf(resources.getColor(R.color.colorAccentForLight))
+            normalColor = ContextCompat.getColor(this, android.R.color.black)
+            selectedColor = ContextCompat.getColor(this, R.color.colorAccentForLight)
+            rippleColor = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorAccentForLight))
         }
 
         tabLayout.setTabTextColors(normalColor, selectedColor)

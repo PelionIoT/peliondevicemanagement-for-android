@@ -23,6 +23,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -131,10 +132,20 @@ class JobFragment : Fragment() {
             LogHelper.debug(TAG, "Fetched from localCache of $workflowID")
             workflowModel = workflow
             workflowDeviceAdapter = WorkflowDeviceAdapter(workflowModel.workflowDevices!!)
+            // FixME
+            //checkAndTurnStatus(workflow.workflowStatus)
             fetchCompletedDevicesCount()
             setupViews()
             setupListeners()
         })
+    }
+
+    private fun checkAndTurnStatus(workflowStatus: String) {
+        if(workflowStatus == WorkflowState.PENDING.name){
+            workflowViewModel.updateWorkflowStatus(workflowModel.workflowID, WorkflowState.COMPLETED.name)
+        } else {
+            workflowViewModel.updateWorkflowStatus(workflowModel.workflowID, WorkflowState.PENDING.name)
+        }
     }
 
     private fun setupViews() {
@@ -166,7 +177,7 @@ class JobFragment : Fragment() {
         // Add swipe-gesture to devices list
         val itemTouchHelper = ItemTouchHelper(
             SwipeDragControllerListener(
-                resources.getDrawable(R.drawable.ic_play_light),
+                ContextCompat.getDrawable(requireContext(), R.drawable.ic_play_light)!!,
                 fetchAttributeColor(context!!, R.attr.colorAccent), swipeListener,
                 ItemTouchHelper.LEFT
             )
@@ -283,7 +294,7 @@ class JobFragment : Fragment() {
                 showHideRefreshTokenButton(false)
                 isSDATokenValid = true
                 updateRunJobButtonText(
-                    resources.getDrawable(R.drawable.ic_play_light),
+                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_play_light)!!,
                     resources.getString(R.string.run_job)
                 )
             } else {
@@ -294,7 +305,7 @@ class JobFragment : Fragment() {
                 showHideRefreshTokenButton(true)
                 isSDATokenValid = false
                 updateRunJobButtonText(
-                    resources.getDrawable(R.drawable.ic_refresh_light),
+                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_refresh_light)!!,
                     resources.getString(R.string.refresh)
                 )
             }
@@ -305,7 +316,7 @@ class JobFragment : Fragment() {
             showHideRefreshTokenButton(true)
             isSDATokenValid = false
             updateRunJobButtonText(
-                resources.getDrawable(R.drawable.ic_refresh_light),
+                ContextCompat.getDrawable(requireContext(), R.drawable.ic_refresh_light)!!,
                 resources.getString(R.string.refresh)
             )
         }

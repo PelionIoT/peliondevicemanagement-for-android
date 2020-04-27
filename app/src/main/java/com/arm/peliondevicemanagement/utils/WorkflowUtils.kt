@@ -61,7 +61,7 @@ object WorkflowUtils {
     fun deleteWorkflowsCache() {
         // Delete workflow-asset files
         val userID = SharedPrefHelper.getSelectedUserID()!!
-        val accountID = SharedPrefHelper.getSelectedAccountID()!!
+        val accountID = SharedPrefHelper.getSelectedAccountID()
         WorkflowFileUtils.deleteWorkflowAssets(userID)
 
         // Delete entries from workflow-database

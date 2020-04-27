@@ -16,16 +16,103 @@
   ~ limitations under the License.
   -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".screens.fragments.CompletedJobsFragment">
+    android:id="@+id/swipeRefreshLayout"
+    android:background="?attr/colorBackground">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="match_parent">
 
-</FrameLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/syncView"
+            android:paddingTop="10dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="12dp"
+            android:elevation="5dp"
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:background="@color/arm_yellow">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/syncText"
+                android:text="@string/syncing_jobs_text"
+                android:layout_toStartOf="@id/syncProgressView"
+                android:fontFamily="@font/lato_regular"
+                android:textSize="16sp"
+                android:textColor="@android:color/black"
+                />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/syncSubText"
+                android:text="@string/syncing_jobs_text"
+                android:layout_toStartOf="@id/syncProgressView"
+                android:fontFamily="@font/lato_regular"
+                android:layout_below="@id/syncText"
+                android:textSize="14sp"
+                tools:text="Downloading assets"
+                android:visibility="gone"
+                tools:visibility="visible"
+                android:textColor="@android:color/black"
+                />
+
+            <ProgressBar
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_alignParentEnd="true"
+                android:id="@+id/syncProgressView"
+                android:layout_centerVertical="true"
+                />
+
+        </RelativeLayout>
+
+        <include
+            layout="@layout/layout_search"
+            android:id="@+id/searchBar"
+            android:layout_below="@id/syncView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:visibility="gone"
+            tools:visibility="visible"
+            />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvWorkflows"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:clipToPadding="false"
+            android:layout_below="@id/searchBar"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            />
+
+        <include
+            layout="@layout/layout_not_jobs"
+            android:id="@+id/notFoundView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:visibility="gone"
+            tools:visibility="visible"
+            />
+
+    </RelativeLayout>
+
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

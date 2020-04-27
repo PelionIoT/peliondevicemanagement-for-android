@@ -75,6 +75,7 @@ class AccountAdapter(private val accountsList: ArrayList<Account>,
         }
 
         override fun publishResults(charSequence: CharSequence, filterResults: FilterResults) {
+            @Suppress("UNCHECKED_CAST")
             accountsListFiltered = filterResults.values as ArrayList<Account>
             notifyDataSetChanged()
         }

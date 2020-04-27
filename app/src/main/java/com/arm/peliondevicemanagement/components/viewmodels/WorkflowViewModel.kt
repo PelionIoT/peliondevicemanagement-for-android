@@ -55,7 +55,8 @@ class WorkflowViewModel : ViewModel() {
     private val workflowDB: WorkflowDB = AppController.getWorkflowDB()
     private var localCache: LocalCache
 
-    private lateinit var workflowsLiveData: LiveData<PagedList<Workflow>>
+    private lateinit var _pendingWorkflowsLiveData: LiveData<PagedList<Workflow>>
+    private lateinit var _completedWorkflowsLiveData: LiveData<PagedList<Workflow>>
     private val refreshStateLiveData = MutableLiveData<LoadState>()
     private val refreshedSDATokenLiveData = MutableLiveData<SDATokenResponse>()
     private val workflowLiveData = MutableLiveData<Workflow>()
@@ -89,18 +90,28 @@ class WorkflowViewModel : ViewModel() {
         localRepository = LocalRepository(scope, cloudRepository, localCache)
     }
 
-    fun initWorkflowLiveData() {
-        workflowsLiveData = getWorkflowsLiveData()
+    fun initPendingWorkflowLiveData() {
+        _pendingWorkflowsLiveData = getPendingWorkflowsLiveData()
     }
 
-    fun getWorkflows(): LiveData<PagedList<Workflow>> = workflowsLiveData
+    fun initCompletedWorkflowsLiveData() {
+        _completedWorkflowsLiveData = getCompletedWorkflowsLiveData()
+    }
+
+    fun getPendingWorkflows(): LiveData<PagedList<Workflow>> = _pendingWorkflowsLiveData
+
+    fun getCompletedWorkflows(): LiveData<PagedList<Workflow>> = _completedWorkflowsLiveData
 
     fun getWorkflow(): LiveData<Workflow> = workflowLiveData
 
     fun getRefreshState(): LiveData<LoadState> = refreshStateLiveData
 
-    fun refresh() {
-        workflowsLiveData.value?.dataSource?.invalidate()
+    fun refreshPendingWorkflows() {
+        _pendingWorkflowsLiveData.value?.dataSource?.invalidate()
+    }
+
+    fun refreshCompletedWorkflows() {
+        _completedWorkflowsLiveData.value?.dataSource?.invalidate()
     }
 
     fun refreshSDAToken(permissionScope: String, audienceList: List<String>) {
@@ -123,9 +134,15 @@ class WorkflowViewModel : ViewModel() {
         }
     }
 
+    fun updateWorkflowStatus(workflowID: String, workflowStatus: String) {
+        localCache.updateWorkflowStatus(workflowID, workflowStatus) {
+            LogHelper.debug(TAG, "Workflow status updated.")
+        }
+    }
+
     fun fetchWorkflow(workflowID: String) {
         scope.launch {
-            val workflow = localCache.fetchWorkflow(workflowID)
+            val workflow = localCache.fetchSingleWorkflow(workflowID)
             workflowLiveData.postValue(workflow)
         }
     }
@@ -148,7 +165,7 @@ class WorkflowViewModel : ViewModel() {
 
     fun getRefreshedSDAToken(): LiveData<SDATokenResponse> = refreshedSDATokenLiveData
 
-    private fun getWorkflowsLiveData(): LiveData<PagedList<Workflow>> {
+    private fun getPendingWorkflowsLiveData(): LiveData<PagedList<Workflow>> {
         val pageConfig = PagedList.Config.Builder()
             .setPageSize(5)
             .setInitialLoadSizeHint(10)
@@ -156,7 +173,24 @@ class WorkflowViewModel : ViewModel() {
             .build()
 
         // Fetch data from the local-cache and return a factory
-        val dataSourceFactory = localRepository.fetchWorkflowsFactory(refreshStateLiveData)
+        val dataSourceFactory = localRepository.fetchPendingWorkflowsFactory(refreshStateLiveData)
+
+        // Get the paged list
+        return LivePagedListBuilder(dataSourceFactory, pageConfig)
+            .setBoundaryCallback(boundaryCallback)
+            .build()
+    }
+
+    private fun getCompletedWorkflowsLiveData(): LiveData<PagedList<Workflow>> {
+        val pageConfig = PagedList.Config.Builder()
+            .setPageSize(5)
+            .setInitialLoadSizeHint(10)
+            .setEnablePlaceholders(false)
+            .build()
+
+        // Fetch data from the local-cache and return a factory
+        val dataSourceFactory = localRepository
+            .fetchCompletedWorkflowsFactory(refreshStateLiveData)
 
         // Get the paged list
         return LivePagedListBuilder(dataSourceFactory, pageConfig)

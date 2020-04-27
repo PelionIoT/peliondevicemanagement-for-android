@@ -34,10 +34,16 @@ import com.arm.peliondevicemanagement.constants.APIConstants.API_WORKFLOW_FILES
 import com.arm.peliondevicemanagement.constants.APIConstants.API_WORKFLOW_SYNC
 import com.arm.peliondevicemanagement.constants.APIConstants.CONTENT_TYPE_JSON
 import com.arm.peliondevicemanagement.constants.APIConstants.DEFAULT_BASE_URL
+import com.arm.peliondevicemanagement.constants.APIConstants.KEY_AFTER_ID
+import com.arm.peliondevicemanagement.constants.APIConstants.KEY_ASSIGNEE_ID
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_AUTHORIZATION
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_BEARER
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_CONTENT_TYPE
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_CONTENT_TYPE_JSON
+import com.arm.peliondevicemanagement.constants.APIConstants.KEY_FILE_ID
+import com.arm.peliondevicemanagement.constants.APIConstants.KEY_LIMIT
+import com.arm.peliondevicemanagement.constants.APIConstants.KEY_WORKFLOW_ID
+import com.arm.peliondevicemanagement.constants.APIConstants.KEY_WORKFLOW_STATUS
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.services.data.SDATokenResponse
 import com.arm.peliondevicemanagement.services.data.WorkflowsResponse
@@ -107,27 +113,29 @@ interface CloudAPIService {
     @GET(API_ACCOUNTS_ME)
     suspend fun getAccountProfile(): Response<AccountProfileModel>
 
-    @GET(API_ASSIGNED_WORKFLOWS)
+    @GET(API_ALL_WORKFLOWS)
     suspend fun getAssignedWorkflows(
-        @Query("limit") itemsPerPage: Int,
-        @Query("after") after: String? = null
+        @Query(KEY_LIMIT) itemsPerPage: Int,
+        @Query(KEY_ASSIGNEE_ID) assignee: String,
+        @Query(KEY_WORKFLOW_STATUS) status: String,
+        @Query(KEY_AFTER_ID) after: String? = null
     ): Response<WorkflowsResponse>
 
     @GET(API_ALL_WORKFLOWS)
     suspend fun getAllWorkflows(
-        @Query("limit") itemsPerPage: Int,
-        @Query("after") after: String? = null
+        @Query(KEY_LIMIT) itemsPerPage: Int,
+        @Query(KEY_AFTER_ID) after: String? = null
     ): Response<WorkflowsResponse>
 
-    @POST("$API_ASSIGNED_WORKFLOWS/{workflow_id}$API_WORKFLOW_SYNC")
+    @POST("$API_ASSIGNED_WORKFLOWS/{$KEY_WORKFLOW_ID}$API_WORKFLOW_SYNC")
     suspend fun syncWorkflow(
-        @Path("workflow_id") workflowID: String
+        @Path(KEY_WORKFLOW_ID) workflowID: String
     ): Response<ResponseBody>
 
     @Streaming
-    @GET("$API_WORKFLOW_FILES/{file_id}")
+    @GET("$API_WORKFLOW_FILES/{$KEY_FILE_ID}")
     suspend fun getWorkflowTaskAssetFile(
-        @Path("file_id") fileID: String
+        @Path(KEY_FILE_ID) fileID: String
     ): Response<ResponseBody>
 
     @GET(API_CLOUD_UI_SERVER + API_LICENSES)

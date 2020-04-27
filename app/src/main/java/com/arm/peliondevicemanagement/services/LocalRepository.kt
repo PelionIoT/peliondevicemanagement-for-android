@@ -22,7 +22,8 @@ import androidx.paging.DataSource
 import com.arm.peliondevicemanagement.components.models.workflow.Workflow
 import com.arm.peliondevicemanagement.constants.state.LoadState
 import com.arm.peliondevicemanagement.services.cache.LocalCache
-import com.arm.peliondevicemanagement.services.store.WorkflowDataSource
+import com.arm.peliondevicemanagement.services.store.CompletedWorkflowDataSource
+import com.arm.peliondevicemanagement.services.store.PendingWorkflowDataSource
 import kotlinx.coroutines.CoroutineScope
 
 class LocalRepository(
@@ -31,10 +32,18 @@ class LocalRepository(
     private val localCache: LocalCache
 ) {
 
-    fun fetchWorkflowsFactory(stateLiveData: MutableLiveData<LoadState>): DataSource.Factory<String, Workflow> {
+    fun fetchPendingWorkflowsFactory(stateLiveData: MutableLiveData<LoadState>): DataSource.Factory<String, Workflow> {
         return object : DataSource.Factory<String, Workflow>() {
             override fun create(): DataSource<String, Workflow> {
-                return WorkflowDataSource(scope, cloudRepository, localCache, stateLiveData)
+                return PendingWorkflowDataSource(scope, cloudRepository, localCache, stateLiveData)
+            }
+        }
+    }
+
+    fun fetchCompletedWorkflowsFactory(stateLiveData: MutableLiveData<LoadState>): DataSource.Factory<String, Workflow> {
+        return object : DataSource.Factory<String, Workflow>() {
+            override fun create(): DataSource<String, Workflow> {
+                return CompletedWorkflowDataSource(localCache, stateLiveData)
             }
         }
     }

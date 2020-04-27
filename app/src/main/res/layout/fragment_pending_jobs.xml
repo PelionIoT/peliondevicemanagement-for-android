@@ -102,12 +102,13 @@
             />
 
         <include
-            layout="@layout/layout_not_found"
+            layout="@layout/layout_not_jobs"
             android:id="@+id/notFoundView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:visibility="gone"
+            tools:visibility="visible"
             />
 
     </RelativeLayout>

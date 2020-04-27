@@ -43,7 +43,7 @@ class SettingsFragment : Fragment() {
     private var initiatedDModeMs: Long = 0
     private var developerModeStepCounter: Int = 5
 
-    private val checkedChangeListener: RadioGroup.OnCheckedChangeListener = RadioGroup.OnCheckedChangeListener { group, checkedId ->
+    private val checkedChangeListener: RadioGroup.OnCheckedChangeListener = RadioGroup.OnCheckedChangeListener { _, checkedId ->
         when (checkedId) {
             R.id.rbThemeDark -> {
                 setThemeAndCallRecreate(true)

@@ -25,6 +25,7 @@ import com.arm.peliondevicemanagement.constants.AppConstants
 import com.arm.peliondevicemanagement.constants.AppConstants.DATABASE_PAGE_SIZE
 import com.arm.peliondevicemanagement.constants.AppConstants.NETWORK_PAGE_SIZE
 import com.arm.peliondevicemanagement.constants.state.LoadState
+import com.arm.peliondevicemanagement.constants.state.workflow.WorkflowState
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.services.CloudRepository
@@ -37,7 +38,7 @@ import com.arm.peliondevicemanagement.utils.WorkflowUtils.getPermissionScopeFrom
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-class WorkflowDataSource(
+class PendingWorkflowDataSource(
     private val scope: CoroutineScope,
     private val cloudRepository: CloudRepository,
     private val localCache: LocalCache,
@@ -45,7 +46,7 @@ class WorkflowDataSource(
 ): PageKeyedDataSource<String, Workflow>()  {
 
     companion object {
-        private val TAG: String = WorkflowDataSource::class.java.simpleName
+        private val TAG: String = PendingWorkflowDataSource::class.java.simpleName
     }
 
     override fun loadInitial(
@@ -53,14 +54,19 @@ class WorkflowDataSource(
         callback: LoadInitialCallback<String, Workflow>
     ) {
         var workflowList: List<Workflow>
-        workflowList = localCache.fetchWorkflows(DATABASE_PAGE_SIZE)
+        workflowList = localCache
+            .fetchWorkflowsByStatus(DATABASE_PAGE_SIZE,
+                WorkflowState.PENDING.name)
 
         if(workflowList.isEmpty()){
             // If local-cache doesn't have this then fetch from the network
             LogHelper.debug(TAG, "LocalCache not-found, making network-request")
             scope.launch {
                 requestAndSaveData {
-                    workflowList = localCache.fetchWorkflows(DATABASE_PAGE_SIZE)
+                    workflowList = localCache
+                        .fetchWorkflowsByStatus(DATABASE_PAGE_SIZE,
+                            WorkflowState.PENDING.name)
+
                     if(workflowList.isNotEmpty()){
                         val lastItem = workflowList.last()
                         LogHelper.debug(TAG, "loadInitial() loadedItems: ${workflowList.size}, " +
@@ -90,14 +96,19 @@ class WorkflowDataSource(
         // params.key = afterID
         LogHelper.debug(TAG, "loadAfter() afterID: ${params.key}")
         var workflowList: List<Workflow>
-        workflowList = localCache.fetchWorkflows(DATABASE_PAGE_SIZE, params.key)
+        workflowList = localCache
+            .fetchWorkflowsByStatus(DATABASE_PAGE_SIZE,
+                WorkflowState.PENDING.name, params.key)
 
         if(workflowList.isEmpty()){
             // If local-cache doesn't have this then fetch from the network
             LogHelper.debug(TAG, "LocalCache not-found, making network-request")
             scope.launch {
                 requestAndSaveData(params.key) {
-                    workflowList = localCache.fetchWorkflows(DATABASE_PAGE_SIZE, params.key)
+                    workflowList = localCache
+                        .fetchWorkflowsByStatus(DATABASE_PAGE_SIZE,
+                            WorkflowState.PENDING.name, params.key)
+
                     if(workflowList.isNotEmpty()){
                         val lastItem = workflowList.last()
                         LogHelper.debug(TAG, "loadAfter() loadedItems: ${workflowList.size}, " +
@@ -125,59 +136,19 @@ class WorkflowDataSource(
     }
 
     private suspend fun requestAndSaveData(after: String? = null, saveFinished: () -> Unit) {
-
+        val status = WorkflowState.PENDING.name
+        val assigneeID = SharedPrefHelper.getSelectedUserID()!!
         try {
             val response = if(after != null){
-                cloudRepository.getAllWorkflows(NETWORK_PAGE_SIZE, after)
+                cloudRepository.getAssignedWorkflows(NETWORK_PAGE_SIZE, assigneeID, status, after)
             } else {
-                cloudRepository.getAllWorkflows(NETWORK_PAGE_SIZE)
+                cloudRepository.getAssignedWorkflows(NETWORK_PAGE_SIZE, assigneeID, status)
             }
 
             if(response?.workflows!!.isNotEmpty()){
                 stateLiveData.postValue(LoadState.DOWNLOADING)
-                response.workflows.let {
-                    // Construct workflow devices-list
-                    it.forEach { workflow ->
-                        // Store accountID
-                        workflow.accountID = SharedPrefHelper.getSelectedAccountID()
-                        // Parse AUDs into devices
-                        workflow.workflowDevices = arrayListOf()
-                        workflow.workflowAUDs.forEach { aud ->
-                            workflow.workflowDevices!!.add(
-                                WorkflowDevice(
-                                    aud.substring(3, aud.length),
-                                    AppConstants.DEVICE_STATE_PENDING
-                                )
-                            )
-                        }
-                        // Fetch SDA_token
-                        val sdaTokenResponse = fetchAndSaveSDAToken(workflow)
-                        if(sdaTokenResponse != null){
-                            workflow.sdaToken = sdaTokenResponse
-                        }
-                        // Download Task Assets
-                        downloadTaskAssets(cloudRepository,
-                            workflow.workflowID, workflow.workflowTasks)
-
-                        // FixME
-                        // Sync workflow
-                        /*if(workflow.workflowID == "016b22375e6e423cce18a69800000000" &&
-                                workflow.workflowStatus != WORKFLOW_STATE_SYNCED){
-                            val isSyncSuccessful = cloudRepository.syncWorkflow(workflow.workflowID)
-                            if(isSyncSuccessful){
-                                workflow.workflowStatus = WORKFLOW_STATE_SYNCED
-                                LogHelper.debug(TAG, "Workflow synced successfully")
-                            } else {
-                                LogHelper.debug(TAG, "Workflow sync failed")
-                            }
-                        }*/
-                    }
-                    // Store in DB
-                    localCache.insertWorkflows(it) {
-                        LogHelper.debug(TAG, "LocalCache->Success()")
-                        stateLiveData.postValue(LoadState.DOWNLOADED)
-                        saveFinished()
-                    }
+                processWorkflowsData(response.workflows){
+                    saveFinished()
                 }
             } else {
                 LogHelper.debug(TAG, "Network data-unavailable")
@@ -186,6 +157,63 @@ class WorkflowDataSource(
             }
         } catch (e: Throwable){
             LogHelper.debug(TAG, "Exception occurred: ${e.message}")
+            saveFinished()
+        }
+    }
+
+    private suspend fun processWorkflowsData(workflows: List<Workflow>, saveFinished: () -> Unit) {
+        val processedWorkflows = arrayListOf<Workflow>()
+        workflows.forEach { workflow ->
+            val isStored = localCache.isWorkflowStored(workflow.workflowID)
+            if(!isStored){
+                // Store accountID
+                workflow.accountID = SharedPrefHelper.getSelectedAccountID()
+                // Parse AUDs into devices
+                workflow.workflowDevices = arrayListOf()
+                workflow.workflowAUDs.forEach { aud ->
+                    workflow.workflowDevices!!.add(
+                        WorkflowDevice(
+                            aud.substring(3, aud.length),
+                            AppConstants.DEVICE_STATE_PENDING
+                        )
+                    )
+                }
+                // Fetch SDA_token
+                val sdaTokenResponse = fetchAndSaveSDAToken(workflow)
+                if(sdaTokenResponse != null){
+                    workflow.sdaToken = sdaTokenResponse
+                }
+                // Download Task Assets
+                downloadTaskAssets(cloudRepository,
+                    workflow.workflowID, workflow.workflowTasks)
+
+                // FixME
+                // Sync workflow
+                /*if(workflow.workflowID == "016b22375e6e423cce18a69800000000" &&
+                        workflow.workflowStatus != WORKFLOW_STATE_SYNCED){
+                    val isSyncSuccessful = cloudRepository.syncWorkflow(workflow.workflowID)
+                    if(isSyncSuccessful){
+                        workflow.workflowStatus = WORKFLOW_STATE_SYNCED
+                        LogHelper.debug(TAG, "Workflow synced successfully")
+                    } else {
+                        LogHelper.debug(TAG, "Workflow sync failed")
+                    }
+                }*/
+                processedWorkflows.add(workflow)
+            } else {
+                LogHelper.debug(TAG, "Workflow with ID: ${workflow.workflowID} already stored, skipping")
+            }
+        }
+
+        if(processedWorkflows.isNotEmpty()){
+            // Store in DB
+            localCache.insertWorkflows(processedWorkflows) {
+                LogHelper.debug(TAG, "LocalCache->Success()")
+                stateLiveData.postValue(LoadState.DOWNLOADED)
+                saveFinished()
+            }
+        } else {
+            LogHelper.debug(TAG, "LocalCache->Skipped()")
             saveFinished()
         }
     }

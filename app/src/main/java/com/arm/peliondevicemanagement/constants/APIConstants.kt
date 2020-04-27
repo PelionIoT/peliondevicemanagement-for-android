@@ -72,5 +72,11 @@ object APIConstants {
     const val KEY_ACCOUNT = "account"
     const val KEY_ACCOUNT_ID = "account_id"
     const val KEY_ERROR_CODE = "error_code"
+    const val KEY_AFTER_ID = "after"
+    const val KEY_LIMIT = "limit"
+    const val KEY_FILE_ID = "file_id"
+    const val KEY_WORKFLOW_ID = "workflow_id"
+    const val KEY_ASSIGNEE_ID = "assignee__eq"
+    const val KEY_WORKFLOW_STATUS = "status__eq"
 
 }
