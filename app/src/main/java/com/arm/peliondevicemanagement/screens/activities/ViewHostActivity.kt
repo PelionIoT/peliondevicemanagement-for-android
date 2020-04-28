@@ -17,8 +17,11 @@
 
 package com.arm.peliondevicemanagement.screens.activities
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
+import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.Toolbar
 import androidx.navigation.NavArgument
 import androidx.navigation.NavController
@@ -30,6 +33,9 @@ import com.arm.peliondevicemanagement.constants.AppConstants.VIEW_HOST_LAUNCH_GR
 import com.arm.peliondevicemanagement.constants.AppConstants.WORKFLOW_ID_ARG
 import com.arm.peliondevicemanagement.constants.AppConstants.viewHostLaunchActionList
 import com.arm.peliondevicemanagement.databinding.ActivityViewHostActivityBinding
+import com.arm.peliondevicemanagement.utils.PlatformUtils
+import com.arm.peliondevicemanagement.utils.PlatformUtils.requestLocationPermission
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class ViewHostActivity : BaseActivity() {
 
@@ -145,6 +151,44 @@ class ViewHostActivity : BaseActivity() {
 
     private fun navigateBackToHomeActivity() {
         fireIntentWithFinish(Intent(this, HomeActivity::class.java), false)
+    }
+
+    @RequiresApi(23)
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        when(requestCode){
+            PlatformUtils.REQUEST_PERMISSION -> if(grantResults.isNotEmpty()) {
+                val locationAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED
+                if(!locationAccepted){
+                    if(shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)){
+                        MaterialAlertDialogBuilder(this)
+                            .setTitle(resources.getString(R.string.attention_text))
+                            .setMessage(resources.getString(R.string.location_perm_desc))
+                            .setPositiveButton(resources.getString(R.string.grant_text)) { _, _ ->
+                                requestLocationPermission(this)
+                            }
+                            .setNegativeButton(resources.getString(R.string.deny_text)) { dialogInterface, _ ->
+                                dialogInterface.dismiss()
+                            }
+                            .setCancelable(false)
+                            .create()
+                            .show()
+                    } else {
+                        MaterialAlertDialogBuilder(this)
+                            .setTitle(resources.getString(R.string.attention_text))
+                            .setMessage(resources.getString(R.string.location_perm_denied_desc))
+                            .setPositiveButton(resources.getString(R.string.open_settings_text)) { _, _ ->
+                                PlatformUtils.openAppSettings(this)
+                            }
+                            .setNegativeButton(resources.getString(R.string.cancel_text)) { dialogInterface, _ ->
+                                dialogInterface.dismiss()
+                            }
+                            .setCancelable(false)
+                            .create()
+                            .show()
+                    }
+                }
+            }
+        }
     }
 
 }

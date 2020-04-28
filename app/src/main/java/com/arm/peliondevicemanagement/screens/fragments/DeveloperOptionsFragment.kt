@@ -70,8 +70,8 @@ class DeveloperOptionsFragment : Fragment() {
             viewBinder.disableMaxMTUSwitch.isChecked = true
         }
 
-        if(SharedPrefHelper.getDeveloperOptions().isLocalCacheDisabled()){
-            viewBinder.disableLocalCachingSwitch.isChecked = true
+        if(SharedPrefHelper.getDeveloperOptions().isJobAutoSyncDisabled()){
+            viewBinder.disableJobAutoSyncSwitch.isChecked = true
         }
         if(SharedPrefHelper.getDeveloperOptions().isAssetDownloadDisabled()){
             viewBinder.disableAssetDownloadSwitch.isChecked = true
@@ -101,9 +101,9 @@ class DeveloperOptionsFragment : Fragment() {
             SharedPrefHelper.getDeveloperOptions().setMaxMTUDisabledStatus(isChecked)
         }
 
-        viewBinder.disableLocalCachingSwitch.setOnCheckedChangeListener { _, isChecked ->
-            LogHelper.debug(TAG, "Local Cache Disabled: $isChecked")
-            SharedPrefHelper.getDeveloperOptions().setLocalCacheDisabledStatus(isChecked)
+        viewBinder.disableJobAutoSyncSwitch.setOnCheckedChangeListener { _, isChecked ->
+            LogHelper.debug(TAG, "Job Auto-Sync Disabled: $isChecked")
+            SharedPrefHelper.getDeveloperOptions().setJobAutoSyncDisabledStatus(isChecked)
         }
 
         viewBinder.disableAssetDownloadSwitch.setOnCheckedChangeListener { _, isChecked ->

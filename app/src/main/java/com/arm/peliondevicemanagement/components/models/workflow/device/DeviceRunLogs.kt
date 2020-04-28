@@ -28,7 +28,7 @@ data class DeviceRunLogs(
     @SerializedName("device_id") val deviceID: String,
     @SerializedName("status") var deviceStatus: String,
     @SerializedName("location") val deviceLocation: String,
-    @SerializedName("execution_time") val deviceLog: String,
-    @SerializedName("log") val deviceExecutionTime: String,
+    @SerializedName("log") val deviceLog: String,
+    @SerializedName("execution_time") val deviceExecutionTime: String,
     @SerializedName("task_runs") val deviceTaskRuns: ArrayList<TaskRun>
 ): Parcelable

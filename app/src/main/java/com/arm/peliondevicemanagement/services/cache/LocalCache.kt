@@ -68,12 +68,26 @@ class LocalCache(
                               devices: ArrayList<WorkflowDevice>,
                               updateFinished: () -> Unit) {
         ioExecutor.execute {
+            /*var totalUpdatedDevices = 0
+            LogHelper.debug(TAG, "Fetching stored devices from cache")
+            val storedDevices = arrayListOf<WorkflowDevice>()
+            storedDevices.addAll(workflowDao.fetchWorkflowDevicesByWorkflowID(workflowID))
+            for(index in 0 until devices.size){
+                if(storedDevices.contains(devices[index])){
+                    totalUpdatedDevices++
+                    LogHelper.debug(TAG, "Matched device ${devices[index].deviceName} " +
+                            "in stored devices")
+                    storedDevices[index] = devices[index]
+                }
+            }*/
             LogHelper.debug(TAG, "Updating ${devices.size} device of workflow: $workflowID")
             workflowDao.updateWorkflowDevices(workflowID, devices)
             updateFinished()
         }
     }
 
+    // FixME [ To be removed later ]
+    @Deprecated("To be removed later")
     fun fetchWorkflows(limit: Int,
                        after: String? = null): List<Workflow> {
         LogHelper.debug(TAG, "fetchWorkflows()")
@@ -97,15 +111,31 @@ class LocalCache(
         }
     }
 
-    fun fetchSingleWorkflow(workflowID: String): Workflow {
-        LogHelper.debug(TAG, "fetchSingleWorkflow()")
+    fun fetchWorkflowsByMultiStatus(limit: Int,
+                                    statusOne: String,
+                                    statusTwo: String,
+                                    after: String? = null): List<Workflow> {
+        LogHelper.debug(TAG, "fetchWorkflowsByMultiStatus()")
         val accountID = SharedPrefHelper.getSelectedAccountID()
-        return workflowDao.fetchSingleWorkflow(accountID, workflowID)!!
+        return if(after != null){
+            workflowDao.fetchWorkflowByMultiStatus(accountID, limit, statusOne, statusTwo, after)
+        } else {
+            workflowDao.fetchWorkflowByMultiStatus(accountID, limit, statusOne, statusTwo)
+        }
+    }
+
+    fun fetchSingleWorkflow(workflowID: String, fetchFinished: (workflow: Workflow) -> Unit) {
+        ioExecutor.execute {
+            LogHelper.debug(TAG, "fetchSingleWorkflow()")
+            val accountID = SharedPrefHelper.getSelectedAccountID()
+            val workflow = workflowDao.fetchSingleWorkflow(accountID, workflowID)!!
+            fetchFinished(workflow)
+        }
     }
 
     fun isWorkflowStored(workflowID: String): Boolean {
         val isStored: Boolean
-        LogHelper.debug(TAG, "fetchSingleWorkflow()")
+        LogHelper.debug(TAG, "isWorkflowStored()")
         val accountID = SharedPrefHelper.getSelectedAccountID()
         val storedWorkflow = workflowDao.fetchSingleWorkflow(accountID, workflowID)
         isStored = storedWorkflow != null

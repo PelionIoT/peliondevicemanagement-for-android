@@ -357,13 +357,13 @@ object WorkflowUtils {
             DeviceRunLogs(
                 workflowID, deviceID,
                 DeviceRunState.HAS_FAILURES.name, location,
-                executionTime, log, taskRuns
+                log, executionTime, taskRuns
             )
         } else {
             DeviceRunLogs(
                 workflowID, deviceID,
                 DeviceRunState.SUCCEEDED.name, location,
-                executionTime, log, taskRuns
+                log, executionTime, taskRuns
             )
         }
     }

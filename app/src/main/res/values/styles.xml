@@ -67,6 +67,7 @@
         <item name="iconDeveloper">@drawable/ic_developer_dark</item>
         <item name="iconDownload">@drawable/ic_download_dark</item>
         <item name="iconAsset">@drawable/ic_asset_dark</item>
+        <item name="iconSync">@drawable/ic_sync_dark</item>
     </style>
 
     <!-- Launch Theme -->
@@ -127,6 +128,7 @@
         <item name="iconDeveloper">@drawable/ic_developer_light</item>
         <item name="iconDownload">@drawable/ic_download_light</item>
         <item name="iconAsset">@drawable/ic_asset_light</item>
+        <item name="iconSync">@drawable/ic_sync_light</item>
     </style>
 
     <style name="AppTheme.Toolbar">

@@ -39,6 +39,7 @@ import androidx.core.content.ContextCompat
 import com.arm.peliondevicemanagement.AppController
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.constants.AppConstants.SDA_SERVICE
+import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.services.data.ErrorResponse
 import com.arm.pelionmobiletransportsdk.TransportManager
 import com.arm.pelionmobiletransportsdk.ble.scanner.BleManager
@@ -112,7 +113,8 @@ object PlatformUtils {
     fun buildErrorBottomSheetDialog(context: Activity,
                                     title: String,
                                     description: String,
-                                    clickListener: View.OnClickListener): BottomSheetDialog {
+                                    clickListener: View.OnClickListener,
+                                    buttonText: String? = null): BottomSheetDialog {
         val bottomSheetDialog = BottomSheetDialog(context, R.style.TransparentSheetDialog)
         // Inflate-view
         val sheetView = context.layoutInflater.inflate(R.layout.layout_error_dialog, null)
@@ -123,6 +125,11 @@ object PlatformUtils {
         // Set On-Click on the retry-button
         val retryButton = sheetView.findViewById<MaterialButton>(R.id.retryButton)
         retryButton.setOnClickListener(clickListener)
+
+        if(buttonText != null){
+            retryButton.text = buttonText
+        }
+
         bottomSheetDialog.setContentView(sheetView)
         return bottomSheetDialog
     }
@@ -185,6 +192,13 @@ object PlatformUtils {
         val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH)
         val date = inputFormat.parse(inputString)
         return TimeAgo.getTimeAgo(date!!.time)
+    }
+
+    fun getCurrentTimeInZFormat(): String {
+        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH)
+        val dateTime = inputFormat.format(Date())
+        //LogHelper.debug(TAG, "ZFormattedTime: $dateTime")
+        return dateTime.toString()
     }
 
     fun isBluetoothEnabled(): Boolean = TransportManager.isBluetoothEnabled()

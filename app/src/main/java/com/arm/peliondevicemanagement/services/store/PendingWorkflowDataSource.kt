@@ -56,8 +56,8 @@ class PendingWorkflowDataSource(
     ) {
         var workflowList: List<Workflow>
         workflowList = localCache
-            .fetchWorkflowsByStatus(DATABASE_PAGE_SIZE,
-                WorkflowState.PENDING.name)
+            .fetchWorkflowsByMultiStatus(DATABASE_PAGE_SIZE,
+                WorkflowState.PENDING.name, WorkflowState.SYNCED.name)
 
         if(workflowList.isEmpty()){
             // If local-cache doesn't have this then fetch from the network
@@ -65,8 +65,8 @@ class PendingWorkflowDataSource(
             scope.launch {
                 requestAndSaveData {
                     workflowList = localCache
-                        .fetchWorkflowsByStatus(DATABASE_PAGE_SIZE,
-                            WorkflowState.PENDING.name)
+                        .fetchWorkflowsByMultiStatus(DATABASE_PAGE_SIZE,
+                            WorkflowState.PENDING.name, WorkflowState.SYNCED.name)
 
                     if(workflowList.isNotEmpty()){
                         val lastItem = workflowList.last()
@@ -98,8 +98,8 @@ class PendingWorkflowDataSource(
         LogHelper.debug(TAG, "loadAfter() afterID: ${params.key}")
         var workflowList: List<Workflow>
         workflowList = localCache
-            .fetchWorkflowsByStatus(DATABASE_PAGE_SIZE,
-                WorkflowState.PENDING.name, params.key)
+            .fetchWorkflowsByMultiStatus(DATABASE_PAGE_SIZE,
+                WorkflowState.PENDING.name, WorkflowState.SYNCED.name, params.key)
 
         if(workflowList.isEmpty()){
             // If local-cache doesn't have this then fetch from the network
@@ -107,8 +107,8 @@ class PendingWorkflowDataSource(
             scope.launch {
                 requestAndSaveData(params.key) {
                     workflowList = localCache
-                        .fetchWorkflowsByStatus(DATABASE_PAGE_SIZE,
-                            WorkflowState.PENDING.name, params.key)
+                        .fetchWorkflowsByMultiStatus(DATABASE_PAGE_SIZE,
+                            WorkflowState.PENDING.name, WorkflowState.SYNCED.name, params.key)
 
                     if(workflowList.isNotEmpty()){
                         val lastItem = workflowList.last()
@@ -137,13 +137,13 @@ class PendingWorkflowDataSource(
     }
 
     private suspend fun requestAndSaveData(after: String? = null, saveFinished: () -> Unit) {
-        val status = WorkflowState.PENDING.name
+        //val status = WorkflowState.PENDING.name
         val assigneeID = SharedPrefHelper.getSelectedUserID()!!
         try {
             val response = if(after != null){
-                cloudRepository.getAssignedWorkflows(NETWORK_PAGE_SIZE, assigneeID, status, after)
+                cloudRepository.getAssignedWorkflows(NETWORK_PAGE_SIZE, assigneeID, after)
             } else {
-                cloudRepository.getAssignedWorkflows(NETWORK_PAGE_SIZE, assigneeID, status)
+                cloudRepository.getAssignedWorkflows(NETWORK_PAGE_SIZE, assigneeID)
             }
 
             if(response?.workflows!!.isNotEmpty()){
@@ -166,7 +166,8 @@ class PendingWorkflowDataSource(
         val processedWorkflows = arrayListOf<Workflow>()
         workflows.forEach { workflow ->
             val isStored = localCache.isWorkflowStored(workflow.workflowID)
-            if(!isStored){
+            if(!isStored && (workflow.workflowStatus == WorkflowState.SYNCED.name
+                        || workflow.workflowStatus == WorkflowState.PENDING.name)){
                 // Store accountID
                 workflow.accountID = SharedPrefHelper.getSelectedAccountID()
                 // Parse AUDs into devices
@@ -208,18 +209,31 @@ class PendingWorkflowDataSource(
                         workflow.workflowID, workflow.workflowTasks)
                 }
 
-                // FixME
                 // Sync workflow
-                /*if(workflow.workflowID == "016b22375e6e423cce18a69800000000" &&
-                        workflow.workflowStatus != WORKFLOW_STATE_SYNCED){
+                // Enable feature-flag, if debug-build
+                if(BuildConfig.DEBUG) {
+                    if(!SharedPrefHelper.getDeveloperOptions().isJobAutoSyncDisabled()){
+                        // Sync-job
+                        val isSyncSuccessful = cloudRepository.syncWorkflow(workflow.workflowID)
+                        if(isSyncSuccessful){
+                            workflow.workflowStatus = WorkflowState.SYNCED.name
+                            LogHelper.debug(TAG, "Workflow with ID: ${workflow.workflowID} synced")
+                        } else {
+                            LogHelper.debug(TAG, "Workflow with ID: ${workflow.workflowID} sync-failed")
+                        }
+                    }
+                } else {
+                    // Sync-job
                     val isSyncSuccessful = cloudRepository.syncWorkflow(workflow.workflowID)
                     if(isSyncSuccessful){
-                        workflow.workflowStatus = WORKFLOW_STATE_SYNCED
-                        LogHelper.debug(TAG, "Workflow synced successfully")
+                        workflow.workflowStatus = WorkflowState.SYNCED.name
+                        LogHelper.debug(TAG, "Workflow with ID: ${workflow.workflowID} synced")
                     } else {
-                        LogHelper.debug(TAG, "Workflow sync failed")
+                        LogHelper.debug(TAG, "Workflow with ID: ${workflow.workflowID} sync-failed")
                     }
-                }*/
+                }
+
+                // Now process workflow for local-caching
                 processedWorkflows.add(workflow)
             } else {
                 LogHelper.debug(TAG, "Workflow with ID: ${workflow.workflowID} already stored, skipping")

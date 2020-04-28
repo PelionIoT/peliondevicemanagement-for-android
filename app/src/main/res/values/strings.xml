@@ -98,6 +98,10 @@
     <string name="no_internet_text">No network connection</string>
     <string name="check_connection_text">Check your Internet connection</string>
 
+    <string name="unauthorized_text">Unauthorized</string>
+    <string name="unauthorized_desc">You need to re-login, in order to use this action</string>
+    <string name="re_login_text">Re-Login</string>
+
     <!-- Workflow asset strings-->
     <string name="asset_downloading_text">Downloading assets</string>
     <string name="asset_downloaded_text">Assets available</string>
@@ -115,11 +119,11 @@
     <string name="feature_flags_desc_text">Warning these flags are for development-use only, app may crash also, try at your own risk</string>
     <string name="auth_flags_text">Authentication</string>
     <string name="sda_flags_text">Secure Device Access</string>
-    <string name="job_flags_text">Jobs &amp; Workflow</string>
+    <string name="job_flags_text">Job</string>
     <string name="auth_disable_reauth_text">Disable Re-Auth</string>
     <string name="sda_virtual_mode_text">Virtual Device Mode</string>
     <string name="sda_disable_max_mtu_text">Disable Max MTU</string>
-    <string name="job_disable_local_cache_text">Disable local-caching</string>
+    <string name="job_disable_workflow_sync_text">Disable Job auto-sync</string>
     <string name="job_disable_asset_download_text">Disable asset-download</string>
     <string name="job_sda_token_download_text">Disable SDA-Token download</string>
 

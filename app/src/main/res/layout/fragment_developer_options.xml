@@ -206,11 +206,11 @@
                 <Switch
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/job_disable_local_cache_text"
+                    android:text="@string/job_disable_workflow_sync_text"
                     android:fontFamily="@font/lato_regular"
                     android:layout_marginTop="10dp"
                     android:textColor="?attr/primaryTextColor"
-                    android:id="@+id/disableLocalCachingSwitch"
+                    android:id="@+id/disableJobAutoSyncSwitch"
                     />
 
                 <Switch

@@ -46,10 +46,12 @@ import com.arm.peliondevicemanagement.components.viewmodels.WorkflowViewModel
 import com.arm.peliondevicemanagement.constants.AppConstants.DEFAULT_TIME_FORMAT
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_COMPLETED
 import com.arm.peliondevicemanagement.constants.ExecutionMode
+import com.arm.peliondevicemanagement.constants.state.NetworkErrorState
 import com.arm.peliondevicemanagement.constants.state.workflow.WorkflowState
 import com.arm.peliondevicemanagement.databinding.FragmentJobBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.screens.activities.ViewHostActivity
+import com.arm.peliondevicemanagement.services.data.ErrorResponse
 import com.arm.peliondevicemanagement.utils.PlatformUtils
 import com.arm.peliondevicemanagement.utils.PlatformUtils.checkForLocationPermission
 import com.arm.peliondevicemanagement.utils.PlatformUtils.enableBluetooth
@@ -87,7 +89,8 @@ class JobFragment : Fragment() {
 
     private var totalDevicesCompleted: Int = 0
     private var isSDATokenValid: Boolean = false
-    private var isAssetAvailable: Boolean = false
+    private var _taskAssetState: AssetState = AssetState.NOT_REQUIRED
+    private lateinit var _downloadActionState: DownloadActionState
 
     private lateinit var errorBottomSheetDialog: BottomSheetDialog
     private lateinit var retryButtonClickListener: View.OnClickListener
@@ -113,7 +116,13 @@ class JobFragment : Fragment() {
         CHECKING,
         DOWNLOADING,
         DOWNLOADED,
-        NOT_FOUND
+        NOT_FOUND,
+        NOT_REQUIRED
+    }
+
+    enum class DownloadActionState {
+        SDA_DOWNLOAD,
+        ASSET_DOWNLOAD
     }
 
     override fun onCreateView(
@@ -137,35 +146,30 @@ class JobFragment : Fragment() {
     private fun setupData() {
         workflowViewModel = ViewModelProvider(this).get(WorkflowViewModel::class.java)
         // Fetch selected-workflow
-        workflowViewModel.fetchWorkflow(workflowID)
-        workflowViewModel.getWorkflow().observe(viewLifecycleOwner, Observer { workflow ->
+        workflowViewModel.fetchSingleWorkflow(workflowID){ workflow ->
             LogHelper.debug(TAG, "Fetched from localCache of $workflowID")
             workflowModel = workflow
+            setupEverything()
+        }
+    }
+
+    private fun setupEverything() {
+        requireActivity().runOnUiThread {
             workflowDeviceAdapter = WorkflowDeviceAdapter(workflowModel.workflowDevices!!)
             // FixME
             //checkAndTurnStatus(workflow.workflowStatus)
             fetchCompletedDevicesCount()
             setupViews()
             setupListeners()
-
-            // If write-task available, then look for assets
-            if(isWriteTaskAvailable(workflowModel.workflowTasks)){
-                viewBinder.cardTaskAssetItem.visibility = View.VISIBLE
-                updateAssetView(AssetState.CHECKING)
-                // Check for workflow-assets
-                workflowViewModel.checkForWorkflowAssets(workflowID, workflowModel.workflowTasks)
-            } else {
-                // Wanna set this one inorder to proceed for run
-                isAssetAvailable = true
-            }
-        })
+        }
     }
 
-    private fun checkAndTurnStatus(workflowStatus: String) {
-        if(workflowStatus == WorkflowState.PENDING.name){
-            workflowViewModel.updateWorkflowStatus(workflowModel.workflowID, WorkflowState.COMPLETED.name)
-        } else {
-            workflowViewModel.updateWorkflowStatus(workflowModel.workflowID, WorkflowState.PENDING.name)
+    private fun checkAndSetWorkflowCompleteStatus() {
+        if(totalDevicesCompleted == workflowModel.workflowDevices?.size
+            && (workflowModel.workflowStatus == WorkflowState.PENDING.name
+                    || workflowModel.workflowStatus == WorkflowState.SYNCED.name)) {
+            workflowViewModel.updateWorkflowStatus(workflowID, WorkflowState.COMPLETED.name)
+            workflowModel.workflowStatus = WorkflowState.COMPLETED.name
         }
     }
 
@@ -213,7 +217,14 @@ class JobFragment : Fragment() {
 
         retryButtonClickListener = View.OnClickListener {
             errorBottomSheetDialog.dismiss()
-            refreshSDAToken()
+            when(_downloadActionState){
+                DownloadActionState.SDA_DOWNLOAD -> {
+                    refreshSDAToken()
+                }
+                DownloadActionState.ASSET_DOWNLOAD -> {
+                    refreshAssets()
+                }
+            }
         }
 
         workflowViewModel.getRefreshedSDAToken().observe(viewLifecycleOwner, Observer { tokenResponse ->
@@ -229,12 +240,17 @@ class JobFragment : Fragment() {
         })
 
         workflowViewModel.getAssetAvailabilityStatus().observe(viewLifecycleOwner, Observer { state ->
-            isAssetAvailable = if(state){
+            if(state){
                 updateAssetView(AssetState.DOWNLOADED)
-                true
             } else {
                 updateAssetView(AssetState.NOT_FOUND)
-                false
+            }
+        })
+
+        workflowViewModel.getErrorResponseLiveData().observe(viewLifecycleOwner, Observer { error ->
+            if(error != null){
+                LogHelper.debug(TAG, "Network-Error: $error")
+                processErrorResponse()
             }
         })
 
@@ -262,14 +278,47 @@ class JobFragment : Fragment() {
         }
 
         viewBinder.downloadButton.setOnClickListener {
-            updateAssetView(AssetState.DOWNLOADING)
-            workflowViewModel.downloadWorkflowAssets(workflowID, workflowModel.workflowTasks)
+            refreshAssets()
         }
+
+        // If write-task available, then look for assets
+        if(isWriteTaskAvailable(workflowModel.workflowTasks) && _taskAssetState != AssetState.DOWNLOADED){
+            updateAssetView(AssetState.CHECKING)
+            // Check for workflow-assets
+            workflowViewModel.checkForWorkflowAssets(workflowID, workflowModel.workflowTasks)
+        } else if(_taskAssetState == AssetState.DOWNLOADED) {
+            updateAssetView(AssetState.DOWNLOADED)
+        } else {
+            updateAssetView(AssetState.NOT_REQUIRED)
+        }
+    }
+
+    private fun processErrorResponse() {
+        showNoInternetDialog(NetworkErrorState.UNAUTHORIZED)
+    }
+
+    private fun setDownloadAction(state: DownloadActionState) {
+        _downloadActionState = state
+    }
+
+    private fun setTaskAssetState(state: AssetState){
+        _taskAssetState = state
+    }
+
+    private fun refreshAssets() {
+        setDownloadAction(DownloadActionState.ASSET_DOWNLOAD)
+        if(!PlatformUtils.isNetworkAvailable(requireContext())) {
+            showNoInternetDialog(NetworkErrorState.NO_NETWORK)
+            return
+        }
+
+        updateAssetView(AssetState.DOWNLOADING)
+        workflowViewModel.downloadWorkflowAssets(workflowID, workflowModel.workflowTasks)
     }
 
     private fun verifyAndRunJob(position: Int? = null) {
         if(isSDATokenValid){
-            if(isAssetAvailable){
+            if(_taskAssetState == AssetState.NOT_REQUIRED || _taskAssetState == AssetState.DOWNLOADED){
                 if(verifyBLEAndLocationPermissions()){
                     if(position != null){
                         initiateSpecificDeviceRun(position)
@@ -284,7 +333,6 @@ class JobFragment : Fragment() {
             }
         } else {
             showSnackbar("Secure device access, not available")
-            //refreshSDAToken()
         }
     }
 
@@ -302,11 +350,14 @@ class JobFragment : Fragment() {
         }
         LogHelper.debug(TAG, "completedDevices: $totalDevicesCompleted, " +
                 "pendingDevices: ${workflowModel.workflowDevices!!.size - totalDevicesCompleted}")
+        // Check status for completion
+        checkAndSetWorkflowCompleteStatus()
     }
 
     private fun refreshSDAToken() {
+        setDownloadAction(DownloadActionState.SDA_DOWNLOAD)
         if(!PlatformUtils.isNetworkAvailable(requireContext())){
-            showNoInternetDialog()
+            showNoInternetDialog(NetworkErrorState.NO_NETWORK)
             return
         }
 
@@ -363,30 +414,38 @@ class JobFragment : Fragment() {
     }
 
     private fun updateAssetView(state: AssetState){
+        setTaskAssetState(state)
         when(state) {
             AssetState.CHECKING -> {
                 viewBinder.tvAssetTitle.text = resources.getString(R.string.asset_checking_text)
                 viewBinder.downloadButton.visibility = View.GONE
                 viewBinder.assetStatusView.visibility = View.GONE
                 viewBinder.downloadProgressbar.visibility = View.VISIBLE
+                viewBinder.cardTaskAssetItem.visibility = View.VISIBLE
             }
             AssetState.DOWNLOADED -> {
                 viewBinder.tvAssetTitle.text = resources.getString(R.string.asset_downloaded_text)
                 viewBinder.downloadButton.visibility = View.GONE
                 viewBinder.downloadProgressbar.visibility = View.GONE
                 viewBinder.assetStatusView.visibility = View.VISIBLE
+                viewBinder.cardTaskAssetItem.visibility = View.VISIBLE
             }
             AssetState.DOWNLOADING -> {
                 viewBinder.tvAssetTitle.text = resources.getString(R.string.asset_downloading_text)
                 viewBinder.downloadButton.visibility = View.GONE
                 viewBinder.assetStatusView.visibility = View.GONE
                 viewBinder.downloadProgressbar.visibility = View.VISIBLE
+                viewBinder.cardTaskAssetItem.visibility = View.VISIBLE
             }
             AssetState.NOT_FOUND -> {
                 viewBinder.tvAssetTitle.text = resources.getString(R.string.asset_not_found_text)
                 viewBinder.downloadProgressbar.visibility = View.INVISIBLE
                 viewBinder.assetStatusView.visibility = View.GONE
                 viewBinder.downloadButton.visibility = View.VISIBLE
+                viewBinder.cardTaskAssetItem.visibility = View.VISIBLE
+            }
+            AssetState.NOT_REQUIRED -> {
+                viewBinder.cardTaskAssetItem.visibility = View.GONE
             }
         }
     }
@@ -509,7 +568,8 @@ class JobFragment : Fragment() {
     }
 
     private fun checkPendingDevices(): Boolean {
-        return workflowModel.workflowStatus != WorkflowState.COMPLETED.name
+        return (workflowModel.workflowStatus != WorkflowState.COMPLETED.name
+                && totalDevicesCompleted != workflowModel.workflowDevices?.size)
     }
 
     private fun createBundleForPendingDevices(): DeviceRun {
@@ -527,6 +587,7 @@ class JobFragment : Fragment() {
         return DeviceRun(
             workflowModel.workflowID,
             workflowModel.workflowName,
+            workflowModel.workflowLocation,
             workflowModel.workflowTasks, pendingDevices,
             workflowModel.sdaToken!!.accessToken
         )
@@ -540,6 +601,7 @@ class JobFragment : Fragment() {
         return DeviceRun(
             workflowModel.workflowID,
             workflowModel.workflowName,
+            workflowModel.workflowLocation,
             workflowModel.workflowTasks, allDevices,
             workflowModel.sdaToken!!.accessToken
         )
@@ -551,6 +613,7 @@ class JobFragment : Fragment() {
         return DeviceRun(
             workflowModel.workflowID,
             workflowModel.workflowName,
+            workflowModel.workflowLocation,
             workflowModel.workflowTasks, arrayListOf(device!!),
             workflowModel.sdaToken!!.accessToken
         )
@@ -578,18 +641,32 @@ class JobFragment : Fragment() {
             .show()
     }
 
-    private fun showNoInternetDialog() {
-        errorBottomSheetDialog = PlatformUtils.buildErrorBottomSheetDialog(
-            requireActivity(),
-            resources.getString(R.string.no_internet_text),
-            resources.getString(R.string.check_connection_text),
-            retryButtonClickListener
-        )
+    private fun showNoInternetDialog(state: NetworkErrorState) {
+        when(state){
+            NetworkErrorState.NO_NETWORK -> {
+                errorBottomSheetDialog = PlatformUtils.buildErrorBottomSheetDialog(
+                    requireActivity(),
+                    resources.getString(R.string.no_internet_text),
+                    resources.getString(R.string.check_connection_text),
+                    retryButtonClickListener
+                )
+            }
+            NetworkErrorState.UNAUTHORIZED -> {
+                errorBottomSheetDialog = PlatformUtils.buildErrorBottomSheetDialog(
+                    requireActivity(),
+                    resources.getString(R.string.unauthorized_text),
+                    resources.getString(R.string.unauthorized_desc),
+                    retryButtonClickListener,
+                    resources.getString(R.string.re_login_text)
+                )
+            }
+        }
         errorBottomSheetDialog.show()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        LogHelper.debug(TAG, "->onDestroyView()")
         workflowViewModel.cancelAllRequests()
         _viewBinder = null
     }

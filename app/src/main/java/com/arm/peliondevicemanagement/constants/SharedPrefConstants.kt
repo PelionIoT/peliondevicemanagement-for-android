@@ -52,7 +52,7 @@ object SharedPrefConstants {
     const val STORE_DISABLE_REAUTH_STATUS = "disableReAuth"
     const val STORE_SDA_EXECUTION_MODE = "sdaExecutionMode"
     const val STORE_DISABLE_MAX_MTU_STATUS = "disableMaxMTU"
-    const val STORE_DISABLE_LOCAL_CACHE_STATUS = "disableLocalCache"
+    const val STORE_DISABLE_JOB_AUTO_SYNC_STATUS = "disableLocalCache"
     const val STORE_DISABLE_ASSET_DOWNLOAD_STATUS = "disableAssetDownload"
     const val STORE_DISABLE_SDA_TOKEN_DOWNLOAD_STATUS = "disableSDATokenDownload"
 

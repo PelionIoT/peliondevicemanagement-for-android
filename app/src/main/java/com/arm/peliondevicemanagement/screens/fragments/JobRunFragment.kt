@@ -22,7 +22,6 @@ import android.animation.AnimatorListenerAdapter
 import android.bluetooth.le.ScanResult
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.view.ContextMenu
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -323,7 +322,7 @@ class JobRunFragment : Fragment() {
             }
             // Create run-log
             createTaskRunLog(
-                deviceResponse.taskID!!, TaskRunState.SUCCEEDED, "undefined"
+                deviceResponse.taskID!!, TaskRunState.SUCCEEDED, "output.txt"
             )
             //LogHelper.debug(TAG, "TaskRunLogs: $taskRunLog")
         } else {
@@ -359,10 +358,12 @@ class JobRunFragment : Fragment() {
     }
 
     private fun processDeviceRunLogs(deviceID: String) {
+        val currentDateTime = PlatformUtils.getCurrentTimeInZFormat()
         val deviceRunLog = createDeviceRunLog(
             deviceRunModel.workflowID,
-            deviceID, "null",
-            "null", "null",
+            deviceID,
+            deviceRunModel.workflowLocation,
+            currentDateTime, "null",
             taskRunLogs, taskFailureCount)
 
         val devicePosition = getItemPosition(deviceID)
@@ -501,7 +502,18 @@ class JobRunFragment : Fragment() {
     }
 
     private fun finalizeEverything() {
-        isJobCompleted = true
+        var failedCount = 0
+        deviceRunModel.workflowDevices.forEach { device ->
+            if(device.deviceState != DEVICE_STATE_COMPLETED){
+                failedCount++
+            }
+        }
+        if(failedCount > 0){
+            addTemporaryDeviceItemInList("", DeviceScanState.FAILED, failedCount)
+        }
+
+        saveLogsToDB()
+
         viewBinder.tvDescription.text = resources.getString(R.string.stopped_text)
         viewBinder.iconView.setImageDrawable(
             PlatformUtils.fetchAttributeDrawable(
@@ -514,23 +526,12 @@ class JobRunFragment : Fragment() {
         )
         viewBinder.elapsedTimer.stop()
 
-        var failedCount = 0
-        deviceRunModel.workflowDevices.forEach { device ->
-            if(device.deviceState != DEVICE_STATE_COMPLETED){
-                failedCount++
-            }
-        }
-        if(failedCount > 0){
-            addTemporaryDeviceItemInList("", DeviceScanState.FAILED, failedCount)
-        }
-
-        saveLogsToDB()
+        isJobCompleted = true
     }
 
     private fun saveLogsToDB() {
         workflowViewModel.updateWorkflowDevices(
             deviceRunModel.workflowID, deviceRunModel.workflowDevices)
-        //workflowViewModel.updateWorkflowStatus(deviceRunModel.workflowID, WorkflowState.COMPLETED.name)
     }
 
     private fun destroyObjects() {

@@ -41,9 +41,9 @@ object DeveloperOptionsHelper {
         SharedPrefManager.with(context = AppController.appController!!)!!
             .getBoolean(SharedPrefConstants.STORE_DISABLE_MAX_MTU_STATUS, false)
 
-    internal fun isLocalCacheDisabled(): Boolean =
+    internal fun isJobAutoSyncDisabled(): Boolean =
         SharedPrefManager.with(context = AppController.appController!!)!!
-            .getBoolean(SharedPrefConstants.STORE_DISABLE_LOCAL_CACHE_STATUS, false)
+            .getBoolean(SharedPrefConstants.STORE_DISABLE_JOB_AUTO_SYNC_STATUS, false)
 
     internal fun isAssetDownloadDisabled(): Boolean =
         SharedPrefManager.with(context = AppController.appController!!)!!
@@ -74,9 +74,9 @@ object DeveloperOptionsHelper {
             .putBoolean(SharedPrefConstants.STORE_DISABLE_MAX_MTU_STATUS, disabled)
             .apply()
 
-    internal fun setLocalCacheDisabledStatus(disabled: Boolean) =
+    internal fun setJobAutoSyncDisabledStatus(disabled: Boolean) =
         SharedPrefManager.with(context = AppController.appController!!)!!.edit()
-            .putBoolean(SharedPrefConstants.STORE_DISABLE_LOCAL_CACHE_STATUS, disabled)
+            .putBoolean(SharedPrefConstants.STORE_DISABLE_JOB_AUTO_SYNC_STATUS, disabled)
             .apply()
 
     internal fun setAssetDownloadDisabledStatus(disabled: Boolean) =
@@ -97,7 +97,7 @@ object DeveloperOptionsHelper {
         editor.remove(SharedPrefConstants.STORE_DISABLE_REAUTH_STATUS)
         editor.remove(SharedPrefConstants.STORE_SDA_EXECUTION_MODE)
         editor.remove(SharedPrefConstants.STORE_DISABLE_MAX_MTU_STATUS)
-        editor.remove(SharedPrefConstants.STORE_DISABLE_LOCAL_CACHE_STATUS)
+        editor.remove(SharedPrefConstants.STORE_DISABLE_JOB_AUTO_SYNC_STATUS)
         editor.remove(SharedPrefConstants.STORE_DISABLE_ASSET_DOWNLOAD_STATUS)
         editor.remove(SharedPrefConstants.STORE_DISABLE_SDA_TOKEN_DOWNLOAD_STATUS)
         editor.apply()

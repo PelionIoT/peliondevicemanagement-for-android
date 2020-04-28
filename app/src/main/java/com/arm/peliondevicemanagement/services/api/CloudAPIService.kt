@@ -117,7 +117,6 @@ interface CloudAPIService {
     suspend fun getAssignedWorkflows(
         @Query(KEY_LIMIT) itemsPerPage: Int,
         @Query(KEY_ASSIGNEE_ID) assignee: String,
-        @Query(KEY_WORKFLOW_STATUS) status: String,
         @Query(KEY_AFTER_ID) after: String? = null
     ): Response<WorkflowsResponse>
 

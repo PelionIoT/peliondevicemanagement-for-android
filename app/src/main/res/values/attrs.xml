@@ -62,6 +62,7 @@
         <attr name="iconDeveloper" format="reference"/>
         <attr name="iconDownload" format="reference"/>
         <attr name="iconAsset" format="reference"/>
+        <attr name="iconSync" format="reference" />
 
     </declare-styleable>
 </resources>

@@ -97,6 +97,10 @@ class LoginFragment : Fragment() {
 
         setupListeners()
         setupProgressView()
+
+        // FixME [ To be removed later ]
+        // Disable job-auto-sync at all-cost
+        SharedPrefHelper.getDeveloperOptions().setJobAutoSyncDisabledStatus(true)
     }
 
     private fun setupProgressView(){

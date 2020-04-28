@@ -15,18 +15,9 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.components.models.workflow.device
+package com.arm.peliondevicemanagement.constants.state
 
-import android.os.Parcelable
-import com.arm.peliondevicemanagement.components.models.workflow.task.WorkflowTask
-import kotlinx.android.parcel.Parcelize
-
-@Parcelize
-data class DeviceRun(
-    val workflowID: String,
-    val workflowName: String,
-    val workflowLocation: String,
-    val workflowTasks: List<WorkflowTask>,
-    var workflowDevices: ArrayList<WorkflowDevice>,
-    val workflowSDAToken: String
-): Parcelable
+enum class NetworkErrorState {
+    NO_NETWORK,
+    UNAUTHORIZED
+}

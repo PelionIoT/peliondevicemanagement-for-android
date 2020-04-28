@@ -26,6 +26,7 @@ import com.arm.peliondevicemanagement.constants.APIConstants.KEY_ACCOUNT_ID
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_GRANT_TYPE
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_PASSWORD
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_USERNAME
+import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.services.api.CloudAPIService
 import com.arm.peliondevicemanagement.services.api.CloudAPIService.Companion.createJSONRequestBody
 import com.arm.peliondevicemanagement.services.data.BaseRepository
@@ -92,17 +93,16 @@ class CloudRepository(private val cloudAPIService: CloudAPIService): BaseReposit
 
     suspend fun getAssignedWorkflows(itemsPerPage: Int,
                                      assigneeID: String,
-                                     status: String,
                                      after: String? = null): WorkflowsResponse? {
         return if(after != null){
             doSafeAPIRequest(
                 call = { cloudAPIService
-                    .getAssignedWorkflows(itemsPerPage, assigneeID, status, after)}
+                    .getAssignedWorkflows(itemsPerPage, assigneeID, after)}
             )
         } else {
             doSafeAPIRequest(
                 call = { cloudAPIService
-                    .getAssignedWorkflows(itemsPerPage, assigneeID, status)}
+                    .getAssignedWorkflows(itemsPerPage, assigneeID)}
             )
         }
     }
@@ -124,7 +124,7 @@ class CloudRepository(private val cloudAPIService: CloudAPIService): BaseReposit
         val response = doSafeAPIRequest(
             call = { cloudAPIService.syncWorkflow(workflowID)}
         )
-        status = response?.toString()?.isEmpty() ?: false
+        status = (response?.contentLength()!!.toInt() == 0)
         return status
     }
 

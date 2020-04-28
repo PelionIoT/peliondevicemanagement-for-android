@@ -32,7 +32,9 @@ import com.arm.peliondevicemanagement.services.CloudRepository
 import com.arm.peliondevicemanagement.services.LocalRepository
 import com.arm.peliondevicemanagement.services.cache.LocalCache
 import com.arm.peliondevicemanagement.services.cache.WorkflowDB
+import com.arm.peliondevicemanagement.services.data.ErrorResponse
 import com.arm.peliondevicemanagement.services.data.SDATokenResponse
+import com.arm.peliondevicemanagement.utils.PlatformUtils
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.downloadTaskAssets
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.fetchSDAToken
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.isWorkflowAssetsDownloaded
@@ -62,8 +64,8 @@ class WorkflowViewModel : ViewModel() {
     private lateinit var _completedWorkflowsLiveData: LiveData<PagedList<Workflow>>
     private val _refreshStateLiveData = MutableLiveData<LoadState>()
     private val _refreshedSDATokenLiveData = MutableLiveData<SDATokenResponse>()
-    private val _pendingWorkflowLiveData = MutableLiveData<Workflow>()
     private val _assetAvailableLiveData = MutableLiveData<Boolean>()
+    private val _errorResponseLiveData = MutableLiveData<ErrorResponse>()
 
     private val boundaryCallback = object: PagedList.BoundaryCallback<Workflow>() {
         override fun onZeroItemsLoaded() {
@@ -102,14 +104,10 @@ class WorkflowViewModel : ViewModel() {
     }
 
     fun getPendingWorkflows(): LiveData<PagedList<Workflow>> = _pendingWorkflowsLiveData
-
     fun getCompletedWorkflows(): LiveData<PagedList<Workflow>> = _completedWorkflowsLiveData
-
-    fun getWorkflow(): LiveData<Workflow> = _pendingWorkflowLiveData
-
     fun getRefreshState(): LiveData<LoadState> = _refreshStateLiveData
-
     fun getAssetAvailabilityStatus(): LiveData<Boolean> = _assetAvailableLiveData
+    fun getErrorResponseLiveData(): LiveData<ErrorResponse> = _errorResponseLiveData
 
     fun refreshPendingWorkflows() {
         _pendingWorkflowsLiveData.value?.dataSource?.invalidate()
@@ -145,10 +143,9 @@ class WorkflowViewModel : ViewModel() {
         }
     }
 
-    fun fetchWorkflow(workflowID: String) {
-        scope.launch {
-            val workflow = localCache.fetchSingleWorkflow(workflowID)
-            _pendingWorkflowLiveData.postValue(workflow)
+    fun fetchSingleWorkflow(workflowID: String, fetched: (workflow: Workflow) -> Unit) {
+        localCache.fetchSingleWorkflow(workflowID){ workflow ->
+            fetched(workflow)
         }
     }
 
@@ -212,8 +209,30 @@ class WorkflowViewModel : ViewModel() {
 
     fun downloadWorkflowAssets(workflowID: String, workflowTasks: List<WorkflowTask>) {
         scope.launch {
-            downloadTaskAssets(cloudRepository, workflowID, workflowTasks)
+            try {
+                downloadTaskAssets(cloudRepository, workflowID, workflowTasks)
+            } catch (e: Throwable) {
+                LogHelper.debug(TAG, "${e.message}")
+                val errorResponse = PlatformUtils.parseErrorResponseFromJson(e.message!!)
+                _errorResponseLiveData.postValue(errorResponse)
+            }
             checkForWorkflowAssets(workflowID, workflowTasks)
+        }
+    }
+
+    // FixME [ Add proper support for maunal sync ]
+    fun syncWorkflow(workflowID: String) {
+        scope.launch {
+            try {
+                val isSuccess = cloudRepository.syncWorkflow(workflowID)
+                if(isSuccess){
+                    LogHelper.debug(TAG, "Sync successful")
+                } else {
+                    LogHelper.debug(TAG, "Sync failed")
+                }
+            } catch (e: Throwable) {
+                LogHelper.debug(TAG, "${e.message}")
+            }
         }
     }
 
