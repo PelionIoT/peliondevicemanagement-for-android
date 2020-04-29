@@ -20,6 +20,7 @@ package com.arm.peliondevicemanagement.screens.fragments
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -50,8 +51,8 @@ import com.arm.peliondevicemanagement.constants.state.NetworkErrorState
 import com.arm.peliondevicemanagement.constants.state.workflow.WorkflowState
 import com.arm.peliondevicemanagement.databinding.FragmentJobBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
+import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.screens.activities.ViewHostActivity
-import com.arm.peliondevicemanagement.services.data.ErrorResponse
 import com.arm.peliondevicemanagement.utils.PlatformUtils
 import com.arm.peliondevicemanagement.utils.PlatformUtils.checkForLocationPermission
 import com.arm.peliondevicemanagement.utils.PlatformUtils.enableBluetooth
@@ -90,6 +91,7 @@ class JobFragment : Fragment() {
     private var totalDevicesCompleted: Int = 0
     private var isSDATokenValid: Boolean = false
     private var _taskAssetState: AssetState = AssetState.NOT_REQUIRED
+    private var isSyncInProgress: Boolean = false
     private lateinit var _downloadActionState: DownloadActionState
 
     private lateinit var errorBottomSheetDialog: BottomSheetDialog
@@ -99,7 +101,11 @@ class JobFragment : Fragment() {
         override fun onSwipedLeft(position: Int) {
             LogHelper.debug(TAG, "Item swiped-left: $position")
             workflowDeviceAdapter.notifyItemChanged(position)
-            verifyAndRunJob(position)
+            if(workflowModel.workflowStatus == WorkflowState.PENDING.name){
+                showSnackbar("Job sync needed, action denied")
+            } else {
+                verifyAndRunJob(position)
+            }
         }
         override fun onSwipedRight(position: Int) {
             LogHelper.debug(TAG, "Item swiped-right: $position")
@@ -122,7 +128,9 @@ class JobFragment : Fragment() {
 
     enum class DownloadActionState {
         SDA_DOWNLOAD,
-        ASSET_DOWNLOAD
+        ASSET_DOWNLOAD,
+        UNAUTHORIZED,
+        JOB_SYNC
     }
 
     override fun onCreateView(
@@ -156,8 +164,6 @@ class JobFragment : Fragment() {
     private fun setupEverything() {
         requireActivity().runOnUiThread {
             workflowDeviceAdapter = WorkflowDeviceAdapter(workflowModel.workflowDevices!!)
-            // FixME
-            //checkAndTurnStatus(workflow.workflowStatus)
             fetchCompletedDevicesCount()
             setupViews()
             setupListeners()
@@ -170,6 +176,8 @@ class JobFragment : Fragment() {
                     || workflowModel.workflowStatus == WorkflowState.SYNCED.name)) {
             workflowViewModel.updateWorkflowStatus(workflowID, WorkflowState.COMPLETED.name)
             workflowModel.workflowStatus = WorkflowState.COMPLETED.name
+            viewBinder.tvStatus.text = resources.getString(
+                R.string.status_format, resources.getString(R.string.completed_text))
         }
     }
 
@@ -177,8 +185,25 @@ class JobFragment : Fragment() {
         // Details Card
         viewBinder.tvName.text = workflowModel.workflowName
         viewBinder.tvDescription.text = workflowModel.workflowDescription
-        viewBinder.tvStatus.text = context!!.getString(
-            R.string.status_format, workflowModel.workflowStatus)
+        // Set status
+        when(workflowModel.workflowStatus){
+            WorkflowState.SYNCED.name -> {
+                viewBinder.tvStatus.text = resources.getString(
+                    R.string.status_format, resources.getString(R.string.ready_text))
+            }
+            WorkflowState.PENDING.name -> {
+                viewBinder.tvStatus.text = resources.getString(
+                    R.string.status_format, resources.getString(R.string.pending_text))
+            }
+            WorkflowState.COMPLETED.name -> {
+                viewBinder.tvStatus.text = resources.getString(
+                    R.string.status_format, resources.getString(R.string.completed_text))
+            }
+            WorkflowState.REASSIGNED.name -> {
+                viewBinder.tvStatus.text = resources.getString(
+                    R.string.status_format, resources.getString(R.string.reassigned_text))
+            }
+        }
         viewBinder.tvLocation.text = context!!.getString(
             R.string.location_format, workflowModel.workflowLocation)
         val creationDateTime = parseJSONTimeString(workflowModel.workflowCreatedAt) +
@@ -209,8 +234,6 @@ class JobFragment : Fragment() {
         )
 
         itemTouchHelper.attachToRecyclerView(viewBinder.rvDevices)
-
-        verifySDAToken()
     }
 
     private fun setupListeners() {
@@ -224,16 +247,20 @@ class JobFragment : Fragment() {
                 DownloadActionState.ASSET_DOWNLOAD -> {
                     refreshAssets()
                 }
+                DownloadActionState.UNAUTHORIZED -> {
+                    navigateToLogin()
+                }
+                DownloadActionState.JOB_SYNC -> {
+                    processWorkflowSync()
+                }
             }
         }
 
         workflowViewModel.getRefreshedSDAToken().observe(viewLifecycleOwner, Observer { tokenResponse ->
-            if(tokenResponse != null && !isSDATokenValid){
+            if(!isSDATokenValid){
                 workflowModel.sdaToken = tokenResponse
                 workflowViewModel.updateLocalSDAToken(
                     workflowModel.workflowID, tokenResponse)
-            } else {
-                showSnackbar("Failed to refresh token")
             }
             showHideSDAProgressbar(false)
             verifySDAToken()
@@ -244,6 +271,23 @@ class JobFragment : Fragment() {
                 updateAssetView(AssetState.DOWNLOADED)
             } else {
                 updateAssetView(AssetState.NOT_FOUND)
+            }
+        })
+
+        workflowViewModel.getWorkflowSyncState().observe(viewLifecycleOwner, Observer { success ->
+            if(success){
+                if(workflowModel.workflowStatus != WorkflowState.COMPLETED.name){
+                    LogHelper.debug(TAG, "Workflow synced successfully")
+                    showSnackbar("Job synced successfully")
+                    isSyncInProgress = false
+                    workflowModel.workflowStatus = WorkflowState.SYNCED.name
+                    workflowViewModel.updateWorkflowStatus(workflowID, WorkflowState.SYNCED.name)
+                    verifySyncStatus()
+                }
+            } else {
+                isSyncInProgress = false
+                LogHelper.debug(TAG, "Workflow sync failed")
+                showSnackbar("Job sync failed")
             }
         })
 
@@ -274,14 +318,31 @@ class JobFragment : Fragment() {
         })
 
         viewBinder.runJobButton.setOnClickListener {
-            verifyAndRunJob()
+            if(workflowModel.workflowStatus == WorkflowState.PENDING.name){
+                processWorkflowSync()
+            } else {
+                verifyAndRunJob()
+            }
         }
 
         viewBinder.downloadButton.setOnClickListener {
             refreshAssets()
         }
 
+        // Verify SDA-Token
+        verifySDAToken()
+
         // If write-task available, then look for assets
+        verifyAssetStatus()
+
+        // If workflow-status is pending then, set the sync-button
+        verifySyncStatus()
+
+        // Check status for completion
+        checkAndSetWorkflowCompleteStatus()
+    }
+
+    private fun verifyAssetStatus() {
         if(isWriteTaskAvailable(workflowModel.workflowTasks) && _taskAssetState != AssetState.DOWNLOADED){
             updateAssetView(AssetState.CHECKING)
             // Check for workflow-assets
@@ -293,8 +354,63 @@ class JobFragment : Fragment() {
         }
     }
 
+    private fun verifySyncStatus() {
+        if(workflowModel.workflowStatus == WorkflowState.PENDING.name){
+            // Update run-button
+            updateRunJobButtonText(
+                ContextCompat.getDrawable(requireContext(), R.drawable.ic_sync_light)!!,
+                resources.getString(R.string.sync_now_text)
+            )
+        } else {
+            viewBinder.tvStatus.text = resources.getString(
+                R.string.status_format, resources.getString(R.string.ready_text))
+            // Update run-button
+            updateRunJobButtonText(
+                ContextCompat.getDrawable(requireContext(), R.drawable.ic_play_light)!!,
+                resources.getString(R.string.run_job)
+            )
+        }
+    }
+
     private fun processErrorResponse() {
-        showNoInternetDialog(NetworkErrorState.UNAUTHORIZED)
+        showHideSDAProgressbar(false)
+        verifySDAToken()
+
+        setDownloadAction(DownloadActionState.UNAUTHORIZED)
+        showErrorMessageDialog(NetworkErrorState.UNAUTHORIZED)
+    }
+
+    private fun navigateToLogin() {
+        (requireActivity() as ViewHostActivity).navigateToLogin()
+    }
+
+    private fun processWorkflowSync() {
+        setDownloadAction(DownloadActionState.JOB_SYNC)
+        if(!PlatformUtils.isNetworkAvailable(requireContext())) {
+            showErrorMessageDialog(NetworkErrorState.NO_NETWORK)
+            return
+        }
+
+        if(!isSDATokenValid){
+            showSnackbar("Refresh secure device access, first")
+            return
+        }
+
+        if(_taskAssetState != AssetState.NOT_REQUIRED){
+            if(_taskAssetState != AssetState.DOWNLOADED){
+                showSnackbar("Assets download required")
+                return
+            }
+        }
+
+        if(isSyncInProgress) {
+            showSnackbar("Already working on it")
+            return
+        }
+
+        isSyncInProgress = true
+        showSnackbar("Syncing now")
+        workflowViewModel.syncWorkflow(workflowID)
     }
 
     private fun setDownloadAction(state: DownloadActionState) {
@@ -308,7 +424,7 @@ class JobFragment : Fragment() {
     private fun refreshAssets() {
         setDownloadAction(DownloadActionState.ASSET_DOWNLOAD)
         if(!PlatformUtils.isNetworkAvailable(requireContext())) {
-            showNoInternetDialog(NetworkErrorState.NO_NETWORK)
+            showErrorMessageDialog(NetworkErrorState.NO_NETWORK)
             return
         }
 
@@ -350,14 +466,12 @@ class JobFragment : Fragment() {
         }
         LogHelper.debug(TAG, "completedDevices: $totalDevicesCompleted, " +
                 "pendingDevices: ${workflowModel.workflowDevices!!.size - totalDevicesCompleted}")
-        // Check status for completion
-        checkAndSetWorkflowCompleteStatus()
     }
 
     private fun refreshSDAToken() {
         setDownloadAction(DownloadActionState.SDA_DOWNLOAD)
         if(!PlatformUtils.isNetworkAvailable(requireContext())){
-            showNoInternetDialog(NetworkErrorState.NO_NETWORK)
+            showErrorMessageDialog(NetworkErrorState.NO_NETWORK)
             return
         }
 
@@ -384,10 +498,6 @@ class JobFragment : Fragment() {
                     fetchAttributeDrawable(context!!, R.attr.iconShieldGreen))
                 showHideRefreshTokenButton(false)
                 isSDATokenValid = true
-                updateRunJobButtonText(
-                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_play_light)!!,
-                    resources.getString(R.string.run_job)
-                )
             } else {
                 viewBinder.tvValidTill.text = context!!.getString(
                     R.string.expired_format, expiryDateTime)
@@ -395,10 +505,6 @@ class JobFragment : Fragment() {
                     fetchAttributeDrawable(context!!, R.attr.iconShieldRed))
                 showHideRefreshTokenButton(true)
                 isSDATokenValid = false
-                /*updateRunJobButtonText(
-                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_refresh_light)!!,
-                    resources.getString(R.string.refresh)
-                )*/
             }
         } else {
             viewBinder.tvValidTill.text = context!!.getString(R.string.na)
@@ -406,10 +512,6 @@ class JobFragment : Fragment() {
                 fetchAttributeDrawable(context!!, R.attr.iconShieldYellow))
             showHideRefreshTokenButton(true)
             isSDATokenValid = false
-            /*updateRunJobButtonText(
-                ContextCompat.getDrawable(requireContext(), R.drawable.ic_refresh_light)!!,
-                resources.getString(R.string.refresh)
-            )*/
         }
     }
 
@@ -641,7 +743,7 @@ class JobFragment : Fragment() {
             .show()
     }
 
-    private fun showNoInternetDialog(state: NetworkErrorState) {
+    private fun showErrorMessageDialog(state: NetworkErrorState) {
         when(state){
             NetworkErrorState.NO_NETWORK -> {
                 errorBottomSheetDialog = PlatformUtils.buildErrorBottomSheetDialog(

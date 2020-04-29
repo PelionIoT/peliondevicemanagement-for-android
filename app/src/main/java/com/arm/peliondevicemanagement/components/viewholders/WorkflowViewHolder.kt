@@ -59,8 +59,8 @@ class WorkflowViewHolder(itemView: View,
                     syncStatusCheckView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check_light))
                 }
                 WorkflowState.SYNCED.name -> {
-                    syncStatusCheckView.background = ContextCompat.getDrawable(context, R.drawable.ic_status_synced)
-                    syncStatusCheckView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_sync_light))
+                    syncStatusCheckView.background = ContextCompat.getDrawable(context, R.drawable.ic_status_ok)
+                    syncStatusCheckView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check_light))
                 } else -> {
                     syncStatusCheckView.background = ContextCompat.getDrawable(context, R.drawable.ic_status_pending)
                     syncStatusCheckView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_exclamation))

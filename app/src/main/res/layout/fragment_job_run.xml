@@ -35,9 +35,14 @@
         app:cardElevation="0dp">
 
         <RelativeLayout
-            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorAccent"
+            android:id="@+id/headerView">
 
             <ImageView
                 android:layout_width="28dp"
@@ -45,7 +50,7 @@
                 android:id="@+id/iconView"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="14dp"
-                android:tint="?attr/colorAccent"
+                android:tint="?attr/primaryInverseIconColor"
                 android:src="?attr/iconPlay"/>
 
             <TextView
@@ -61,6 +66,7 @@
                 android:ellipsize="middle"
                 android:singleLine="true"
                 android:textSize="14sp"
+                android:textColor="?attr/primaryInverseTextColor"
                 />
 
             <TextView
@@ -68,7 +74,7 @@
                 android:layout_height="wrap_content"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
-                android:paddingBottom="5dp"
+                android:paddingBottom="12dp"
                 android:id="@+id/tvName"
                 android:layout_below="@id/tvDescription"
                 tools:text="Test Job 101"
@@ -77,17 +83,19 @@
                 android:ellipsize="middle"
                 android:singleLine="true"
                 android:textSize="16sp"
+                android:textColor="?attr/primaryInverseTextColor"
                 />
+
+        </RelativeLayout>
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="?attr/dividerColor"
-                android:alpha="0.12"
-                android:layout_marginTop="10dp"
+                android:alpha="0.19"
                 android:layout_marginBottom="5dp"
                 android:id="@+id/divider"
-                android:layout_below="@+id/tvName"
+                android:layout_below="@+id/headerView"
                 />
 
             <TextView
@@ -227,12 +235,12 @@
         android:text="@string/stop_text"
         app:icon="?attr/iconStop"
         app:backgroundTint="?attr/colorAccent"
-        app:iconTint="@android:color/white"
+        app:iconTint="?attr/primaryInverseIconColor"
         app:layout_anchorGravity="bottom"
         app:elevation="10dp"
         android:textAllCaps="false"
         android:id="@+id/stopButton"
-        android:textColor="@android:color/white"
+        android:textColor="?attr/primaryInverseTextColor"
         android:layout_marginBottom="25dp"
         android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"/>

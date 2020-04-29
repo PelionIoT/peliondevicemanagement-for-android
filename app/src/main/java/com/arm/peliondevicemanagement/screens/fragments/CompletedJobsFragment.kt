@@ -37,10 +37,12 @@ import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickList
 import com.arm.peliondevicemanagement.components.models.workflow.Workflow
 import com.arm.peliondevicemanagement.components.viewmodels.WorkflowViewModel
 import com.arm.peliondevicemanagement.constants.state.LoadState
+import com.arm.peliondevicemanagement.constants.state.NetworkErrorState
 import com.arm.peliondevicemanagement.databinding.FragmentCompletedJobsBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.screens.activities.HomeActivity
 import com.arm.peliondevicemanagement.utils.PlatformUtils
+import com.google.android.material.bottomsheet.BottomSheetDialog
 
 class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
 
@@ -56,11 +58,10 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
 
     private lateinit var itemClickListener: RecyclerItemClickListener
 
-    private val onBackPressedCallback = object: OnBackPressedCallback(true){
-        override fun handleOnBackPressed() {
-            (activity as HomeActivity).callCloseApp()
-        }
-    }
+    private var totalItemsForUpload: Int = 0
+
+    private lateinit var errorBottomSheetDialog: BottomSheetDialog
+    private lateinit var retryButtonClickListener: View.OnClickListener
 
     private val refreshListener: androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener = androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener {
         refreshContent()
@@ -89,7 +90,6 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
     }
 
     private fun init() {
-        requireActivity().onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
         workflowViewModel = ViewModelProvider(this).get(WorkflowViewModel::class.java)
 
         workflowViewModel.initCompletedWorkflowsLiveData()
@@ -110,6 +110,11 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
     private fun setupListeners() {
         viewBinder.swipeRefreshLayout.setOnRefreshListener(refreshListener)
 
+        retryButtonClickListener = View.OnClickListener {
+            errorBottomSheetDialog.dismiss()
+            prepareForUpload()
+        }
+
         workflowViewModel.getCompletedWorkflows().observe(viewLifecycleOwner, Observer {
             if(it != null && it.isNotEmpty()){
                 setSwipeRefreshStatus(false)
@@ -124,17 +129,7 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
                 }
                 LoadState.LOADED -> {
                     setSwipeRefreshStatus(false)
-                    updateSyncView(false)
-                }
-                LoadState.DOWNLOADING -> {
-                    setSwipeRefreshStatus(false)
-                    updateSyncView(true, "Downloading Assets")
-                }
-                LoadState.DOWNLOADED -> {
-                    updateSyncView(true, "Downloaded successfully")
-                }
-                LoadState.FAILED -> {
-                    updateSyncView(true, "Download failed")
+                    checkJobsPendingForSync()
                 }
                 else -> {
                     updateSyncView(false)
@@ -143,6 +138,10 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
                 }
             }
         })
+
+        viewBinder.uploadJobsButton.setOnClickListener {
+            prepareForUpload()
+        }
     }
 
     private fun refreshContent() {
@@ -152,14 +151,50 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
         workflowViewModel.refreshCompletedWorkflows()
     }
 
-    private fun updateSyncView(visibility: Boolean, text: String? = null) {
+    private fun checkJobsPendingForSync() {
+        totalItemsForUpload = 0
+        workflowAdapter.currentList?.forEach { workflow ->
+            if(!workflow.uploadCompleted){
+                totalItemsForUpload++
+            }
+        }
+        when {
+            totalItemsForUpload == 1 -> {
+                updateSyncView(true,
+                    resources.getString(R.string.sync_pending_text),
+                    "$totalItemsForUpload job is waiting in the queue")
+            }
+            totalItemsForUpload > 1 -> {
+                updateSyncView(true,
+                    resources.getString(R.string.sync_pending_text),
+                    "$totalItemsForUpload jobs are waiting in the queue")
+            }
+            else -> {
+                updateSyncView(false)
+            }
+        }
+    }
+
+    private fun prepareForUpload() {
+        if(!PlatformUtils.isNetworkAvailable(requireContext())) {
+            showErrorMessageDialog(NetworkErrorState.NO_NETWORK)
+            return
+        }
+
+        (requireActivity() as HomeActivity).showSnackbar(requireView(), "You're expecting too much")
+    }
+
+    private fun updateSyncView(visibility: Boolean, text: String? = null, desc: String? = null, inProgress: Boolean = false) {
         if(visibility) {
             viewBinder.syncView.visibility = View.VISIBLE
-            if(!text.isNullOrEmpty()){
-                viewBinder.syncSubText.visibility = View.VISIBLE
-                viewBinder.syncSubText.text = text
+            viewBinder.syncText.text = text
+            viewBinder.syncSubText.text = desc
+            if(inProgress){
+                viewBinder.uploadJobsButton.visibility = View.INVISIBLE
+                viewBinder.syncProgressView.visibility = View.VISIBLE
             } else {
-                viewBinder.syncSubText.visibility = View.GONE
+                viewBinder.syncProgressView.visibility = View.GONE
+                viewBinder.uploadJobsButton.visibility = View.VISIBLE
             }
         } else {
             viewBinder.syncView.visibility = View.GONE
@@ -187,10 +222,33 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
         itemClickListener.onItemClick(model.workflowID)
     }
 
+    private fun showErrorMessageDialog(state: NetworkErrorState) {
+        when(state){
+            NetworkErrorState.NO_NETWORK -> {
+                errorBottomSheetDialog = PlatformUtils.buildErrorBottomSheetDialog(
+                    requireActivity(),
+                    resources.getString(R.string.no_internet_text),
+                    resources.getString(R.string.check_connection_text),
+                    retryButtonClickListener
+                )
+            }
+            NetworkErrorState.UNAUTHORIZED -> {
+                errorBottomSheetDialog = PlatformUtils.buildErrorBottomSheetDialog(
+                    requireActivity(),
+                    resources.getString(R.string.unauthorized_text),
+                    resources.getString(R.string.unauthorized_desc),
+                    retryButtonClickListener,
+                    resources.getString(R.string.re_login_text)
+                )
+            }
+        }
+        errorBottomSheetDialog.show()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
-        _viewBinder = null
         workflowViewModel.cancelAllRequests()
+        _viewBinder = null
     }
 
 }

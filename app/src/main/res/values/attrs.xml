@@ -24,10 +24,14 @@
 
         <!-- Icon Colors -->
         <attr name="primaryIconColor" format="color"/>
+        <attr name="primaryInverseIconColor" format="color"/>
 
         <!-- Text Colors -->
         <attr name="primaryTextColor" format="color"/>
         <attr name="secondaryTextColor" format="color"/>
+
+        <attr name="primaryInverseTextColor" format="color"/>
+        <attr name="secondaryInverseTextColor" format="color"/>
 
         <!-- Component Colors -->
         <attr name="dividerColor" format="color"/>
@@ -41,6 +45,7 @@
         <attr name="iconLock" format="reference"/>
         <attr name="iconSearch" format="reference"/>
         <attr name="iconWidget" format="reference"/>
+        <attr name="iconWidgetInverse" format="reference"/>
         <attr name="iconLocation" format="reference"/>
         <attr name="iconDevice" format="reference"/>
         <attr name="iconClose" format="reference"/>
@@ -63,6 +68,9 @@
         <attr name="iconDownload" format="reference"/>
         <attr name="iconAsset" format="reference"/>
         <attr name="iconSync" format="reference" />
+        <attr name="iconUpload" format="reference" />
+        <attr name="iconClock" format="reference" />
+        <attr name="iconList" format="reference" />
 
     </declare-styleable>
 </resources>

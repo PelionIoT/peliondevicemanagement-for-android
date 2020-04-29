@@ -65,6 +65,7 @@ class WorkflowViewModel : ViewModel() {
     private val _refreshStateLiveData = MutableLiveData<LoadState>()
     private val _refreshedSDATokenLiveData = MutableLiveData<SDATokenResponse>()
     private val _assetAvailableLiveData = MutableLiveData<Boolean>()
+    private val _workflowSyncStateLiveData = MutableLiveData<Boolean>()
     private val _errorResponseLiveData = MutableLiveData<ErrorResponse>()
 
     private val boundaryCallback = object: PagedList.BoundaryCallback<Workflow>() {
@@ -107,6 +108,7 @@ class WorkflowViewModel : ViewModel() {
     fun getCompletedWorkflows(): LiveData<PagedList<Workflow>> = _completedWorkflowsLiveData
     fun getRefreshState(): LiveData<LoadState> = _refreshStateLiveData
     fun getAssetAvailabilityStatus(): LiveData<Boolean> = _assetAvailableLiveData
+    fun getWorkflowSyncState(): LiveData<Boolean> = _workflowSyncStateLiveData
     fun getErrorResponseLiveData(): LiveData<ErrorResponse> = _errorResponseLiveData
 
     fun refreshPendingWorkflows() {
@@ -126,7 +128,10 @@ class WorkflowViewModel : ViewModel() {
             if(tokenResponse != null){
                 _refreshedSDATokenLiveData.postValue(tokenResponse)
             } else {
-                _refreshedSDATokenLiveData.postValue(null)
+                _errorResponseLiveData.postValue(
+                    ErrorResponse(401,
+                        "invalid_token",
+                        "Unauthorized"))
             }
         }
     }
@@ -192,7 +197,7 @@ class WorkflowViewModel : ViewModel() {
 
         // Fetch data from the local-cache and return a factory
         val dataSourceFactory = localRepository
-            .fetchCompletedWorkflowsFactory(_refreshStateLiveData)
+            .fetchCompletedWorkflowsFactory()
 
         // Get the paged list
         return LivePagedListBuilder(dataSourceFactory, pageConfig)
@@ -220,18 +225,19 @@ class WorkflowViewModel : ViewModel() {
         }
     }
 
-    // FixME [ Add proper support for maunal sync ]
     fun syncWorkflow(workflowID: String) {
         scope.launch {
             try {
                 val isSuccess = cloudRepository.syncWorkflow(workflowID)
                 if(isSuccess){
-                    LogHelper.debug(TAG, "Sync successful")
+                    _workflowSyncStateLiveData.postValue(true)
                 } else {
-                    LogHelper.debug(TAG, "Sync failed")
+                    _workflowSyncStateLiveData.postValue(false)
                 }
             } catch (e: Throwable) {
                 LogHelper.debug(TAG, "${e.message}")
+                val errorResponse = PlatformUtils.parseErrorResponseFromJson(e.message!!)
+                _errorResponseLiveData.postValue(errorResponse)
             }
         }
     }

@@ -180,16 +180,20 @@ class AuthActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
         when(item.itemId) {
             R.id.signout -> {
-                WorkflowUtils.deleteWorkflowsCache()
-                SharedPrefHelper.storeMultiAccountStatus(false)
-                SharedPrefHelper.clearEverything()
-                LogHelper.debug(TAG, "Sign-out complete")
-                navigationController.navigate(
-                    AccountsFragmentDirections
-                        .actionAccountsFragmentToLoginFragment())
+                navigateToLogin()
             }
         }
         return true
+    }
+
+    fun navigateToLogin() {
+        WorkflowUtils.deleteWorkflowsCache()
+        SharedPrefHelper.storeMultiAccountStatus(false)
+        SharedPrefHelper.clearEverything()
+        LogHelper.debug(TAG, "Sign-out complete")
+        navigationController.navigate(
+            AccountsFragmentDirections
+                .actionAccountsFragmentToLoginFragment())
     }
 
 }

@@ -17,30 +17,15 @@
 
 package com.arm.peliondevicemanagement.services.store
 
-import androidx.lifecycle.MutableLiveData
 import androidx.paging.PageKeyedDataSource
-import com.arm.peliondevicemanagement.components.models.workflow.device.WorkflowDevice
 import com.arm.peliondevicemanagement.components.models.workflow.Workflow
-import com.arm.peliondevicemanagement.constants.AppConstants
 import com.arm.peliondevicemanagement.constants.AppConstants.DATABASE_PAGE_SIZE
-import com.arm.peliondevicemanagement.constants.AppConstants.NETWORK_PAGE_SIZE
-import com.arm.peliondevicemanagement.constants.state.LoadState
 import com.arm.peliondevicemanagement.constants.state.workflow.WorkflowState
 import com.arm.peliondevicemanagement.helpers.LogHelper
-import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
-import com.arm.peliondevicemanagement.services.CloudRepository
 import com.arm.peliondevicemanagement.services.cache.LocalCache
-import com.arm.peliondevicemanagement.services.data.SDATokenResponse
-import com.arm.peliondevicemanagement.utils.WorkflowUtils.downloadTaskAssets
-import com.arm.peliondevicemanagement.utils.WorkflowUtils.fetchSDAToken
-import com.arm.peliondevicemanagement.utils.WorkflowUtils.getAudienceListFromDevices
-import com.arm.peliondevicemanagement.utils.WorkflowUtils.getPermissionScopeFromTasks
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 class CompletedWorkflowDataSource(
-    private val localCache: LocalCache,
-    private val stateLiveData: MutableLiveData<LoadState>
+    private val localCache: LocalCache
 ): PageKeyedDataSource<String, Workflow>()  {
 
     companion object {

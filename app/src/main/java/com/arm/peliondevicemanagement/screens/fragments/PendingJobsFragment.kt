@@ -54,12 +54,6 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
 
     private lateinit var itemClickListener: RecyclerItemClickListener
 
-    private val onBackPressedCallback = object: OnBackPressedCallback(true){
-        override fun handleOnBackPressed() {
-            (activity as HomeActivity).callCloseApp()
-        }
-    }
-
     private val queryTextListener = object : SearchView.OnQueryTextListener {
         override fun onQueryTextSubmit(query: String?): Boolean = false
 
@@ -97,7 +91,6 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
     }
 
     private fun init() {
-        requireActivity().onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
         workflowViewModel = ViewModelProvider(this).get(WorkflowViewModel::class.java)
 
         workflowViewModel.initPendingWorkflowLiveData()
@@ -212,7 +205,7 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _viewBinder = null
         workflowViewModel.cancelAllRequests()
+        _viewBinder = null
     }
 }

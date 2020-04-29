@@ -45,25 +45,28 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/syncText"
-                android:text="@string/syncing_jobs_text"
-                android:layout_toStartOf="@id/syncProgressView"
-                android:fontFamily="@font/lato_regular"
+                android:text="@string/sync_pending_text"
+                android:layout_toStartOf="@id/uploadJobsButton"
+                android:fontFamily="@font/lato_bold"
                 android:textSize="16sp"
                 android:textColor="@android:color/black"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:layout_marginEnd="5dp"
                 />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/syncSubText"
-                android:text="@string/syncing_jobs_text"
-                android:layout_toStartOf="@id/syncProgressView"
+                android:text="@string/uploading_asset_text"
+                android:layout_toStartOf="@id/uploadJobsButton"
                 android:fontFamily="@font/lato_regular"
                 android:layout_below="@id/syncText"
                 android:textSize="14sp"
-                tools:text="Downloading assets"
-                android:visibility="gone"
-                tools:visibility="visible"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:layout_marginEnd="5dp"
                 android:textColor="@android:color/black"
                 />
 
@@ -73,6 +76,25 @@
                 android:layout_alignParentEnd="true"
                 android:id="@+id/syncProgressView"
                 android:layout_centerVertical="true"
+                />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="5dp"
+                android:id="@+id/uploadJobsButton"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                app:strokeColor="@color/arm_dark_black"
+                app:rippleColor="@color/arm_dark_black"
+                app:icon="?attr/iconUpload"
+                app:iconTint="@color/arm_dark_black"
+                app:iconPadding="10dp"
+                android:text="@string/upload_text"
+                android:textColor="@color/arm_dark_black"
+                android:textAllCaps="false"
+                android:fontFamily="@font/lato_bold"
                 />
 
         </RelativeLayout>

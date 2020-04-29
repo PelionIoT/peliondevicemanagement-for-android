@@ -226,19 +226,20 @@ class HomeActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     private fun navigateToSettings() {
         val settingsIntent = Intent(this, ViewHostActivity::class.java)
         settingsIntent.putExtra(VIEW_HOST_LAUNCH_GRAPH, viewHostLaunchActionList[1])
-        fireIntent(settingsIntent, true)
+        fireIntentWithFinish(settingsIntent, true)
     }
 
     private fun navigateToJob(workflowID: String) {
         val jobIntent = Intent(this, ViewHostActivity::class.java)
         jobIntent.putExtra(VIEW_HOST_LAUNCH_GRAPH, viewHostLaunchActionList[0])
         jobIntent.putExtra(AppConstants.WORKFLOW_ID_ARG, workflowID)
-        fireIntent(jobIntent, true)
+        fireIntentWithFinish(jobIntent, true)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         pendingJobsFragment = null
+        completedJobsFragment = null
     }
 
     override fun onItemClick(data: Any) {

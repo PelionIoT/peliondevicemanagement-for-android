@@ -33,8 +33,11 @@ import com.arm.peliondevicemanagement.constants.AppConstants.VIEW_HOST_LAUNCH_GR
 import com.arm.peliondevicemanagement.constants.AppConstants.WORKFLOW_ID_ARG
 import com.arm.peliondevicemanagement.constants.AppConstants.viewHostLaunchActionList
 import com.arm.peliondevicemanagement.databinding.ActivityViewHostActivityBinding
+import com.arm.peliondevicemanagement.helpers.LogHelper
+import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.utils.PlatformUtils
 import com.arm.peliondevicemanagement.utils.PlatformUtils.requestLocationPermission
+import com.arm.peliondevicemanagement.utils.WorkflowUtils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class ViewHostActivity : BaseActivity() {
@@ -151,6 +154,14 @@ class ViewHostActivity : BaseActivity() {
 
     private fun navigateBackToHomeActivity() {
         fireIntentWithFinish(Intent(this, HomeActivity::class.java), false)
+    }
+
+    fun navigateToLogin() {
+        WorkflowUtils.deleteWorkflowsCache()
+        SharedPrefHelper.storeMultiAccountStatus(false)
+        SharedPrefHelper.clearEverything()
+        LogHelper.debug(TAG, "Sign-out complete")
+        fireIntentWithFinish(Intent(this, AuthActivity::class.java), false)
     }
 
     @RequiresApi(23)

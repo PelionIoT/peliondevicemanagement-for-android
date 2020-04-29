@@ -40,10 +40,10 @@ class LocalRepository(
         }
     }
 
-    fun fetchCompletedWorkflowsFactory(stateLiveData: MutableLiveData<LoadState>): DataSource.Factory<String, Workflow> {
+    fun fetchCompletedWorkflowsFactory(): DataSource.Factory<String, Workflow> {
         return object : DataSource.Factory<String, Workflow>() {
             override fun create(): DataSource<String, Workflow> {
-                return CompletedWorkflowDataSource(localCache, stateLiveData)
+                return CompletedWorkflowDataSource(localCache)
             }
         }
     }

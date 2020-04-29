@@ -39,6 +39,7 @@ import com.arm.peliondevicemanagement.components.models.user.UserProfile
 import com.arm.peliondevicemanagement.components.viewmodels.LoginViewModel
 import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
 import com.arm.peliondevicemanagement.components.models.user.AccountProfileModel
+import com.arm.peliondevicemanagement.constants.state.NetworkErrorState
 import com.arm.peliondevicemanagement.screens.activities.AuthActivity
 import com.arm.peliondevicemanagement.utils.PlatformUtils
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -62,6 +63,8 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
     private lateinit var activeAccountModel: Account
     private lateinit var errorBottomSheetDialog: BottomSheetDialog
     private lateinit var retryButtonClickListener: View.OnClickListener
+
+    private lateinit var networkRequestState: NetworkErrorState
 
     private val onBackPressedCallback = object: OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
@@ -120,7 +123,14 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
     private fun setupListeners() {
         retryButtonClickListener = View.OnClickListener {
             errorBottomSheetDialog.dismiss()
-            processSelectedAccount(activeAccountModel)
+            when(networkRequestState){
+                NetworkErrorState.NO_NETWORK -> {
+                    processSelectedAccount(activeAccountModel)
+                }
+                NetworkErrorState.UNAUTHORIZED -> {
+                    navigateToLogin()
+                }
+            }
         }
 
         viewBinder.searchBar.searchTextBox.setOnQueryTextListener(queryTextListener)
@@ -147,7 +157,8 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
     private fun processErrorResponse() {
         showHideProgressbar(false)
         showHideAccountList(true)
-        (activity as AuthActivity).showSnackbar(viewBinder.root, "Failed to authenticate")
+        networkRequestState = NetworkErrorState.UNAUTHORIZED
+        showErrorMessageDialog(NetworkErrorState.UNAUTHORIZED)
     }
 
     private fun showHideProgressbar(visibility: Boolean, text: String = ""){
@@ -158,6 +169,10 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
         } else {
             viewBinder.progressLayout.root.visibility = View.GONE
         }
+    }
+
+    private fun navigateToLogin() {
+        (requireActivity() as AuthActivity).navigateToLogin()
     }
 
     private fun showHideAccountList(visibility: Boolean) = if(visibility){
@@ -184,7 +199,8 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
             navigateToDashboardFragment()
         } else {
             if(!PlatformUtils.isNetworkAvailable(requireContext())){
-                showNoInternetDialog()
+                networkRequestState = NetworkErrorState.NO_NETWORK
+                showErrorMessageDialog(NetworkErrorState.NO_NETWORK)
                 return
             }
 
@@ -247,13 +263,26 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
         (requireActivity() as AuthActivity).launchHomeActivity()
     }
 
-    private fun showNoInternetDialog() {
-        errorBottomSheetDialog = PlatformUtils.buildErrorBottomSheetDialog(
-            requireActivity(),
-            resources.getString(R.string.no_internet_text),
-            resources.getString(R.string.check_connection_text),
-            retryButtonClickListener
-        )
+    private fun showErrorMessageDialog(state: NetworkErrorState) {
+        when(state){
+            NetworkErrorState.NO_NETWORK -> {
+                errorBottomSheetDialog = PlatformUtils.buildErrorBottomSheetDialog(
+                    requireActivity(),
+                    resources.getString(R.string.no_internet_text),
+                    resources.getString(R.string.check_connection_text),
+                    retryButtonClickListener
+                )
+            }
+            NetworkErrorState.UNAUTHORIZED -> {
+                errorBottomSheetDialog = PlatformUtils.buildErrorBottomSheetDialog(
+                    requireActivity(),
+                    resources.getString(R.string.unauthorized_text),
+                    resources.getString(R.string.unauthorized_desc),
+                    retryButtonClickListener,
+                    resources.getString(R.string.re_login_text)
+                )
+            }
+        }
         errorBottomSheetDialog.show()
     }
 

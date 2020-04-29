@@ -43,66 +43,74 @@
                 app:cardElevation="0dp">
 
                 <RelativeLayout
-                    android:orientation="vertical"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:id="@+id/iconView"
-                        android:layout_marginStart="24dp"
-                        android:layout_marginTop="14dp"
-                        android:src="?attr/iconWidget"/>
-
-                    <TextView
+                    <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingStart="20dp"
-                        android:paddingEnd="16dp"
-                        android:paddingBottom="0dp"
-                        android:paddingTop="10dp"
-                        android:id="@+id/tvName"
-                        tools:text="Name"
-                        android:layout_toEndOf="@id/iconView"
-                        android:fontFamily="@font/lato_regular"
-                        android:ellipsize="middle"
-                        android:singleLine="true"
-                        android:textSize="18sp"
-                        />
+                        android:background="?attr/colorAccent"
+                        android:id="@+id/headerView">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingStart="20dp"
-                        android:paddingEnd="16dp"
-                        android:paddingBottom="1dp"
-                        android:paddingTop="1dp"
-                        android:id="@+id/tvDescription"
-                        android:layout_below="@id/tvName"
-                        tools:text="Description"
-                        android:layout_toEndOf="@+id/iconView"
-                        android:fontFamily="@font/lato_regular"
-                        android:ellipsize="middle"
-                        android:singleLine="true"
-                        android:textSize="14sp"
-                        />
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:id="@+id/iconView"
+                            android:layout_marginStart="24dp"
+                            android:layout_marginTop="14dp"
+                            android:src="?attr/iconWidgetInverse"/>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingStart="20dp"
+                            android:paddingEnd="16dp"
+                            android:paddingBottom="0dp"
+                            android:paddingTop="10dp"
+                            android:id="@+id/tvName"
+                            android:textColor="?attr/primaryInverseTextColor"
+                            tools:text="Name"
+                            android:layout_toEndOf="@id/iconView"
+                            android:fontFamily="@font/lato_regular"
+                            android:ellipsize="middle"
+                            android:singleLine="true"
+                            android:textSize="18sp"
+                            />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingStart="20dp"
+                            android:paddingEnd="16dp"
+                            android:paddingBottom="15dp"
+                            android:paddingTop="1dp"
+                            android:textColor="?attr/primaryInverseTextColor"
+                            android:id="@+id/tvDescription"
+                            android:layout_below="@id/tvName"
+                            tools:text="Description"
+                            android:layout_toEndOf="@+id/iconView"
+                            android:fontFamily="@font/lato_regular"
+                            android:ellipsize="middle"
+                            android:singleLine="true"
+                            android:textSize="14sp"
+                            />
+
+                    </RelativeLayout>
 
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="?attr/dividerColor"
-                        android:alpha="0.12"
-                        android:layout_marginTop="10dp"
+                        android:alpha="0.19"
                         android:layout_marginBottom="5dp"
                         android:id="@+id/divider"
-                        android:layout_below="@+id/tvDescription"
+                        android:layout_below="@+id/headerView"
                         />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingStart="25dp"
+                        android:paddingStart="20dp"
                         android:paddingEnd="16dp"
                         android:paddingBottom="5dp"
                         android:paddingTop="5dp"
@@ -113,12 +121,14 @@
                         android:ellipsize="middle"
                         android:singleLine="true"
                         android:textSize="14sp"
+                        android:drawableStart="?attr/iconList"
+                        android:drawablePadding="10dp"
                         />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingStart="25dp"
+                        android:paddingStart="20dp"
                         android:paddingEnd="16dp"
                         android:paddingBottom="5dp"
                         android:paddingTop="5dp"
@@ -129,12 +139,14 @@
                         android:ellipsize="middle"
                         android:singleLine="true"
                         android:textSize="14sp"
+                        android:drawableStart="?attr/iconLocation"
+                        android:drawablePadding="10dp"
                         />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingStart="25dp"
+                        android:paddingStart="20dp"
                         android:paddingEnd="16dp"
                         android:paddingBottom="15dp"
                         android:paddingTop="5dp"
@@ -145,6 +157,8 @@
                         android:ellipsize="middle"
                         android:singleLine="true"
                         android:textSize="14sp"
+                        android:drawableStart="?attr/iconClock"
+                        android:drawablePadding="10dp"
                         />
 
                 </RelativeLayout>
@@ -416,12 +430,12 @@
         android:text="@string/run_job"
         app:icon="?attr/iconPlay"
         app:backgroundTint="?attr/colorAccent"
-        app:iconTint="@android:color/white"
+        app:iconTint="?attr/primaryInverseIconColor"
         app:layout_anchorGravity="bottom"
         app:elevation="10dp"
         android:textAllCaps="false"
         android:id="@+id/runJobButton"
-        android:textColor="@android:color/white"
+        android:textColor="?attr/primaryInverseTextColor"
         android:layout_marginBottom="25dp"
         android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"/>
