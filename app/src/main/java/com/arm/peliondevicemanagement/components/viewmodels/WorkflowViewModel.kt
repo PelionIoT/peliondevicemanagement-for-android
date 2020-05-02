@@ -26,20 +26,31 @@ import com.arm.peliondevicemanagement.AppController
 import com.arm.peliondevicemanagement.components.models.workflow.device.WorkflowDevice
 import com.arm.peliondevicemanagement.components.models.workflow.Workflow
 import com.arm.peliondevicemanagement.components.models.workflow.task.WorkflowTask
+import com.arm.peliondevicemanagement.constants.APIConstants.CONTENT_TYPE_TEXT_PLAIN
+import com.arm.peliondevicemanagement.constants.AppConstants.TASK_NAME_FILE
 import com.arm.peliondevicemanagement.constants.state.LoadState
+import com.arm.peliondevicemanagement.constants.state.workflow.WorkflowState
+import com.arm.peliondevicemanagement.constants.state.workflow.task.TaskRunState
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.services.CloudRepository
 import com.arm.peliondevicemanagement.services.LocalRepository
 import com.arm.peliondevicemanagement.services.cache.LocalCache
 import com.arm.peliondevicemanagement.services.cache.WorkflowDB
 import com.arm.peliondevicemanagement.services.data.ErrorResponse
+import com.arm.peliondevicemanagement.services.data.FileUploadResponse
 import com.arm.peliondevicemanagement.services.data.SDATokenResponse
 import com.arm.peliondevicemanagement.utils.PlatformUtils
+import com.arm.peliondevicemanagement.utils.WorkflowUtils.convertDeviceRunLogsToJson
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.downloadTaskAssets
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.fetchSDAToken
+import com.arm.peliondevicemanagement.utils.WorkflowUtils.fetchTaskOutputAsset
+import com.arm.peliondevicemanagement.utils.WorkflowUtils.getWorkflowTaskIDs
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.isWorkflowAssetsDownloaded
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.saveWorkflowTaskOutputAsset
 import kotlinx.coroutines.*
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import java.lang.Exception
 import java.util.concurrent.Executors
 import kotlin.coroutines.CoroutineContext
 
@@ -66,6 +77,7 @@ class WorkflowViewModel : ViewModel() {
     private val _refreshedSDATokenLiveData = MutableLiveData<SDATokenResponse>()
     private val _assetAvailableLiveData = MutableLiveData<Boolean>()
     private val _workflowSyncStateLiveData = MutableLiveData<Boolean>()
+    private val _assetUploadResponseLiveData = MutableLiveData<Int>()
     private val _errorResponseLiveData = MutableLiveData<ErrorResponse>()
 
     private val boundaryCallback = object: PagedList.BoundaryCallback<Workflow>() {
@@ -109,6 +121,7 @@ class WorkflowViewModel : ViewModel() {
     fun getRefreshState(): LiveData<LoadState> = _refreshStateLiveData
     fun getAssetAvailabilityStatus(): LiveData<Boolean> = _assetAvailableLiveData
     fun getWorkflowSyncState(): LiveData<Boolean> = _workflowSyncStateLiveData
+    fun getAssetUploadLiveData(): LiveData<Int> = _assetUploadResponseLiveData
     fun getErrorResponseLiveData(): LiveData<ErrorResponse> = _errorResponseLiveData
 
     fun refreshPendingWorkflows() {
@@ -154,9 +167,9 @@ class WorkflowViewModel : ViewModel() {
         }
     }
 
-    fun updateWorkflowDevices(workflowID: String, devices: ArrayList<WorkflowDevice>) {
+    fun updateWorkflowDevices(workflowID: String, devices: ArrayList<WorkflowDevice>, updateFinished: () -> Unit) {
         localCache.updateWorkflowDevices(workflowID, devices) {
-            LogHelper.debug(TAG, "Devices updated.")
+            updateFinished()
         }
     }
 
@@ -238,6 +251,94 @@ class WorkflowViewModel : ViewModel() {
                 LogHelper.debug(TAG, "${e.message}")
                 val errorResponse = PlatformUtils.parseErrorResponseFromJson(e.message!!)
                 _errorResponseLiveData.postValue(errorResponse)
+            }
+        }
+    }
+
+    private suspend fun uploadWorkflowTaskAssetFile(workflowID: String, taskID: String): FileUploadResponse? {
+        try {
+            val fileForUpload = fetchTaskOutputAsset(workflowID, taskID)
+            return if(fileForUpload != null) {
+                val requestBody = fileForUpload
+                    .asRequestBody(CONTENT_TYPE_TEXT_PLAIN)
+
+                val filePart = MultipartBody.Part
+                    .createFormData(TASK_NAME_FILE,
+                        fileForUpload.name, requestBody)
+
+                LogHelper.debug(TAG, "Uploading task asset with taskID: $taskID")
+                cloudRepository.uploadWorkflowTaskAssetFile(filePart)
+            } else {
+                null
+            }
+        } catch (e: Throwable){
+            LogHelper.debug(TAG, "${e.message}")
+            return null
+        }
+    }
+
+    fun processWorkflowsForTaskAssetUpload(workflows: List<Workflow>) {
+        scope.launch {
+            try {
+                var totalUploadCount = (workflows.size - 1)
+                workflows.forEach { workflow ->
+                    val listOfUploadResponse = hashMapOf<String, FileUploadResponse>()
+                    // Fetch task-IDs for READ-Tasks
+                    val listOfTaskIDs = getWorkflowTaskIDs(workflow.workflowTasks)
+                    // Now process, asset upload
+                    if(listOfTaskIDs.isNotEmpty()){
+                        LogHelper.debug(TAG, "Found ${listOfTaskIDs.size} asset for upload, processing")
+
+                        listOfTaskIDs.forEach { taskID ->
+                            val uploadResponse = uploadWorkflowTaskAssetFile(workflow.workflowID, taskID)
+                            if(uploadResponse != null){
+                                listOfUploadResponse[taskID] = uploadResponse
+                                LogHelper.debug(TAG, "Upload complete of asset with taskID: $taskID, " +
+                                        "fileID: ${uploadResponse.fileID}, size: ${uploadResponse.fileSize}")
+                            }
+                        }
+
+                        LogHelper.debug(TAG, "Found ${listOfUploadResponse.size} upload response")
+
+                        if(listOfUploadResponse.isNotEmpty()){
+                            LogHelper.debug(TAG, "Updating ${workflow.workflowDevices?.size} device of workflowID: ${workflow.workflowID}")
+                            workflow.workflowDevices?.forEach { device ->
+                                LogHelper.debug(TAG, "Updating device-run-logs of device: ${device.deviceName}")
+                                device.deviceRunLogs?.deviceTaskRuns?.forEach { taskRun->
+                                    if(listOfUploadResponse.containsKey(taskRun.taskID)
+                                        && taskRun.taskStatus == TaskRunState.SUCCEEDED.name){
+                                        LogHelper.debug(TAG, "Updating task-run-logs of taskID: ${taskRun.taskID}")
+                                        taskRun.outputParameters!![1].paramValue = listOfUploadResponse[taskRun.taskID]!!.fileID
+                                    }
+                                }
+                            }
+
+                            // Update local-cache of workflow
+                            updateWorkflowDevices(workflow.workflowID, workflow.workflowDevices!!){
+                                LogHelper.debug(TAG, "Devices updated in local-cache.")
+                            }
+                        }
+                    }
+                    // Now process, run-logs
+                    LogHelper.debug(TAG, "->Move to device-run log upload")
+                    workflow.workflowDevices?.forEach { device ->
+                        val runLog = convertDeviceRunLogsToJson(device.deviceRunLogs!!)
+                        LogHelper.debug(TAG, "Device-Logs: $runLog")
+                        LogHelper.debug(TAG, "Uploading logs for deviceID: ${device.deviceName}")
+                        val response = cloudRepository.uploadDeviceRunLogs(runLog)
+                        if(response != null){
+                            LogHelper.debug(TAG, "Logs uploaded for deviceID: ${device.deviceName}, " +
+                                    "logs: $response")
+                        }
+                    }
+                    localCache.updateWorkflowUploadStatus(workflow.workflowID, true){
+                        LogHelper.debug(TAG, "Workflow assets & logs uploaded successfully")
+                        _assetUploadResponseLiveData.postValue(totalUploadCount--)
+                    }
+                }
+            } catch (e: Exception){
+                LogHelper.debug(TAG, "${e.message}")
+                _assetUploadResponseLiveData.postValue(-1)
             }
         }
     }

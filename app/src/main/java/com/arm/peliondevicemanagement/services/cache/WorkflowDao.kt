@@ -69,6 +69,9 @@ interface WorkflowDao {
     @Query("UPDATE workflows SET sdaToken=:sdaToken WHERE workflowID=:workflowID")
     fun updateWorkflowSDAToken(workflowID: String, sdaToken: SDATokenResponse?)
 
+    @Query("UPDATE workflows SET uploadCompleted=:uploadStatus WHERE (accountID=:accountID AND workflowID=:workflowID)")
+    fun updateWorkflowUploadStatus(accountID: String, workflowID: String, uploadStatus: Boolean)
+
     /*@TypeConverters(WDevicesListConverter::class)
     @Query("SELECT workflowDevices FROM workflows WHERE workflowID=:workflowID")
     fun fetchWorkflowDevicesByWorkflowID(workflowID: String): List<WorkflowDevice>?*/

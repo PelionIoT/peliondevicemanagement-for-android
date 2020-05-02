@@ -64,22 +64,22 @@ class LocalCache(
         }
     }
 
+    fun updateWorkflowUploadStatus(workflowID: String,
+                             uploadStatus: Boolean,
+                             updateFinished: () -> Unit) {
+        ioExecutor.execute {
+            val accountID = SharedPrefHelper.getSelectedAccountID()
+            LogHelper.debug(TAG, "Updating upload-status of workflow: $workflowID " +
+                    "to $uploadStatus")
+            workflowDao.updateWorkflowUploadStatus(accountID, workflowID, uploadStatus)
+            updateFinished()
+        }
+    }
+
     fun updateWorkflowDevices(workflowID: String,
                               devices: ArrayList<WorkflowDevice>,
                               updateFinished: () -> Unit) {
         ioExecutor.execute {
-            /*var totalUpdatedDevices = 0
-            LogHelper.debug(TAG, "Fetching stored devices from cache")
-            val storedDevices = arrayListOf<WorkflowDevice>()
-            storedDevices.addAll(workflowDao.fetchWorkflowDevicesByWorkflowID(workflowID))
-            for(index in 0 until devices.size){
-                if(storedDevices.contains(devices[index])){
-                    totalUpdatedDevices++
-                    LogHelper.debug(TAG, "Matched device ${devices[index].deviceName} " +
-                            "in stored devices")
-                    storedDevices[index] = devices[index]
-                }
-            }*/
             LogHelper.debug(TAG, "Updating ${devices.size} device of workflow: $workflowID")
             workflowDao.updateWorkflowDevices(workflowID, devices)
             updateFinished()

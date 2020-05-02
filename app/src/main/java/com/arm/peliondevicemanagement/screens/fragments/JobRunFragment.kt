@@ -41,11 +41,13 @@ import com.arm.peliondevicemanagement.components.adapters.WorkflowDeviceAdapter
 import com.arm.peliondevicemanagement.components.models.GenericBleDevice
 import com.arm.peliondevicemanagement.components.models.workflow.device.DeviceResponse
 import com.arm.peliondevicemanagement.components.models.workflow.device.DeviceRun
+import com.arm.peliondevicemanagement.components.models.workflow.device.DeviceRunLogs
 import com.arm.peliondevicemanagement.components.models.workflow.device.WorkflowDevice
 import com.arm.peliondevicemanagement.components.models.workflow.task.TaskRun
 import com.arm.peliondevicemanagement.components.viewmodels.SDAViewModel
 import com.arm.peliondevicemanagement.components.viewmodels.WorkflowViewModel
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_COMPLETED
+import com.arm.peliondevicemanagement.constants.AppConstants.WORKFLOW_OUT_ASSETS_FILENAME
 import com.arm.peliondevicemanagement.constants.ExecutionMode
 import com.arm.peliondevicemanagement.constants.state.workflow.WorkflowState
 import com.arm.peliondevicemanagement.constants.state.workflow.device.DeviceResponseState
@@ -60,10 +62,13 @@ import com.arm.peliondevicemanagement.utils.WorkflowUtils.createDeviceRunLog
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.createTaskRunLog
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.getDeviceCommands
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.getSDAExecutionMode
+import com.arm.peliondevicemanagement.utils.WorkflowUtils.isReadTaskType
 import com.arm.pelionmobiletransportsdk.ble.BleDevice
 import com.arm.pelionmobiletransportsdk.ble.callbacks.BleScannerCallback
 import com.arm.pelionmobiletransportsdk.ble.scanner.BleManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.*
 
 @ExperimentalCoroutinesApi
@@ -314,23 +319,27 @@ class JobRunFragment : Fragment() {
 
     private fun processSDAResponse(deviceResponse: DeviceResponse) {
         val taskRunLog: TaskRun = if(deviceResponse.operationResponse != null){
-            if(deviceResponse.operationResponse.blob != null){
+            // If task-type is READ then save command-response in logs
+            if(isReadTaskType(deviceResponse.taskID!!, deviceRunModel.workflowTasks)
+                && deviceResponse.operationResponse.blob != null){
+                // Parse command-response
                 val outputResponse = deviceResponse.operationResponse.blob!!
-                LogHelper.debug(TAG, "SDA_Response ${outputResponse.contentToString()}")
+                LogHelper.debug(TAG, "SDA_Command_Response ${outputResponse.contentToString()}")
+                // Save to local-storage
                 workflowViewModel.saveWorkflowTaskOutputAssets(deviceRunModel.workflowID,
-                    deviceResponse.taskID!!, outputResponse)
+                    deviceResponse.taskID, outputResponse)
+                // Create run-log
+                createTaskRunLog(deviceResponse.taskID,
+                    TaskRunState.SUCCEEDED, WORKFLOW_OUT_ASSETS_FILENAME)
+            } else {
+                // Create run-log
+                createTaskRunLog(deviceResponse.taskID, TaskRunState.SUCCEEDED)
             }
-            // Create run-log
-            createTaskRunLog(
-                deviceResponse.taskID!!, TaskRunState.SUCCEEDED, "output.txt"
-            )
             //LogHelper.debug(TAG, "TaskRunLogs: $taskRunLog")
         } else {
             taskFailureCount++
             // Create run-log
-            createTaskRunLog(
-                deviceResponse.taskID!!, TaskRunState.FAILED
-            )
+            createTaskRunLog(deviceResponse.taskID!!, TaskRunState.FAILED)
             //LogHelper.debug(TAG, "TaskRunLogs: $taskRunLog")
         }
         taskRunLogs.add(taskRunLog)
@@ -363,7 +372,7 @@ class JobRunFragment : Fragment() {
             deviceRunModel.workflowID,
             deviceID,
             deviceRunModel.workflowLocation,
-            currentDateTime, "null",
+            currentDateTime, "The command ran to completion without any hassle",
             taskRunLogs, taskFailureCount)
 
         val devicePosition = getItemPosition(deviceID)
@@ -512,7 +521,11 @@ class JobRunFragment : Fragment() {
             addTemporaryDeviceItemInList("", DeviceScanState.FAILED, failedCount)
         }
 
-        saveLogsToDB()
+        // Update localDB for changes
+        workflowViewModel.updateWorkflowDevices(
+            deviceRunModel.workflowID, deviceRunModel.workflowDevices) {
+            LogHelper.debug(TAG, "Devices updated in local-cache.")
+        }
 
         viewBinder.tvDescription.text = resources.getString(R.string.stopped_text)
         viewBinder.iconView.setImageDrawable(
@@ -527,11 +540,6 @@ class JobRunFragment : Fragment() {
         viewBinder.elapsedTimer.stop()
 
         isJobCompleted = true
-    }
-
-    private fun saveLogsToDB() {
-        workflowViewModel.updateWorkflowDevices(
-            deviceRunModel.workflowID, deviceRunModel.workflowDevices)
     }
 
     private fun destroyObjects() {

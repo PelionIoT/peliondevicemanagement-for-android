@@ -25,5 +25,5 @@ import kotlinx.android.parcel.Parcelize
 data class TaskRunParam(
     @SerializedName("name") val paramName: String,
     @SerializedName("type") val paramType: String,
-    @SerializedName("value") val paramValue: String
+    @SerializedName("value") var paramValue: String
 ): Parcelable

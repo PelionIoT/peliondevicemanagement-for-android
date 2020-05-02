@@ -42,6 +42,7 @@ import com.arm.peliondevicemanagement.databinding.FragmentCompletedJobsBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.screens.activities.HomeActivity
 import com.arm.peliondevicemanagement.utils.PlatformUtils
+import com.arm.peliondevicemanagement.utils.WorkflowUtils.getWorkflowTaskIDs
 import com.google.android.material.bottomsheet.BottomSheetDialog
 
 class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
@@ -142,6 +143,27 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
         viewBinder.uploadJobsButton.setOnClickListener {
             prepareForUpload()
         }
+
+        workflowViewModel.getAssetUploadLiveData().observe(viewLifecycleOwner, Observer { statusCode ->
+            when {
+                statusCode > 0 -> {
+                    LogHelper.debug(TAG, "Upload complete")
+                    updateSyncView(true,
+                        "Syncing jobs",
+                        "Uploading $statusCode jobs",
+                        true
+                    )
+                }
+                statusCode == 0 -> {
+                    LogHelper.debug(TAG, "All Uploads complete")
+                    refreshContent()
+                }
+                else -> {
+                    LogHelper.debug(TAG, "Upload failed")
+                    refreshContent()
+                }
+            }
+        })
     }
 
     private fun refreshContent() {
@@ -181,7 +203,13 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
             return
         }
 
-        (requireActivity() as HomeActivity).showSnackbar(requireView(), "You're expecting too much")
+        updateSyncView(true,
+            "Syncing jobs",
+            "Uploading ${workflowAdapter.currentList?.size} jobs",
+            true
+        )
+
+        workflowViewModel.processWorkflowsForTaskAssetUpload(workflowAdapter.currentList!!)
     }
 
     private fun updateSyncView(visibility: Boolean, text: String? = null, desc: String? = null, inProgress: Boolean = false) {

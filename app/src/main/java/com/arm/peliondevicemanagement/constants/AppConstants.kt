@@ -43,6 +43,7 @@ object AppConstants {
     const val WORKFLOW_STATE_SYNCED = "SYNCED"
     const val WORKFLOW_STATE_COMPLETED = "COMPLETED"
     const val WORKFLOW_ASSETS_DIRECTORY = "w_assets"
+    const val WORKFLOW_OUT_ASSETS_FILENAME = "output.txt"
 
     // Date-Time constants
     const val DEFAULT_DATE_FORMAT = "dd-MM-yyyy"

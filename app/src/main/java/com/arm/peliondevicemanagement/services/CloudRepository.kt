@@ -26,13 +26,10 @@ import com.arm.peliondevicemanagement.constants.APIConstants.KEY_ACCOUNT_ID
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_GRANT_TYPE
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_PASSWORD
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_USERNAME
-import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.services.api.CloudAPIService
 import com.arm.peliondevicemanagement.services.api.CloudAPIService.Companion.createJSONRequestBody
-import com.arm.peliondevicemanagement.services.data.BaseRepository
-import com.arm.peliondevicemanagement.services.data.LoginResponse
-import com.arm.peliondevicemanagement.services.data.SDATokenResponse
-import com.arm.peliondevicemanagement.services.data.WorkflowsResponse
+import com.arm.peliondevicemanagement.services.data.*
+import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.ResponseBody
 
@@ -131,6 +128,18 @@ class CloudRepository(private val cloudAPIService: CloudAPIService): BaseReposit
     suspend fun getWorkflowTaskAssetFile(fileID: String): ResponseBody? {
         return doSafeAPIRequest(
             call = { cloudAPIService.getWorkflowTaskAssetFile(fileID)}
+        )
+    }
+
+    suspend fun uploadWorkflowTaskAssetFile(filePart: MultipartBody.Part): FileUploadResponse? {
+        return doSafeAPIRequest(
+            call = { cloudAPIService.uploadWorkflowTaskAssetFile(filePart)}
+        )
+    }
+
+    suspend fun uploadDeviceRunLogs(json: String): DeviceRunUploadResponse? {
+        return doSafeAPIRequest(
+            call = { cloudAPIService.uploadRunLogs(json.toRequestBody(CONTENT_TYPE_JSON))}
         )
     }
 

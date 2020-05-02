@@ -20,6 +20,7 @@ package com.arm.peliondevicemanagement.utils
 import android.content.Context
 import com.arm.peliondevicemanagement.AppController
 import com.arm.peliondevicemanagement.constants.AppConstants
+import com.arm.peliondevicemanagement.constants.AppConstants.WORKFLOW_OUT_ASSETS_FILENAME
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -84,6 +85,26 @@ object WorkflowFileUtils {
         }
     }
 
+    fun readWorkflowAssetFile(locationPath: String): File? {
+
+        val context = AppController.appController!!.applicationContext
+        val subDirPath = getWorkflowAssetsDirectory(context) +
+                File.separator + locationPath
+
+        val subDir = File(subDirPath)
+        if(!subDir.exists()){
+            return null
+        }
+
+        val filePath = subDirPath + File.separator + WORKFLOW_OUT_ASSETS_FILENAME
+        val file = File(filePath)
+        if(!file.exists()){
+            return null
+        }
+
+        return file
+    }
+
     fun writeWorkflowAssetFile(locationPath: String,
                                fileName: String,
                                fileContent: ByteArray): Boolean {
@@ -93,7 +114,8 @@ object WorkflowFileUtils {
 
         val subDir = File(subDirPath)
         if(!subDir.exists()){
-            return false
+            LogHelper.debug(TAG, "Directory does not exists, creating one")
+            subDir.mkdirs()
         }
 
         val filePath = subDirPath + File.separator + fileName

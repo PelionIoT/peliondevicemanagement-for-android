@@ -32,6 +32,7 @@ object APIConstants {
     const val DEFAULT_BASE_URL = DEFAULT_SSL + CLOUD_URL_PRODUCTION
 
     val CONTENT_TYPE_JSON: MediaType = "application/json; charset=utf-8".toMediaTypeOrNull()!!
+    val CONTENT_TYPE_TEXT_PLAIN: MediaType = "text/plain".toMediaTypeOrNull()!!
 
     // Auth Endpoints
     const val API_LOGIN = "/auth/login"
@@ -77,6 +78,5 @@ object APIConstants {
     const val KEY_FILE_ID = "file_id"
     const val KEY_WORKFLOW_ID = "workflow_id"
     const val KEY_ASSIGNEE_ID = "assignee__eq"
-    const val KEY_WORKFLOW_STATUS = "status__eq"
 
 }

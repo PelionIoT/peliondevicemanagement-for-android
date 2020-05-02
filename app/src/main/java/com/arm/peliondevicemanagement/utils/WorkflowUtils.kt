@@ -35,6 +35,7 @@ import com.arm.peliondevicemanagement.constants.AppConstants.TASK_NAME_FILE
 import com.arm.peliondevicemanagement.constants.AppConstants.TASK_NAME_FILEPATH
 import com.arm.peliondevicemanagement.constants.AppConstants.TASK_TYPE_FILE
 import com.arm.peliondevicemanagement.constants.AppConstants.TASK_TYPE_STRING
+import com.arm.peliondevicemanagement.constants.AppConstants.WORKFLOW_OUT_ASSETS_FILENAME
 import com.arm.peliondevicemanagement.constants.AppConstants.WRITE_TASK
 import com.arm.peliondevicemanagement.constants.ExecutionMode
 import com.arm.peliondevicemanagement.constants.state.workflow.device.DeviceRunState
@@ -50,6 +51,9 @@ import com.arm.peliondevicemanagement.transport.sda.DeviceCommand
 import com.arm.peliondevicemanagement.utils.WorkflowFileUtils.isFileExists
 import com.arm.peliondevicemanagement.utils.WorkflowFileUtils.readWorkflowAssetFile
 import com.arm.peliondevicemanagement.utils.WorkflowFileUtils.writeWorkflowAssetFile
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import java.io.File
 import java.util.*
 import java.util.concurrent.Executors
 import kotlin.collections.ArrayList
@@ -118,26 +122,18 @@ object WorkflowUtils {
     }
 
     fun isValidSDAToken(expiresIn: String): Boolean {
-        val tokenExpiryDate =
-            PlatformUtils.parseJSONTimeString(expiresIn, AppConstants.DEFAULT_DATE_FORMAT)
-        val tokenExpiryTime =
-            PlatformUtils.parseJSONTimeString(expiresIn, AppConstants.DEFAULT_TIME_FORMAT)
-        val currentDateTime = Date()
-        val currentDate =
-            PlatformUtils.parseDateTimeString(currentDateTime, AppConstants.DEFAULT_DATE_FORMAT)
-        val currentTime =
-            PlatformUtils.parseDateTimeString(currentDateTime, AppConstants.DEFAULT_TIME_FORMAT)
-
-        val tokenExpiryDateTime = "$tokenExpiryDate, $tokenExpiryTime"
-        val nowDateTime = "$currentDate, $currentTime"
+        val tokenExpiryDate = PlatformUtils
+            .convertJSONDateTimeStringToDate(expiresIn, AppConstants.DEFAULT_DATE_FORMAT)
+        val currentDate = Date()
 
         var tokenStatus = false
-        if(tokenExpiryDateTime >= nowDateTime){
+        if(tokenExpiryDate.after(currentDate) && tokenExpiryDate.time > System.currentTimeMillis()){
             tokenStatus = true
         }
+
         LogHelper.debug(TAG, "isValidSDAToken() $tokenStatus, " +
-                "CurrentDateTime: $nowDateTime " +
-                "TokenExpiresOn: $tokenExpiryDateTime")
+                "CurrentDateTime: $currentDate " +
+                "TokenExpiresOn: $tokenExpiryDate")
 
         return tokenStatus
     }
@@ -178,6 +174,17 @@ object WorkflowUtils {
         return status
     }
 
+    fun isReadTaskType(taskID: String, tasks: List<WorkflowTask>): Boolean {
+        var status = false
+        tasks.forEach { task->
+            if(taskID == task.taskID && task.taskName == READ_TASK){
+                status = true
+                return status
+            }
+        }
+        return status
+    }
+
     fun getPermissionScopeFromTasks(tasks: List<WorkflowTask>): String {
         val scope: String
         val scopeBuffer = StringBuffer()
@@ -201,6 +208,16 @@ object WorkflowUtils {
 
         scope = scopeBuffer.toString()
         return scope
+    }
+
+    fun getWorkflowTaskIDs(tasks: List<WorkflowTask>): List<String> {
+        val listOfTaskIDs = arrayListOf<String>()
+        tasks.forEach { task ->
+            if(task.taskName == READ_TASK){
+                listOfTaskIDs.add(task.taskID)
+            }
+        }
+        return listOfTaskIDs
     }
 
     fun getAudienceListFromDevices(devices: List<WorkflowDevice>): List<String> {
@@ -259,6 +276,21 @@ object WorkflowUtils {
             LogHelper.debug(TAG, "No downloadable assets found.")
         }
 
+    }
+
+    fun fetchTaskOutputAsset(workflowID: String, taskID: String): File? {
+        val userID = SharedPrefHelper.getSelectedUserID()
+        val accountID = SharedPrefHelper.getSelectedAccountID()
+        val filePath = "$userID/$accountID/$workflowID/$taskID"
+
+        LogHelper.debug(TAG, "Looking for asset with taskID: $taskID")
+        val fileForUpload = readWorkflowAssetFile(filePath)
+
+        if(fileForUpload != null){
+            LogHelper.debug(TAG, "Found asset with taskID: $taskID")
+        }
+
+        return fileForUpload
     }
 
     fun getDeviceCommands(workflowID: String, tasks: List<WorkflowTask>): List<TaskDeviceCommand> {
@@ -332,9 +364,11 @@ object WorkflowUtils {
                 outputParamsList.add(
                     TaskRunParam(KEY_ERROR_CODE, TaskTypeState.NUMBER.name, "0")
                 )
-                outputParamsList.add(
-                    TaskRunParam(TASK_NAME_FILE, TaskTypeState.FILE.name, fileID!!)
-                )
+                if(fileID != null){
+                    outputParamsList.add(
+                        TaskRunParam(TASK_NAME_FILE, TaskTypeState.FILE.name, fileID)
+                    )
+                }
                 return TaskRun(taskID, TaskRunState.SUCCEEDED.name, outputParamsList)
             }
             TaskRunState.FAILED -> {
@@ -394,9 +428,14 @@ object WorkflowUtils {
 
         val ioExecutor = Executors.newSingleThreadExecutor()
         ioExecutor.execute {
-            val isSuccessful = writeWorkflowAssetFile(filePath, "output.txt", fileContent)
+            val isSuccessful = writeWorkflowAssetFile(filePath, WORKFLOW_OUT_ASSETS_FILENAME, fileContent)
             saveFinished(isSuccessful)
         }
+    }
+
+    fun convertDeviceRunLogsToJson(deviceRunLogs: DeviceRunLogs): String {
+        val type = object : TypeToken<DeviceRunLogs>() {}.type
+        return Gson().toJson(deviceRunLogs, type)
     }
 
 }

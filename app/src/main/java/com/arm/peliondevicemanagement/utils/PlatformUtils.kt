@@ -18,8 +18,6 @@
 package com.arm.peliondevicemanagement.utils
 
 import android.Manifest
-import android.R.attr.host
-import android.R.attr.port
 import android.app.Activity
 import android.bluetooth.le.ScanSettings
 import android.content.Context
@@ -39,7 +37,6 @@ import androidx.core.content.ContextCompat
 import com.arm.peliondevicemanagement.AppController
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.constants.AppConstants.SDA_SERVICE
-import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.services.data.ErrorResponse
 import com.arm.pelionmobiletransportsdk.TransportManager
 import com.arm.pelionmobiletransportsdk.ble.scanner.BleManager
@@ -181,6 +178,12 @@ object PlatformUtils {
         val outputFormat = SimpleDateFormat(format, Locale.ENGLISH)
         val date = inputFormat.parse(inputString)
         return outputFormat.format(date!!)
+    }
+
+    fun convertJSONDateTimeStringToDate(inputString: String, format: String = "MMM dd, yyyy"): Date {
+        // default should be: dd-MM-yyyy, but the use-case is different
+        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH)
+        return inputFormat.parse(inputString)!!
     }
 
     fun parseDateTimeString(inputString: Date, format: String = "dd-MM-yyyy"): String {

@@ -22,7 +22,6 @@ import com.arm.peliondevicemanagement.components.models.LicenseModel
 import com.arm.peliondevicemanagement.components.models.user.UserProfile
 import com.arm.peliondevicemanagement.constants.APIConstants.API_ACCOUNTS_ME
 import com.arm.peliondevicemanagement.constants.APIConstants.API_ALL_WORKFLOWS
-import com.arm.peliondevicemanagement.services.data.LoginResponse
 import com.arm.peliondevicemanagement.constants.APIConstants.API_LOGIN
 import com.arm.peliondevicemanagement.constants.APIConstants.API_IMPERSONATE
 import com.arm.peliondevicemanagement.constants.APIConstants.API_USER_ME
@@ -30,6 +29,7 @@ import com.arm.peliondevicemanagement.constants.APIConstants.API_ASSIGNED_WORKFL
 import com.arm.peliondevicemanagement.constants.APIConstants.API_CLOUD_UI_SERVER
 import com.arm.peliondevicemanagement.constants.APIConstants.API_LICENSES
 import com.arm.peliondevicemanagement.constants.APIConstants.API_SDA_TOKEN
+import com.arm.peliondevicemanagement.constants.APIConstants.API_WORKFLOW_DEVICE_RUNS
 import com.arm.peliondevicemanagement.constants.APIConstants.API_WORKFLOW_FILES
 import com.arm.peliondevicemanagement.constants.APIConstants.API_WORKFLOW_SYNC
 import com.arm.peliondevicemanagement.constants.APIConstants.CONTENT_TYPE_JSON
@@ -43,15 +43,10 @@ import com.arm.peliondevicemanagement.constants.APIConstants.KEY_CONTENT_TYPE_JS
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_FILE_ID
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_LIMIT
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_WORKFLOW_ID
-import com.arm.peliondevicemanagement.constants.APIConstants.KEY_WORKFLOW_STATUS
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
-import com.arm.peliondevicemanagement.services.data.SDATokenResponse
-import com.arm.peliondevicemanagement.services.data.WorkflowsResponse
-import okhttp3.Interceptor
-import okhttp3.OkHttpClient
-import okhttp3.RequestBody
+import com.arm.peliondevicemanagement.services.data.*
+import okhttp3.*
 import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.ResponseBody
 import org.json.JSONObject
 import retrofit2.Response
 import retrofit2.Retrofit
@@ -136,6 +131,17 @@ interface CloudAPIService {
     suspend fun getWorkflowTaskAssetFile(
         @Path(KEY_FILE_ID) fileID: String
     ): Response<ResponseBody>
+
+    @Multipart
+    @POST(API_WORKFLOW_FILES)
+    suspend fun uploadWorkflowTaskAssetFile(
+        @Part filePart: MultipartBody.Part
+    ): Response<FileUploadResponse>
+
+    @POST(API_WORKFLOW_DEVICE_RUNS)
+    suspend fun uploadRunLogs(
+        @Body params: RequestBody
+    ): Response<DeviceRunUploadResponse>
 
     @GET(API_CLOUD_UI_SERVER + API_LICENSES)
     suspend fun getLicenses(): Response<List<LicenseModel>>

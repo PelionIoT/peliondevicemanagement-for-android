@@ -15,18 +15,18 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.components.models.workflow.task
+package com.arm.peliondevicemanagement.services.data
 
-import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
-import kotlinx.android.parcel.Parcelize
 
-@Parcelize
-data class WorkflowTask(
-    @SerializedName("id") val taskID: String,
-    @SerializedName("name") val taskName: String,
-    @SerializedName("description") val taskDescription: String,
-    @SerializedName("mandatory") val isMandatory: Boolean,
-    @SerializedName("input_params") val inputParameters: List<TaskParam>,
-    @SerializedName("output_params") val outputParameters: List<TaskParam>
-): Parcelable
+data class DeviceRunUploadResponse(
+    @SerializedName("id")
+    val id: String,
+    @SerializedName("workflow_id")
+    val workflowID: String,
+    @SerializedName("device_id")
+    val deviceID: String,
+    @SerializedName("created_at")
+    val createdAt: String
+
+)
