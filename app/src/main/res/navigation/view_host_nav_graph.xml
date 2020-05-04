@@ -24,7 +24,7 @@
 
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="com.arm.peliondevicemanagement.screens.fragments.SettingsFragment"
+        android:name="com.arm.peliondevicemanagement.screens.fragments.settings.SettingsFragment"
         android:label="fragment_settings"
         tools:layout="@layout/fragment_settings" >
         <action
@@ -52,13 +52,13 @@
 
     <fragment
         android:id="@+id/activityInfoFragment"
-        android:name="com.arm.peliondevicemanagement.screens.fragments.ActivityInfoFragment"
+        android:name="com.arm.peliondevicemanagement.screens.fragments.settings.ActivityInfoFragment"
         android:label="fragment_activity_info"
         tools:layout="@layout/fragment_activity_info" />
 
     <fragment
         android:id="@+id/helpAndSupportFragment"
-        android:name="com.arm.peliondevicemanagement.screens.fragments.HelpAndSupportFragment"
+        android:name="com.arm.peliondevicemanagement.screens.fragments.settings.HelpAndSupportFragment"
         android:label="fragment_help_and_support"
         tools:layout="@layout/fragment_help_and_support" >
         <action
@@ -93,13 +93,13 @@
 
     <fragment
         android:id="@+id/licensesFragment"
-        android:name="com.arm.peliondevicemanagement.screens.fragments.LicensesFragment"
+        android:name="com.arm.peliondevicemanagement.screens.fragments.settings.LicensesFragment"
         android:label="fragment_licenses"
         tools:layout="@layout/fragment_licenses" />
 
     <fragment
         android:id="@+id/jobFragment"
-        android:name="com.arm.peliondevicemanagement.screens.fragments.JobFragment"
+        android:name="com.arm.peliondevicemanagement.screens.fragments.jobs.JobFragment"
         android:label="fragment_job"
         tools:layout="@layout/fragment_job">
 
@@ -120,7 +120,7 @@
 
     <fragment
         android:id="@+id/jobRunFragment"
-        android:name="com.arm.peliondevicemanagement.screens.fragments.JobRunFragment"
+        android:name="com.arm.peliondevicemanagement.screens.fragments.jobs.JobRunFragment"
         android:label="fragment_job_run"
         tools:layout="@layout/fragment_job_run">
         <argument
@@ -130,7 +130,7 @@
 
     <fragment
         android:id="@+id/developerOptionsFragment"
-        android:name="com.arm.peliondevicemanagement.screens.fragments.DeveloperOptionsFragment"
+        android:name="com.arm.peliondevicemanagement.screens.fragments.settings.DeveloperOptionsFragment"
         android:label="fragment_developer_options"
         tools:layout="@layout/fragment_developer_options" />
 

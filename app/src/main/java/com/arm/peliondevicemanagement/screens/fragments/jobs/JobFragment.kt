@@ -15,12 +15,11 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.screens.fragments
+package com.arm.peliondevicemanagement.screens.fragments.jobs
 
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -40,9 +39,9 @@ import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.adapters.WorkflowDeviceAdapter
 import com.arm.peliondevicemanagement.components.listeners.RecyclerItemSwipeListener
 import com.arm.peliondevicemanagement.components.listeners.SwipeDragControllerListener
+import com.arm.peliondevicemanagement.components.models.workflow.Workflow
 import com.arm.peliondevicemanagement.components.models.workflow.device.DeviceRun
 import com.arm.peliondevicemanagement.components.models.workflow.device.WorkflowDevice
-import com.arm.peliondevicemanagement.components.models.workflow.Workflow
 import com.arm.peliondevicemanagement.components.viewmodels.WorkflowViewModel
 import com.arm.peliondevicemanagement.constants.AppConstants.DEFAULT_TIME_FORMAT
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_COMPLETED
@@ -51,7 +50,6 @@ import com.arm.peliondevicemanagement.constants.state.NetworkErrorState
 import com.arm.peliondevicemanagement.constants.state.workflow.WorkflowState
 import com.arm.peliondevicemanagement.databinding.FragmentJobBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
-import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.screens.activities.ViewHostActivity
 import com.arm.peliondevicemanagement.utils.PlatformUtils
 import com.arm.peliondevicemanagement.utils.PlatformUtils.checkForLocationPermission
@@ -61,12 +59,12 @@ import com.arm.peliondevicemanagement.utils.PlatformUtils.fetchAttributeDrawable
 import com.arm.peliondevicemanagement.utils.PlatformUtils.isBluetoothEnabled
 import com.arm.peliondevicemanagement.utils.PlatformUtils.isLocationServiceEnabled
 import com.arm.peliondevicemanagement.utils.PlatformUtils.openLocationServiceSettings
-import com.arm.peliondevicemanagement.utils.WorkflowUtils.getPermissionScopeFromTasks
-import com.arm.peliondevicemanagement.utils.WorkflowUtils.isValidSDAToken
 import com.arm.peliondevicemanagement.utils.PlatformUtils.parseJSONTimeIntoTimeAgo
 import com.arm.peliondevicemanagement.utils.PlatformUtils.parseJSONTimeString
 import com.arm.peliondevicemanagement.utils.WorkflowUtils
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.getAudienceListFromDevices
+import com.arm.peliondevicemanagement.utils.WorkflowUtils.getPermissionScopeFromTasks
+import com.arm.peliondevicemanagement.utils.WorkflowUtils.isValidSDAToken
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.isWriteTaskAvailable
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -90,7 +88,8 @@ class JobFragment : Fragment() {
 
     private var totalDevicesCompleted: Int = 0
     private var isSDATokenValid: Boolean = false
-    private var _taskAssetState: AssetState = AssetState.NOT_REQUIRED
+    private var _taskAssetState: AssetState =
+        AssetState.NOT_REQUIRED
     private var isSyncInProgress: Boolean = false
     private lateinit var _downloadActionState: DownloadActionState
 
@@ -204,16 +203,16 @@ class JobFragment : Fragment() {
                     R.string.status_format, resources.getString(R.string.reassigned_text))
             }
         }
-        viewBinder.tvLocation.text = context!!.getString(
+        viewBinder.tvLocation.text = requireContext().getString(
             R.string.location_format, workflowModel.workflowLocation)
         val creationDateTime = parseJSONTimeString(workflowModel.workflowCreatedAt) +
                 " - " + parseJSONTimeIntoTimeAgo(workflowModel.workflowCreatedAt)
-        viewBinder.tvCreatedAt.text = context!!.getString(
+        viewBinder.tvCreatedAt.text = requireContext().getString(
             R.string.created_at_format, creationDateTime)
 
         val totalCompletedText = "$totalDevicesCompleted/${workflowModel.workflowDevices!!.size}"
 
-        viewBinder.tvCompleted.text = context!!
+        viewBinder.tvCompleted.text = requireContext()
             .getString(R.string.devices_completed_format,
                 totalCompletedText)
 
@@ -228,7 +227,7 @@ class JobFragment : Fragment() {
         val itemTouchHelper = ItemTouchHelper(
             SwipeDragControllerListener(
                 ContextCompat.getDrawable(requireContext(), R.drawable.ic_play_light)!!,
-                fetchAttributeColor(context!!, R.attr.colorAccent), swipeListener,
+                fetchAttributeColor(requireContext(), R.attr.colorAccent), swipeListener,
                 ItemTouchHelper.LEFT
             )
         )
@@ -464,7 +463,8 @@ class JobFragment : Fragment() {
                 totalDevicesCompleted++
             }
         }
-        LogHelper.debug(TAG, "completedDevices: $totalDevicesCompleted, " +
+        LogHelper.debug(
+            TAG, "completedDevices: $totalDevicesCompleted, " +
                 "pendingDevices: ${workflowModel.workflowDevices!!.size - totalDevicesCompleted}")
     }
 
@@ -492,24 +492,24 @@ class JobFragment : Fragment() {
             val expiryTime = parseJSONTimeString(expiresIn, DEFAULT_TIME_FORMAT)
             val expiryDateTime = "$expiryDate, $expiryTime"
             if(isValidSDAToken(expiresIn)){
-                viewBinder.tvValidTill.text = context!!.getString(
+                viewBinder.tvValidTill.text = requireContext().getString(
                     R.string.active_format, expiryDateTime)
                 viewBinder.secureIconView.setImageDrawable(
-                    fetchAttributeDrawable(context!!, R.attr.iconShieldGreen))
+                    fetchAttributeDrawable(requireContext(), R.attr.iconShieldGreen))
                 showHideRefreshTokenButton(false)
                 isSDATokenValid = true
             } else {
-                viewBinder.tvValidTill.text = context!!.getString(
+                viewBinder.tvValidTill.text = requireContext().getString(
                     R.string.expired_format, expiryDateTime)
                 viewBinder.secureIconView.setImageDrawable(
-                    fetchAttributeDrawable(context!!, R.attr.iconShieldRed))
+                    fetchAttributeDrawable(requireContext(), R.attr.iconShieldRed))
                 showHideRefreshTokenButton(true)
                 isSDATokenValid = false
             }
         } else {
-            viewBinder.tvValidTill.text = context!!.getString(R.string.na)
+            viewBinder.tvValidTill.text = requireContext().getString(R.string.na)
             viewBinder.secureIconView.setImageDrawable(
-                fetchAttributeDrawable(context!!, R.attr.iconShieldYellow))
+                fetchAttributeDrawable(requireContext(), R.attr.iconShieldYellow))
             showHideRefreshTokenButton(true)
             isSDATokenValid = false
         }
@@ -576,14 +576,14 @@ class JobFragment : Fragment() {
             viewBinder.tvDeviceHeader.setCompoundDrawablesWithIntrinsicBounds(
                 null,
                 null,
-                fetchAttributeDrawable(context!!, R.attr.iconArrowUp),
+                fetchAttributeDrawable(requireContext(), R.attr.iconArrowUp),
                 null)
         } else {
             viewBinder.rvDevices.visibility = View.GONE
             viewBinder.tvDeviceHeader.setCompoundDrawablesWithIntrinsicBounds(
                 null,
                 null,
-                fetchAttributeDrawable(context!!, R.attr.iconArrowDown),
+                fetchAttributeDrawable(requireContext(), R.attr.iconArrowDown),
                 null)
         }
     }
@@ -683,7 +683,8 @@ class JobFragment : Fragment() {
             }
         }
 
-        LogHelper.debug(TAG, "createBundleForPendingDevices() " +
+        LogHelper.debug(
+            TAG, "createBundleForPendingDevices() " +
                 "Found ${pendingDevices.size} pending-device")
 
         return DeviceRun(
@@ -697,7 +698,8 @@ class JobFragment : Fragment() {
 
     private fun createBundleForAllDevices(): DeviceRun {
         val allDevices = ArrayList<WorkflowDevice>(workflowModel.workflowDevices!!)
-        LogHelper.debug(TAG, "createRunBundleForAllDevices() " +
+        LogHelper.debug(
+            TAG, "createRunBundleForAllDevices() " +
                 "Found ${allDevices.size} device for run-bundle")
 
         return DeviceRun(
@@ -724,8 +726,11 @@ class JobFragment : Fragment() {
     private fun navigateToRunFragment(runBundle: DeviceRun) {
         // Move to device-run
         Navigation.findNavController(viewBinder.root)
-            .navigate(JobFragmentDirections
-                .actionJobFragmentToJobRunFragment(runBundle))
+            .navigate(
+                JobFragmentDirections.actionJobFragmentToJobRunFragment(
+                    runBundle
+                )
+            )
     }
 
     private fun showWorkflowCompleteDialog() {

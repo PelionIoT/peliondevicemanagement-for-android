@@ -19,7 +19,6 @@ package com.arm.peliondevicemanagement.screens.activities
 
 import android.content.Intent
 import android.content.res.ColorStateList
-import android.graphics.Color
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
@@ -40,8 +39,8 @@ import com.arm.peliondevicemanagement.constants.AppConstants.viewHostLaunchActio
 import com.arm.peliondevicemanagement.databinding.ActivityHomeBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
-import com.arm.peliondevicemanagement.screens.fragments.CompletedJobsFragment
-import com.arm.peliondevicemanagement.screens.fragments.PendingJobsFragment
+import com.arm.peliondevicemanagement.screens.fragments.jobs.CompletedJobsFragment
+import com.arm.peliondevicemanagement.screens.fragments.jobs.PendingJobsFragment
 import com.arm.peliondevicemanagement.utils.PlatformUtils
 import com.arm.peliondevicemanagement.utils.WorkflowUtils
 import com.google.android.material.navigation.NavigationView
@@ -164,8 +163,10 @@ class HomeActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     private fun initFragmentViews() {
         fragmentNamesList = listOf("Pending", "Completed")
         // Initialize fragments
-        pendingJobsFragment = PendingJobsFragment()
-        completedJobsFragment = CompletedJobsFragment()
+        pendingJobsFragment =
+            PendingJobsFragment()
+        completedJobsFragment =
+            CompletedJobsFragment()
         // Add them to the list
         fragmentList = listOf<Fragment>(pendingJobsFragment!!, completedJobsFragment!!)
         // Initialize adapter

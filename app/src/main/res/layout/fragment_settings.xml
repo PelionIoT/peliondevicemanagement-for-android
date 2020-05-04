@@ -23,7 +23,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="?attr/colorBackground"
     android:padding="10dp"
-    tools:context=".screens.fragments.SettingsFragment">
+    tools:context=".screens.fragments.settings.SettingsFragment">
 
     <RelativeLayout
         android:layout_width="match_parent"

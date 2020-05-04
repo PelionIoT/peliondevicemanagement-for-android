@@ -30,15 +30,6 @@ interface WorkflowDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertWorkflows(workflows: List<Workflow>)
 
-    // FixME [ Add assignee field after testing ]
-    @Query("SELECT * FROM workflows WHERE accountID=:accountID ORDER BY pKey ASC LIMIT :limit")
-    fun fetchWorkflows(accountID: String, limit: Int): List<Workflow>
-
-    @Query("SELECT * FROM workflows WHERE accountID=:accountID AND (pKey > " +
-            "(SELECT pKey FROM workflows WHERE workflowID LIKE :afterID)) " +
-            "ORDER BY pKey ASC LIMIT :limit")
-    fun fetchWorkflows(accountID: String, limit: Int, afterID: String): List<Workflow>
-
     @Query("SELECT * FROM workflows WHERE (accountID=:accountID AND workflowStatus=:workflowStatus) ORDER BY pKey ASC LIMIT :limit")
     fun fetchWorkflowByStatus(accountID: String, limit: Int, workflowStatus: String): List<Workflow>
 
@@ -64,7 +55,6 @@ interface WorkflowDao {
     @Query("UPDATE workflows SET workflowStatus=:workflowStatus WHERE (accountID=:accountID AND workflowID=:workflowID)")
     fun updateWorkflowStatus(accountID: String, workflowID: String, workflowStatus: String)
 
-
     @TypeConverters(SDATokenResponseConverter::class)
     @Query("UPDATE workflows SET sdaToken=:sdaToken WHERE workflowID=:workflowID")
     fun updateWorkflowSDAToken(workflowID: String, sdaToken: SDATokenResponse?)
@@ -72,16 +62,9 @@ interface WorkflowDao {
     @Query("UPDATE workflows SET uploadCompleted=:uploadStatus WHERE (accountID=:accountID AND workflowID=:workflowID)")
     fun updateWorkflowUploadStatus(accountID: String, workflowID: String, uploadStatus: Boolean)
 
-    /*@TypeConverters(WDevicesListConverter::class)
-    @Query("SELECT workflowDevices FROM workflows WHERE workflowID=:workflowID")
-    fun fetchWorkflowDevicesByWorkflowID(workflowID: String): List<WorkflowDevice>?*/
-
     @TypeConverters(WDevicesListConverter::class)
     @Query("UPDATE workflows SET workflowDevices=:devices WHERE workflowID=:workflowID")
     fun updateWorkflowDevices(workflowID: String, devices: ArrayList<WorkflowDevice>)
-
-    /*@DELETE
-    fun deleteWorkflow(workflowID: String)*/
 
     @Query("DELETE FROM workflows WHERE accountID=:accountID")
     fun deleteAllWorkflows(accountID: String)

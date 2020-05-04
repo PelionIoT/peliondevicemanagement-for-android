@@ -23,7 +23,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="?attr/colorBackground"
     android:padding="10dp"
-    tools:context=".screens.fragments.AccountsFragment">
+    tools:context=".screens.fragments.auth.AccountsFragment">
 
     <include
         layout="@layout/layout_search"

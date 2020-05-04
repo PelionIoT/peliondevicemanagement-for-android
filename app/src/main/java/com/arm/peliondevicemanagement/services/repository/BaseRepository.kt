@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.services.data
+package com.arm.peliondevicemanagement.services.repository
 
-import com.arm.peliondevicemanagement.helpers.LogHelper
+import com.arm.peliondevicemanagement.services.data.ErrorResponse
+import com.arm.peliondevicemanagement.services.data.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import retrofit2.Response
@@ -38,7 +39,7 @@ open class BaseRepository{
         return data
     }
 
-    private suspend fun <T: Any> returnSafeAPIResponse(call: suspend ()-> Response<T>) : Result<T>{
+    private suspend fun <T: Any> returnSafeAPIResponse(call: suspend ()-> Response<T>) : Result<T> {
         // Call network-request
         val response = call.invoke()
 
@@ -47,7 +48,9 @@ open class BaseRepository{
                 "code: ${response.code()}, message: ${response.message()},\n" +
                 "body: ${response.body()}")*/
 
-        if(response.isSuccessful) return Result.Success(response.body()!!)
+        if(response.isSuccessful) return Result.Success(
+            response.body()!!
+        )
 
         // Parse error-response
         val gson = Gson()

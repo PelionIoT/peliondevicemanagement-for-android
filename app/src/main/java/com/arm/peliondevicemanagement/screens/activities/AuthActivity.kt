@@ -34,7 +34,7 @@ import com.arm.peliondevicemanagement.constants.AppConstants.IS_ACCOUNT_GRAPH
 import com.arm.peliondevicemanagement.databinding.ActivityAuthBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
-import com.arm.peliondevicemanagement.screens.fragments.AccountsFragmentDirections
+import com.arm.peliondevicemanagement.screens.fragments.auth.AccountsFragmentDirections
 import com.arm.peliondevicemanagement.utils.PlatformUtils
 import com.arm.peliondevicemanagement.utils.WorkflowUtils
 import com.google.android.material.navigation.NavigationView

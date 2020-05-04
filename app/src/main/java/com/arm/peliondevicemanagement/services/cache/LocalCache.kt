@@ -86,19 +86,6 @@ class LocalCache(
         }
     }
 
-    // FixME [ To be removed later ]
-    @Deprecated("To be removed later")
-    fun fetchWorkflows(limit: Int,
-                       after: String? = null): List<Workflow> {
-        LogHelper.debug(TAG, "fetchWorkflows()")
-        val accountID = SharedPrefHelper.getSelectedAccountID()
-        return if(after != null){
-            workflowDao.fetchWorkflows(accountID, limit, after)
-        } else {
-            workflowDao.fetchWorkflows(accountID, limit)
-        }
-    }
-
     fun fetchWorkflowsByStatus(limit: Int,
                                workflowStatus: String,
                                after: String? = null): List<Workflow> {

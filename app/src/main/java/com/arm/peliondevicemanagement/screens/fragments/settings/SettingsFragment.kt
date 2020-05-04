@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.screens.fragments
+package com.arm.peliondevicemanagement.screens.fragments.settings
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RadioGroup
+import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import com.arm.peliondevicemanagement.BuildConfig
 import com.arm.peliondevicemanagement.R

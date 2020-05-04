@@ -20,11 +20,14 @@ package com.arm.peliondevicemanagement
 import android.app.Application
 import android.content.res.Configuration
 import com.arm.mbed.sda.proxysdk.SecuredDeviceAccess
-import com.arm.peliondevicemanagement.services.CloudRepository
+import com.arm.peliondevicemanagement.services.repository.CloudRepository
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.services.api.CloudAPIService
 import com.arm.peliondevicemanagement.services.cache.WorkflowDB
 
+/**
+ * Application class, used to define app-wide dependencies
+ */
 class AppController : Application() {
 
     companion object {
@@ -38,6 +41,9 @@ class AppController : Application() {
         internal fun getWorkflowDB(): WorkflowDB = workflowDB!!
     }
 
+    /**
+     * Initialize app-wide dependencies, which will be accessed later-on
+     */
     override fun onCreate() {
         super.onCreate()
         LogHelper.debug(TAG, "onApplicationCreate()")
@@ -45,28 +51,35 @@ class AppController : Application() {
         appController = this
         // Setup Cloud-Services
         cloudAPIService = CloudAPIService()
-        cloudRepository = CloudRepository(cloudAPIService!!)
+        cloudRepository =
+            CloudRepository(
+                cloudAPIService!!
+            )
         // Setup Local-DB
         workflowDB = WorkflowDB.getInstance(this)
         // Setup Android-Keystore
         SecuredDeviceAccess.setKeyStorePath(this.filesDir.toString())
     }
 
+    /**
+     * Called when configuration changes like screen-rotation occur
+     */
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         LogHelper.debug(TAG, "onConfigurationChanged()")
     }
 
+    /**
+     * Called when system is low on memory
+     */
     override fun onLowMemory() {
         super.onLowMemory()
         LogHelper.debug(TAG, "onLowMemory()")
     }
 
-    override fun onTrimMemory(level: Int) {
-        super.onTrimMemory(level)
-        LogHelper.debug(TAG, "onTrimMemory()")
-    }
-
+    /**
+     * Called when the process terminates
+     */
     override fun onTerminate() {
         super.onTerminate()
         LogHelper.debug(TAG, "onTerminate()")

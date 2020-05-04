@@ -26,6 +26,8 @@ import com.arm.peliondevicemanagement.components.models.workflow.Workflow
 import com.arm.peliondevicemanagement.constants.AppConstants.WORKFLOW_STATE_COMPLETED
 import com.arm.peliondevicemanagement.constants.AppConstants.WORKFLOW_STATE_SYNCED
 import com.arm.peliondevicemanagement.constants.state.workflow.WorkflowState
+import com.arm.peliondevicemanagement.utils.PlatformUtils
+import com.arm.peliondevicemanagement.utils.WorkflowUtils
 import kotlinx.android.synthetic.main.layout_item_account.view.tvName
 import kotlinx.android.synthetic.main.layout_item_workflow.view.*
 
@@ -59,8 +61,18 @@ class WorkflowViewHolder(itemView: View,
                     syncStatusCheckView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check_light))
                 }
                 WorkflowState.SYNCED.name -> {
-                    syncStatusCheckView.background = ContextCompat.getDrawable(context, R.drawable.ic_status_ok)
-                    syncStatusCheckView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check_light))
+                    if(model.sdaToken != null){
+                        if(WorkflowUtils.isValidSDAToken(model.sdaToken!!.expiresIn)){
+                            syncStatusCheckView.background = ContextCompat.getDrawable(context, R.drawable.ic_status_ok)
+                            syncStatusCheckView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check_light))
+                        } else {
+                            syncStatusCheckView.background = ContextCompat.getDrawable(context, R.drawable.ic_status_failed)
+                            syncStatusCheckView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_close_light))
+                        }
+                    } else {
+                        syncStatusCheckView.background = ContextCompat.getDrawable(context, R.drawable.ic_status_pending)
+                        syncStatusCheckView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_exclamation))
+                    }
                 } else -> {
                     syncStatusCheckView.background = ContextCompat.getDrawable(context, R.drawable.ic_status_pending)
                     syncStatusCheckView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_exclamation))

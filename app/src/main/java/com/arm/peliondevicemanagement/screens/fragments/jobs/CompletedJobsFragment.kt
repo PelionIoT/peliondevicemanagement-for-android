@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.screens.fragments
+package com.arm.peliondevicemanagement.screens.fragments.jobs
 
 import android.content.Context
 import android.os.Bundle
@@ -23,8 +23,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.OnBackPressedCallback
-import androidx.core.view.setPadding
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -40,9 +38,7 @@ import com.arm.peliondevicemanagement.constants.state.LoadState
 import com.arm.peliondevicemanagement.constants.state.NetworkErrorState
 import com.arm.peliondevicemanagement.databinding.FragmentCompletedJobsBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
-import com.arm.peliondevicemanagement.screens.activities.HomeActivity
 import com.arm.peliondevicemanagement.utils.PlatformUtils
-import com.arm.peliondevicemanagement.utils.WorkflowUtils.getWorkflowTaskIDs
 import com.google.android.material.bottomsheet.BottomSheetDialog
 
 class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
@@ -243,7 +239,8 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
 
     override fun onItemClick(data: Any) {
         val model = data as Workflow
-        LogHelper.debug(TAG, "onItemClick()-> " +
+        LogHelper.debug(
+            TAG, "onItemClick()-> " +
                 "workflowName: ${model.workflowName}, " +
                 "workflowID: ${model.workflowID}")
         // Pass it to Home-Activity for launch

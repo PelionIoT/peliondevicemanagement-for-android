@@ -15,10 +15,8 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.screens.fragments
+package com.arm.peliondevicemanagement.screens.fragments.auth
 
-import android.graphics.BlendModeColorFilter
-import android.graphics.ColorFilter
 import android.os.Bundle
 import android.os.Handler
 import android.util.DisplayMetrics
@@ -29,8 +27,6 @@ import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.BlendModeColorFilterCompat
-import androidx.core.graphics.BlendModeCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
@@ -88,7 +84,7 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        requireActivity().onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, onBackPressedCallback)
         initLogoPosition()
         setVersionName()
         runSplash()
@@ -97,10 +93,6 @@ class LoginFragment : Fragment() {
 
         setupListeners()
         setupProgressView()
-
-        // FixME [ To be removed later ]
-        // Disable job-auto-sync at all-cost
-        SharedPrefHelper.getDeveloperOptions().setJobAutoSyncDisabledStatus(true)
     }
 
     private fun setupProgressView(){
@@ -167,7 +159,7 @@ class LoginFragment : Fragment() {
     private fun initLogoPosition(){
         viewBinder.loginView.visibility = View.GONE
         val displayMetrics = DisplayMetrics()
-        activity!!.windowManager.defaultDisplay.getMetrics(displayMetrics)
+        requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
 
         viewBinder.llLogo.apply {
             viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {

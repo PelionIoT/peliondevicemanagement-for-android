@@ -23,7 +23,7 @@
     android:padding="10dp"
     android:background="?attr/colorBackground"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".screens.fragments.ActivityInfoFragment">
+    tools:context=".screens.fragments.settings.ActivityInfoFragment">
 
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"

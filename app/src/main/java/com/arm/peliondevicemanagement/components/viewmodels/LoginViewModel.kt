@@ -24,7 +24,7 @@ import com.arm.peliondevicemanagement.AppController
 import com.arm.peliondevicemanagement.components.models.user.AccountProfileModel
 import com.arm.peliondevicemanagement.components.models.user.UserProfile
 import com.arm.peliondevicemanagement.helpers.LogHelper
-import com.arm.peliondevicemanagement.services.CloudRepository
+import com.arm.peliondevicemanagement.services.repository.CloudRepository
 import com.arm.peliondevicemanagement.services.data.ErrorResponse
 import com.arm.peliondevicemanagement.services.data.LoginResponse
 import com.arm.peliondevicemanagement.utils.PlatformUtils.parseErrorResponseFromJson

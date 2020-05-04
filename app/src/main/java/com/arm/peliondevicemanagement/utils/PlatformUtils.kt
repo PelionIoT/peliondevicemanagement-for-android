@@ -180,15 +180,10 @@ object PlatformUtils {
         return outputFormat.format(date!!)
     }
 
-    fun convertJSONDateTimeStringToDate(inputString: String, format: String = "MMM dd, yyyy"): Date {
+    fun convertJSONDateTimeStringToDate(inputString: String): Date {
         // default should be: dd-MM-yyyy, but the use-case is different
         val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH)
         return inputFormat.parse(inputString)!!
-    }
-
-    fun parseDateTimeString(inputString: Date, format: String = "dd-MM-yyyy"): String {
-        val outputFormat = SimpleDateFormat(format, Locale.ENGLISH)
-        return outputFormat.format(inputString)
     }
 
     fun parseJSONTimeIntoTimeAgo(inputString: String): String {
@@ -228,11 +223,11 @@ object PlatformUtils {
         return bleBuilder.build()
     }
 
-    fun isSDKEqualORHigher(version: Int): Boolean {
+    private fun isSDKEqualORHigher(version: Int): Boolean {
         return Build.VERSION.SDK_INT >= version
     }
 
-    fun hasLocationPermission(context: Context): Boolean {
+    private fun hasLocationPermission(context: Context): Boolean {
         return (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
     }
 

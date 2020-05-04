@@ -23,7 +23,7 @@
     android:layout_height="match_parent"
     android:padding="10dp"
     android:background="?attr/colorBackground"
-    tools:context=".screens.fragments.JobFragment">
+    tools:context=".screens.fragments.jobs.JobFragment">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"

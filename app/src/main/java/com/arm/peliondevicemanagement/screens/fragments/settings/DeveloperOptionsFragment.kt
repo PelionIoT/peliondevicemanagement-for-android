@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.screens.fragments
+package com.arm.peliondevicemanagement.screens.fragments.settings
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.services
+package com.arm.peliondevicemanagement.services.repository
 
 import com.arm.peliondevicemanagement.components.models.user.AccountProfileModel
 import com.arm.peliondevicemanagement.components.models.LicenseModel

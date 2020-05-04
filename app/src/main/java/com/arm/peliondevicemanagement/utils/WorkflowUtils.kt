@@ -26,7 +26,6 @@ import com.arm.peliondevicemanagement.components.models.workflow.device.DeviceRu
 import com.arm.peliondevicemanagement.components.models.workflow.device.WorkflowDevice
 import com.arm.peliondevicemanagement.components.models.workflow.task.*
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_ERROR_CODE
-import com.arm.peliondevicemanagement.constants.AppConstants
 import com.arm.peliondevicemanagement.constants.AppConstants.COMMAND_CONFIGURE
 import com.arm.peliondevicemanagement.constants.AppConstants.COMMAND_READ
 import com.arm.peliondevicemanagement.constants.AppConstants.READ_TASK
@@ -43,7 +42,7 @@ import com.arm.peliondevicemanagement.constants.state.workflow.task.TaskRunState
 import com.arm.peliondevicemanagement.constants.state.workflow.task.TaskTypeState
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
-import com.arm.peliondevicemanagement.services.CloudRepository
+import com.arm.peliondevicemanagement.services.repository.CloudRepository
 import com.arm.peliondevicemanagement.services.cache.LocalCache
 import com.arm.peliondevicemanagement.services.data.SDATokenResponse
 import com.arm.peliondevicemanagement.transport.sda.CommandConstants
@@ -123,7 +122,7 @@ object WorkflowUtils {
 
     fun isValidSDAToken(expiresIn: String): Boolean {
         val tokenExpiryDate = PlatformUtils
-            .convertJSONDateTimeStringToDate(expiresIn, AppConstants.DEFAULT_DATE_FORMAT)
+            .convertJSONDateTimeStringToDate(expiresIn)
         val currentDate = Date()
 
         var tokenStatus = false

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.services
+package com.arm.peliondevicemanagement.services.repository
 
 import androidx.lifecycle.MutableLiveData
 import androidx.paging.DataSource

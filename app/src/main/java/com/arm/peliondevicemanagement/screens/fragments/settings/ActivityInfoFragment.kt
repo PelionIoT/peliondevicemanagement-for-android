@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.screens.fragments
+package com.arm.peliondevicemanagement.screens.fragments.settings
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -73,7 +73,7 @@ class ActivityInfoFragment : Fragment() {
             LogHelper.debug(TAG, "onStoredProfile(): $profile")
             loginHistoryModelsList = ArrayList(profile.loginHistory)
         } else {
-            viewBinder.notFoundView.errorText.text = activity!!.getString(R.string.no_login_history)
+            viewBinder.notFoundView.errorText.text = requireActivity().getString(R.string.no_login_history)
             viewBinder.notFoundView.root.visibility = View.VISIBLE
         }
     }

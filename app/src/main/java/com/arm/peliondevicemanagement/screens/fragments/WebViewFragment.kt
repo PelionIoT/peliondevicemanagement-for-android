@@ -17,6 +17,7 @@
 
 package com.arm.peliondevicemanagement.screens.fragments
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -53,6 +54,7 @@ class WebViewFragment : Fragment() {
         init()
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     private fun init() {
         val webURL = args.webURL
         LogHelper.debug(TAG, "requestedWebURL: $webURL")

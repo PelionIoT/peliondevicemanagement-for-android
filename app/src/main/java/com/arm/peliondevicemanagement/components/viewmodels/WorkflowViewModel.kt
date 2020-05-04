@@ -29,11 +29,10 @@ import com.arm.peliondevicemanagement.components.models.workflow.task.WorkflowTa
 import com.arm.peliondevicemanagement.constants.APIConstants.CONTENT_TYPE_TEXT_PLAIN
 import com.arm.peliondevicemanagement.constants.AppConstants.TASK_NAME_FILE
 import com.arm.peliondevicemanagement.constants.state.LoadState
-import com.arm.peliondevicemanagement.constants.state.workflow.WorkflowState
 import com.arm.peliondevicemanagement.constants.state.workflow.task.TaskRunState
 import com.arm.peliondevicemanagement.helpers.LogHelper
-import com.arm.peliondevicemanagement.services.CloudRepository
-import com.arm.peliondevicemanagement.services.LocalRepository
+import com.arm.peliondevicemanagement.services.repository.CloudRepository
+import com.arm.peliondevicemanagement.services.repository.LocalRepository
 import com.arm.peliondevicemanagement.services.cache.LocalCache
 import com.arm.peliondevicemanagement.services.cache.WorkflowDB
 import com.arm.peliondevicemanagement.services.data.ErrorResponse
@@ -105,7 +104,12 @@ class WorkflowViewModel : ViewModel() {
 
     init {
         localCache = LocalCache(workflowDB.workflowsDao(), Executors.newSingleThreadExecutor())
-        localRepository = LocalRepository(scope, cloudRepository, localCache)
+        localRepository =
+            LocalRepository(
+                scope,
+                cloudRepository,
+                localCache
+            )
     }
 
     fun initPendingWorkflowLiveData() {

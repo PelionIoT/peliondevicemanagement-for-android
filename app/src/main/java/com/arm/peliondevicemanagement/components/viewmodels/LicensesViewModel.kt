@@ -22,7 +22,7 @@ import androidx.lifecycle.ViewModel
 import com.arm.peliondevicemanagement.AppController
 import com.arm.peliondevicemanagement.components.models.LicenseModel
 import com.arm.peliondevicemanagement.helpers.LogHelper
-import com.arm.peliondevicemanagement.services.CloudRepository
+import com.arm.peliondevicemanagement.services.repository.CloudRepository
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 

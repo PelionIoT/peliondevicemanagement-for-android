@@ -29,7 +29,7 @@ import com.arm.peliondevicemanagement.constants.state.LoadState
 import com.arm.peliondevicemanagement.constants.state.workflow.WorkflowState
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
-import com.arm.peliondevicemanagement.services.CloudRepository
+import com.arm.peliondevicemanagement.services.repository.CloudRepository
 import com.arm.peliondevicemanagement.services.cache.LocalCache
 import com.arm.peliondevicemanagement.services.data.SDATokenResponse
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.downloadTaskAssets

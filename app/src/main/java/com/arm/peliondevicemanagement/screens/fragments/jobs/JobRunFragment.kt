@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.screens.fragments
+package com.arm.peliondevicemanagement.screens.fragments.jobs
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
@@ -41,7 +41,6 @@ import com.arm.peliondevicemanagement.components.adapters.WorkflowDeviceAdapter
 import com.arm.peliondevicemanagement.components.models.GenericBleDevice
 import com.arm.peliondevicemanagement.components.models.workflow.device.DeviceResponse
 import com.arm.peliondevicemanagement.components.models.workflow.device.DeviceRun
-import com.arm.peliondevicemanagement.components.models.workflow.device.DeviceRunLogs
 import com.arm.peliondevicemanagement.components.models.workflow.device.WorkflowDevice
 import com.arm.peliondevicemanagement.components.models.workflow.task.TaskRun
 import com.arm.peliondevicemanagement.components.viewmodels.SDAViewModel
@@ -49,7 +48,6 @@ import com.arm.peliondevicemanagement.components.viewmodels.WorkflowViewModel
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_STATE_COMPLETED
 import com.arm.peliondevicemanagement.constants.AppConstants.WORKFLOW_OUT_ASSETS_FILENAME
 import com.arm.peliondevicemanagement.constants.ExecutionMode
-import com.arm.peliondevicemanagement.constants.state.workflow.WorkflowState
 import com.arm.peliondevicemanagement.constants.state.workflow.device.DeviceResponseState
 import com.arm.peliondevicemanagement.constants.state.workflow.device.DeviceScanState
 import com.arm.peliondevicemanagement.constants.state.workflow.device.DeviceState
@@ -67,8 +65,6 @@ import com.arm.pelionmobiletransportsdk.ble.BleDevice
 import com.arm.pelionmobiletransportsdk.ble.callbacks.BleScannerCallback
 import com.arm.pelionmobiletransportsdk.ble.scanner.BleManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.*
 
 @ExperimentalCoroutinesApi
@@ -163,7 +159,7 @@ class JobRunFragment : Fragment() {
     }
 
     private fun init() {
-        requireActivity().onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, onBackPressedCallback)
         deviceRunModel = args.runObject
         //LogHelper.debug(TAG, "deviceRunBundle: $deviceRunModel")
 
@@ -203,7 +199,8 @@ class JobRunFragment : Fragment() {
                 totalDevicesCompleted++
             }
         }
-        LogHelper.debug(TAG, "completedDevices: $totalDevicesCompleted, " +
+        LogHelper.debug(
+            TAG, "completedDevices: $totalDevicesCompleted, " +
                 "pendingDevices: ${deviceRunModel.workflowDevices.size.minus(totalDevicesCompleted)}")
 
         val completedOutOfPending = "$totalDevicesCompleted/${deviceRunModel.workflowDevices.size}"
@@ -215,7 +212,7 @@ class JobRunFragment : Fragment() {
 
     private fun setupViews() {
         viewBinder.tvName.text = deviceRunModel.workflowName
-        viewBinder.tvTasks.text = context!!.getString(
+        viewBinder.tvTasks.text = requireContext().getString(
             R.string.total_tasks_format,
             deviceRunModel.workflowTasks.size.toString())
         viewBinder.elapsedTimer.start()
@@ -256,42 +253,50 @@ class JobRunFragment : Fragment() {
         sdaViewModel.deviceStateLiveData.observe(viewLifecycleOwner, Observer { stateResponse ->
             when(stateResponse.state) {
                 DeviceState.CONNECTING -> {
-                    LogHelper.debug(TAG, "DeviceState: Connecting, " +
+                    LogHelper.debug(
+                        TAG, "DeviceState: Connecting, " +
                             "deviceIdentifier: ${stateResponse.deviceIdentifier}")
                     addTemporaryDeviceItemInList(stateResponse.deviceIdentifier, DeviceScanState.CONNECTING)
                 }
                 DeviceState.CONNECTED -> {
-                    LogHelper.debug(TAG, "DeviceState: Connected, " +
+                    LogHelper.debug(
+                        TAG, "DeviceState: Connected, " +
                             "deviceIdentifier: ${stateResponse.deviceIdentifier}")
                 }
                 DeviceState.RUNNING -> {
-                    LogHelper.debug(TAG, "DeviceState: Running, " +
+                    LogHelper.debug(
+                        TAG, "DeviceState: Running, " +
                             "deviceIdentifier: ${stateResponse.deviceIdentifier}")
                     updateDeviceItemInList(activeItemPosition, stateResponse.deviceIdentifier, "Running")
                 }
                 DeviceState.COMMAND_COMPLETED -> {
-                    LogHelper.debug(TAG, "DeviceState: Command-Completed, " +
+                    LogHelper.debug(
+                        TAG, "DeviceState: Command-Completed, " +
                             "deviceIdentifier: ${stateResponse.deviceIdentifier}")
                 }
                 DeviceState.COMMAND_FAILED -> {
-                    LogHelper.debug(TAG, "DeviceState: Command-Failed, " +
+                    LogHelper.debug(
+                        TAG, "DeviceState: Command-Failed, " +
                             "deviceIdentifier: ${stateResponse.deviceIdentifier}")
                 }
                 DeviceState.COMPLETED -> {
-                    LogHelper.debug(TAG, "DeviceState: Completed, " +
+                    LogHelper.debug(
+                        TAG, "DeviceState: Completed, " +
                             "deviceIdentifier: ${stateResponse.deviceIdentifier}")
                     updateDeviceItemInList(activeItemPosition, stateResponse.deviceIdentifier, "Completed")
                     processDeviceRunLogs(stateResponse.deviceIdentifier)
                     sdaViewModel.disconnectFromDevice()
                 }
                 DeviceState.DISCONNECTED -> {
-                    LogHelper.debug(TAG, "DeviceState: Disconnected, " +
+                    LogHelper.debug(
+                        TAG, "DeviceState: Disconnected, " +
                             "deviceIdentifier: ${stateResponse.deviceIdentifier}")
                     activeItemPosition = 0
                     setTotalDevicesCompletedStatus()
                 }
                 DeviceState.FAILED -> {
-                    LogHelper.debug(TAG, "DeviceState: Failed, " +
+                    LogHelper.debug(
+                        TAG, "DeviceState: Failed, " +
                             "deviceIdentifier: ${stateResponse.deviceIdentifier}")
                     sdaViewModel.disconnectFromDevice()
                 }

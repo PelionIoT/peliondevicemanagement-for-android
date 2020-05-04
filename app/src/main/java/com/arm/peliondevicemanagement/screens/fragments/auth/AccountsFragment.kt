@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.screens.fragments
+package com.arm.peliondevicemanagement.screens.fragments.auth
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -98,7 +98,7 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
     }
 
     private fun init() {
-        requireActivity().onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, onBackPressedCallback)
         loginViewModel = ViewModelProvider(this).get(LoginViewModel::class.java)
         accountAdapter = AccountAdapter(accountModelsList, this)
         viewBinder.rvAccounts.apply {
@@ -185,7 +185,8 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
 
     override fun onItemClick(data: Any) {
         val model = data as Account
-        LogHelper.debug(TAG, "onItemClick()-> " +
+        LogHelper.debug(
+            TAG, "onItemClick()-> " +
                 "accountName: ${model.accountName}, " +
                 "accountID: ${model.accountID}")
 

@@ -15,23 +15,23 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.screens.fragments
+package com.arm.peliondevicemanagement.screens.fragments.settings
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.components.adapters.HelpAndSupportAdapter
+import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
 import com.arm.peliondevicemanagement.components.models.HelpAndSupportModel
 import com.arm.peliondevicemanagement.constants.AppConstants
 import com.arm.peliondevicemanagement.databinding.FragmentHelpAndSupportBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
-import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
 import com.arm.peliondevicemanagement.utils.PlatformUtils
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -97,14 +97,16 @@ class HelpAndSupportFragment : Fragment(), RecyclerItemClickListener {
 
     private fun navigateToWebViewFragment(url: String) {
         Navigation.findNavController(viewBinder.root)
-            .navigate(HelpAndSupportFragmentDirections
-                .actionHelpAndSupportFragmentToWebViewFragment(url))
+            .navigate(
+                HelpAndSupportFragmentDirections.actionHelpAndSupportFragmentToWebViewFragment(
+                    url
+                )
+            )
     }
 
     private fun navigateToLicensesFragment() {
         Navigation.findNavController(viewBinder.root)
-            .navigate(HelpAndSupportFragmentDirections
-                .actionHelpAndSupportFragmentToLicensesFragment())
+            .navigate(HelpAndSupportFragmentDirections.actionHelpAndSupportFragmentToLicensesFragment())
     }
 
     override fun onDestroyView() {
