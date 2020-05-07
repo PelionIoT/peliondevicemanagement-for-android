@@ -15,24 +15,27 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.components.models.user
+package com.arm.peliondevicemanagement.components.models.branding
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class AccountProfile(
-    @SerializedName("id") val accountID: String,
-    @SerializedName("display_name") val accountName: String,
-    @SerializedName("email") val accountEmail: String,
-    @SerializedName("company") val companyName: String,
-    @SerializedName("custom_fields") val customFlags: CustomFlagsModel
-    // For later-use, when dealing with multiple features
-    //@SerializedName("policies") val accountPolicies: List<AccountPolicyModel>
-): Parcelable
+data class BrandingImage(
+    @SerializedName("static_uri") val imageURL: String?,
+    @SerializedName("reference") val imageReference: String
+): Parcelable {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
 
-@Parcelize
-data class CustomFlagsModel(
-    @SerializedName("default_theme") val defaultTheme: String
-): Parcelable
+        other as BrandingImage
+        if (imageReference != other.imageReference) return false
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return imageReference.hashCode()
+    }
+}

@@ -38,6 +38,7 @@ import com.arm.peliondevicemanagement.constants.state.LoadState
 import com.arm.peliondevicemanagement.constants.state.NetworkErrorState
 import com.arm.peliondevicemanagement.databinding.FragmentCompletedJobsBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
+import com.arm.peliondevicemanagement.screens.activities.HomeActivity
 import com.arm.peliondevicemanagement.utils.PlatformUtils
 import com.google.android.material.bottomsheet.BottomSheetDialog
 
@@ -60,8 +61,15 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
     private lateinit var errorBottomSheetDialog: BottomSheetDialog
     private lateinit var retryButtonClickListener: View.OnClickListener
 
+    private lateinit var activeActionState: ActionState
+
     private val refreshListener: androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener = androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener {
         refreshContent()
+    }
+
+    enum class ActionState {
+        UPLOAD,
+        UNAUTHORIZED
     }
 
     override fun onCreateView(
@@ -109,7 +117,14 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
 
         retryButtonClickListener = View.OnClickListener {
             errorBottomSheetDialog.dismiss()
-            prepareForUpload()
+            when(activeActionState){
+                ActionState.UNAUTHORIZED -> {
+                    (requireActivity() as HomeActivity).navigateToLoginForReAuth()
+                }
+                ActionState.UPLOAD -> {
+                    prepareForUpload()
+                }
+            }
         }
 
         workflowViewModel.getCompletedWorkflows().observe(viewLifecycleOwner, Observer {
@@ -157,6 +172,7 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
                 else -> {
                     LogHelper.debug(TAG, "Upload failed")
                     refreshContent()
+                    processErrorResponse()
                 }
             }
         })
@@ -167,6 +183,11 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
 
         showHide404View(false)
         workflowViewModel.refreshCompletedWorkflows()
+    }
+
+    private fun processErrorResponse() {
+        activeActionState = ActionState.UNAUTHORIZED
+        showErrorMessageDialog(NetworkErrorState.UNAUTHORIZED)
     }
 
     private fun checkJobsPendingForSync() {
@@ -194,6 +215,7 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
     }
 
     private fun prepareForUpload() {
+        activeActionState = ActionState.UPLOAD
         if(!PlatformUtils.isNetworkAvailable(requireContext())) {
             showErrorMessageDialog(NetworkErrorState.NO_NETWORK)
             return

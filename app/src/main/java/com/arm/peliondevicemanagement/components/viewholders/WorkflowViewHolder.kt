@@ -23,11 +23,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
 import com.arm.peliondevicemanagement.components.models.workflow.Workflow
+import com.arm.peliondevicemanagement.constants.AppConstants
 import com.arm.peliondevicemanagement.constants.AppConstants.WORKFLOW_STATE_COMPLETED
 import com.arm.peliondevicemanagement.constants.AppConstants.WORKFLOW_STATE_SYNCED
 import com.arm.peliondevicemanagement.constants.state.workflow.WorkflowState
 import com.arm.peliondevicemanagement.utils.PlatformUtils
 import com.arm.peliondevicemanagement.utils.WorkflowUtils
+import com.arm.peliondevicemanagement.utils.WorkflowUtils.isValidSDAToken
 import kotlinx.android.synthetic.main.layout_item_account.view.tvName
 import kotlinx.android.synthetic.main.layout_item_workflow.view.*
 
@@ -54,7 +56,8 @@ class WorkflowViewHolder(itemView: View,
                 deviceCountText = model.workflowAUDs.size.toString() + " Devices"
                 chipDeviceCount.text = deviceCountText
             }
-            chipLocation.text = model.workflowLocation
+            //chipLocation.text = model.workflowLocation
+            // Set workflow-status
             when(model.workflowStatus){
                 WorkflowState.COMPLETED.name -> {
                     syncStatusCheckView.background = ContextCompat.getDrawable(context, R.drawable.ic_status_ok)
@@ -63,7 +66,7 @@ class WorkflowViewHolder(itemView: View,
                 WorkflowState.SYNCED.name -> {
                     if(model.sdaToken != null){
                         if(WorkflowUtils.isValidSDAToken(model.sdaToken!!.expiresIn)){
-                            syncStatusCheckView.background = ContextCompat.getDrawable(context, R.drawable.ic_status_ok)
+                            syncStatusCheckView.background = ContextCompat.getDrawable(context, R.drawable.ic_status_synced)
                             syncStatusCheckView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check_light))
                         } else {
                             syncStatusCheckView.background = ContextCompat.getDrawable(context, R.drawable.ic_status_failed)
@@ -78,6 +81,18 @@ class WorkflowViewHolder(itemView: View,
                     syncStatusCheckView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_exclamation))
                 }
             }
+            // Set SDA-Expiry time
+            if(model.sdaToken != null){
+                val expiresIn = model.sdaToken!!.expiresIn
+                val expiryDate = PlatformUtils.parseJSONTimeString(expiresIn)
+                val expiryTime =
+                    PlatformUtils.parseJSONTimeString(expiresIn, AppConstants.DEFAULT_TIME_FORMAT)
+                val expiryDateTime = "$expiryDate, $expiryTime"
+                chipExpiryTime.text = expiryDateTime
+            } else {
+                chipExpiryTime.text = resources.getString(R.string.na)
+            }
+
         }
     }
 

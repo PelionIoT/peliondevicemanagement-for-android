@@ -21,6 +21,8 @@ import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.models.user.UserLoginHistory
+import com.arm.peliondevicemanagement.constants.AppConstants
+import com.arm.peliondevicemanagement.utils.PlatformUtils
 import kotlinx.android.synthetic.main.layout_item_loginhistory.view.*
 
 class LoginHistoryViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
@@ -37,7 +39,12 @@ class LoginHistoryViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) 
 
         itemView.apply {
             tvIPAddress.text = context.getString(R.string.ip_format, model.ipAddress)
-            tvDate.text = context.getString(R.string.date_format, model.date)
+            val loginDate = PlatformUtils.parseJSONTimeString(model.date)
+            val loginTime = PlatformUtils
+                .parseJSONTimeString(model.date, AppConstants.DEFAULT_TIME_FORMAT)
+            val loginDateTime = "$loginDate, $loginTime"
+
+            tvDate.text = context.getString(R.string.date_format, loginDateTime)
             tvStatus.text = context.getString(R.string.status_format, loginStatus)
             tvUserAgent.text = context.getString(R.string.user_agent_format, model.userAgent)
         }

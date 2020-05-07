@@ -40,7 +40,8 @@ object APIConstants {
     const val API_CAPTCHA = "/auth/captcha"
     const val API_SDA_TOKEN = "/ace-auth/token"
     const val API_USER_ME = "/v3/users/me"
-    const val API_ACCOUNTS_ME = "/v3/accounts/me?include=policies"
+    const val API_ACCOUNTS = "/v3/accounts"
+    const val API_ACCOUNTS_ME = "$API_ACCOUNTS/me?include=policies"
 
     // WigWag-Cloud-UI-Server APIs
     const val API_CLOUD_UI_SERVER = "/wigwag/cloud-ui-server/v2"
@@ -54,10 +55,8 @@ object APIConstants {
     const val API_WORKFLOW_DEVICE_RUNS = "/v3/pdm-workflow-device-runs"
 
     // Theme Branding Endpoints
-    const val API_BRANDING_COLORS_LIGHT = "/branding-colors/light"
-    const val API_BRANDING_COLORS_DARK = "/branding-colors/dark"
-    const val API_BRANDING_IMAGES_LIGHT = "/branding-images/light"
-    const val API_BRANDING_IMAGES_DARK = "/branding-images/dark"
+    const val API_BRANDING_COLORS = "/branding-colors"
+    const val API_BRANDING_IMAGES = "/branding-images"
 
     // Endpoint Keys
     const val KEY_AUTHORIZATION = "Authorization"
@@ -78,5 +77,8 @@ object APIConstants {
     const val KEY_FILE_ID = "file_id"
     const val KEY_WORKFLOW_ID = "workflow_id"
     const val KEY_ASSIGNEE_ID = "assignee__eq"
+    const val KEY_THEME = "theme"
+    const val KEY_BRAND_LOGO = "brand_logo_landscape"
+    const val KEY_VALIDATION_ERROR = "validation_error"
 
 }

@@ -95,7 +95,15 @@
         android:id="@+id/licensesFragment"
         android:name="com.arm.peliondevicemanagement.screens.fragments.settings.LicensesFragment"
         android:label="fragment_licenses"
-        tools:layout="@layout/fragment_licenses" />
+        tools:layout="@layout/fragment_licenses" >
+        <action
+            android:id="@+id/action_licensesFragment_to_licenseViewFragment"
+            app:destination="@id/licenseViewFragment"
+            app:enterAnim="@anim/right_in"
+            app:exitAnim="@anim/right_out"
+            app:popEnterAnim="@anim/left_in"
+            app:popExitAnim="@anim/left_out"/>
+    </fragment>
 
     <fragment
         android:id="@+id/jobFragment"
@@ -133,5 +141,14 @@
         android:name="com.arm.peliondevicemanagement.screens.fragments.settings.DeveloperOptionsFragment"
         android:label="fragment_developer_options"
         tools:layout="@layout/fragment_developer_options" />
+    <fragment
+        android:id="@+id/licenseViewFragment"
+        android:name="com.arm.peliondevicemanagement.screens.fragments.settings.LicenseViewFragment"
+        android:label="fragment_license_view"
+        tools:layout="@layout/fragment_license_view" >
+        <argument
+            android:name="license_text"
+            app:argType="string" />
+    </fragment>
 
 </navigation>

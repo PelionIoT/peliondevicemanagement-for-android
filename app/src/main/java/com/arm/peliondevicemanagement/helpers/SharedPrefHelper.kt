@@ -65,6 +65,10 @@ object SharedPrefHelper {
         SharedPrefManager.with(context = AppController.appController!!)!!
             .getString(SharedPrefConstants.STORE_SELECTED_ACCOUNT_NAME, "")!!
 
+    internal fun getSelectedAccountBrandingLogo(): String =
+        SharedPrefManager.with(context = AppController.appController!!)!!
+            .getString(SharedPrefConstants.STORE_SELECTED_ACCOUNT_LOGO_URL, "")!!
+
     internal fun getSDAPopPemPubKey(): String =
         SharedPrefManager.with(context = AppController.appController!!)!!
             .getString(SharedPrefConstants.STORE_SDA_POPPEMPUB_KEY, "")!!
@@ -130,6 +134,11 @@ object SharedPrefHelper {
             .putString(SharedPrefConstants.STORE_SELECTED_ACCOUNT_NAME, accountName)
             .apply()
 
+    internal fun storeSelectedAccountBrandingLogoURL(url: String) =
+        SharedPrefManager.with(context = AppController.appController!!)!!.edit()
+            .putString(SharedPrefConstants.STORE_SELECTED_ACCOUNT_LOGO_URL, url)
+            .apply()
+
     internal fun storeSDAPopPemPubKey(popPemPubKey: String) =
         SharedPrefManager.with(context = AppController.appController!!)!!.edit()
             .putString(SharedPrefConstants.STORE_SDA_POPPEMPUB_KEY, popPemPubKey)
@@ -167,17 +176,26 @@ object SharedPrefHelper {
     internal fun clearEverything() {
         // Reset developer-options
         developerOptions.resetOptions()
+        // Reset everything else
         val editor = SharedPrefManager.with(context = AppController.appController!!)!!.edit()
+        // Login credentials
         editor.remove(SharedPrefConstants.STORE_USER_NAME)
         editor.remove(SharedPrefConstants.STORE_USER_PASSWORD)
         editor.remove(SharedPrefConstants.STORE_USER_ACCESS_TOKEN)
-        editor.remove(SharedPrefConstants.STORE_SELECTED_USER_ID)
-        editor.remove(SharedPrefConstants.STORE_ACCOUNTS)
+        // User information
         editor.remove(SharedPrefConstants.STORE_USER_PROFILE)
+        editor.remove(SharedPrefConstants.STORE_SELECTED_USER_ID)
+        // Account information
+        editor.remove(SharedPrefConstants.STORE_ACCOUNTS)
         editor.remove(SharedPrefConstants.STORE_USER_ACCOUNT_PROFILE)
         editor.remove(SharedPrefConstants.STORE_SELECTED_ACCOUNT_ID)
         editor.remove(SharedPrefConstants.STORE_SELECTED_ACCOUNT_NAME)
+        editor.remove(SharedPrefConstants.STORE_SUPPORTS_MULTI_ACCOUNTS)
+        // SDA information
         editor.remove(SharedPrefConstants.STORE_SDA_POPPEMPUB_KEY)
+        // Theme & Branding information
+        editor.remove(SharedPrefConstants.STORE_DARK_THEME_STATUS)
+        //editor.remove(SharedPrefConstants.STORE_SELECTED_ACCOUNT_LOGO_URL)
         editor.apply()
     }
 }

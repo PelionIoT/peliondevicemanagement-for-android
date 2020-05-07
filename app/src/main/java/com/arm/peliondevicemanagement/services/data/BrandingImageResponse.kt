@@ -15,24 +15,14 @@
  * limitations under the License.
  */
 
-package com.arm.peliondevicemanagement.components.models.user
+package com.arm.peliondevicemanagement.services.data
 
 import android.os.Parcelable
+import com.arm.peliondevicemanagement.components.models.branding.BrandingImage
 import com.google.gson.annotations.SerializedName
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class AccountProfile(
-    @SerializedName("id") val accountID: String,
-    @SerializedName("display_name") val accountName: String,
-    @SerializedName("email") val accountEmail: String,
-    @SerializedName("company") val companyName: String,
-    @SerializedName("custom_fields") val customFlags: CustomFlagsModel
-    // For later-use, when dealing with multiple features
-    //@SerializedName("policies") val accountPolicies: List<AccountPolicyModel>
-): Parcelable
-
-@Parcelize
-data class CustomFlagsModel(
-    @SerializedName("default_theme") val defaultTheme: String
+data class BrandingImageResponse(
+    @SerializedName("data") val brandingImages: List<BrandingImage>
 ): Parcelable

@@ -17,12 +17,15 @@
 
 package com.arm.peliondevicemanagement.components.viewmodels
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.arm.peliondevicemanagement.AppController
 import com.arm.peliondevicemanagement.components.models.LicenseModel
 import com.arm.peliondevicemanagement.helpers.LogHelper
+import com.arm.peliondevicemanagement.services.data.ErrorResponse
 import com.arm.peliondevicemanagement.services.repository.CloudRepository
+import com.arm.peliondevicemanagement.utils.PlatformUtils.parseErrorResponseFromJson
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
@@ -39,19 +42,25 @@ class LicensesViewModel : ViewModel() {
     private val scope = CoroutineScope(coroutineContext)
     private val repository: CloudRepository = AppController.getCloudRepository()
 
-    val licensesLiveData = MutableLiveData<List<LicenseModel>>()
+    private val _licensesLiveData = MutableLiveData<List<LicenseModel>>()
+    private val _errorResponseLiveData = MutableLiveData<ErrorResponse>()
 
-    fun getLicenses() {
+    fun getLicensesLiveData(): LiveData<List<LicenseModel>> = _licensesLiveData
+    fun getErrorResponseLiveData(): LiveData<ErrorResponse> = _errorResponseLiveData
+
+    fun loadLicensesFromCloud() {
         scope.launch {
             try {
                 val licensesResponse = repository.getLicenses()
-                licensesLiveData.postValue(licensesResponse)
+                _licensesLiveData.postValue(licensesResponse)
             } catch (e: Throwable){
                 LogHelper.debug(TAG, "Exception occurred: ${e.message}")
-                licensesLiveData.postValue(null)
+                val errorResponse = parseErrorResponseFromJson(e.message!!)
+                _errorResponseLiveData.postValue(errorResponse)
             }
         }
     }
+
     fun cancelAllRequests() = coroutineContext.cancel()
 
 }

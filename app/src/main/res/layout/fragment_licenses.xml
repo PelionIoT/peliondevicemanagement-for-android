@@ -16,21 +16,39 @@
   ~ limitations under the License.
   -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="?attr/colorBackground"
     android:padding="10dp"
+    android:id="@+id/swipeRefreshLayout"
     tools:context=".screens.fragments.settings.LicensesFragment">
 
-    <include
-        layout="@layout/layout_not_found"
-        android:id="@+id/notFoundView"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:visibility="visible"
-        />
+        android:layout_height="wrap_content">
 
-</RelativeLayout>
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:strokeWidth="1dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@drawable/stroke_color"
+            app:cardBackgroundColor="?attr/cardColor"
+            >
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvLicenseList"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                />
+
+        </com.google.android.material.card.MaterialCardView>
+
+    </RelativeLayout>
+
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

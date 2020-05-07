@@ -32,18 +32,27 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import com.arm.peliondevicemanagement.BuildConfig
 import com.arm.peliondevicemanagement.R
+import com.arm.peliondevicemanagement.components.models.branding.BrandingImage
 import com.arm.peliondevicemanagement.components.models.user.Account
-import com.arm.peliondevicemanagement.components.models.user.AccountProfileModel
+import com.arm.peliondevicemanagement.components.models.user.AccountProfile
 import com.arm.peliondevicemanagement.components.models.user.UserProfile
 import com.arm.peliondevicemanagement.components.viewmodels.LoginViewModel
+import com.arm.peliondevicemanagement.constants.APIConstants.KEY_BRAND_LOGO
+import com.arm.peliondevicemanagement.constants.APIConstants.KEY_VALIDATION_ERROR
+import com.arm.peliondevicemanagement.constants.BrandingTheme
 import com.arm.peliondevicemanagement.constants.state.LoginState
 import com.arm.peliondevicemanagement.databinding.FragmentLoginBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.screens.activities.AuthActivity
+import com.arm.peliondevicemanagement.services.data.BrandingImageResponse
+import com.arm.peliondevicemanagement.services.data.ErrorResponse
 import com.arm.peliondevicemanagement.utils.PlatformUtils.buildErrorBottomSheetDialog
 import com.arm.peliondevicemanagement.utils.PlatformUtils.isNetworkAvailable
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.layout_version.*
 
@@ -60,6 +69,8 @@ class LoginFragment : Fragment() {
 
     private lateinit var userEmail: String
     private lateinit var userPassword: String
+
+    private var activeAccountID: String = ""
 
     private var activeLoginActionState: LoginState = LoginState.ACTION_LOGIN
 
@@ -83,8 +94,11 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        // Add onBackPressed-callback
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, onBackPressedCallback)
+
+        // Setup everything else
+        setupBrandingLogo()
         initLogoPosition()
         setVersionName()
         runSplash()
@@ -93,6 +107,21 @@ class LoginFragment : Fragment() {
 
         setupListeners()
         setupProgressView()
+    }
+
+    private fun setupBrandingLogo() {
+        val brandLogoURL = SharedPrefHelper.getSelectedAccountBrandingLogo()
+        if(brandLogoURL.isNotEmpty()){
+            Glide.with(requireView())
+                .load(brandLogoURL)
+                .placeholder(R.drawable.logo_arm)
+                .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                .error(R.drawable.logo_arm)
+                .into(viewBinder.logoImageView)
+            LogHelper.debug(TAG, "CustomBrandingLogo: Available, loaded")
+        } else {
+            LogHelper.debug(TAG, "CustomBrandingLogo: Not available, skipped")
+        }
     }
 
     private fun setupProgressView(){
@@ -117,6 +146,9 @@ class LoginFragment : Fragment() {
         }
 
         loginViewModel.getLoginActionLiveData().observe(viewLifecycleOwner, Observer { response ->
+            // Use this only for re-Auth
+            activeAccountID = ""
+            // Now process the login response
             if(!response.accounts.isNullOrEmpty()){
                 processMultiAccountData(response.accounts)
                 navigateToAccountsFragment()
@@ -131,14 +163,17 @@ class LoginFragment : Fragment() {
 
         loginViewModel.getAccountProfileLiveData().observe(viewLifecycleOwner, Observer { response ->
             processUserAccountProfileData(response)
+        })
+
+        loginViewModel.getAccountBrandingImagesLiveData().observe(viewLifecycleOwner, Observer { response ->
+            processAccountBrandingImagesData(response)
             navigateToDashboardFragment()
         })
 
-        loginViewModel.getErrorResponseLiveData().observe(viewLifecycleOwner, Observer {
-            //LogHelper.debug(TAG, "error: $error")
+        loginViewModel.getErrorResponseLiveData().observe(viewLifecycleOwner, Observer { error ->
             when(activeLoginActionState){
                 LoginState.ACTION_LOGIN -> {
-                    processLoginError()
+                    processLoginError(error)
                 }
                 LoginState.ACTION_USER_PROFILE -> {
                     processUserProfileORAccountProfileError()
@@ -290,10 +325,20 @@ class LoginFragment : Fragment() {
         userEmail = viewBinder.emailInputTxt.text.toString()
         userPassword = viewBinder.passwordInputTxt.text.toString()
 
+        // Check if already signed-in
+        if(SharedPrefHelper.getUserName().isNotEmpty()){
+            // Also verify that the user belongs to same-account
+            if(SharedPrefHelper.getSelectedAccountID().isNotEmpty()
+                && userEmail == SharedPrefHelper.getUserName()){
+                LogHelper.debug(TAG, "Logged-in account found, using this for sign-in")
+                activeAccountID = SharedPrefHelper.getSelectedAccountID()
+            }
+        }
+
         SharedPrefHelper.removeCredentials(true)
         setLoginActionState(LoginState.ACTION_LOGIN)
         SharedPrefHelper.storeSelectedUserName(userEmail)
-        loginViewModel.doLogin(userEmail, userPassword)
+        loginViewModel.doLogin(userEmail, userPassword, activeAccountID)
     }
 
     private fun showNoInternetDialog() {
@@ -306,6 +351,7 @@ class LoginFragment : Fragment() {
     }
 
     private fun processMultiAccountData(accounts: List<Account>) {
+        LogHelper.debug(TAG, "LoginMode: MultiAccount()")
         // Store listOfAccounts as JSON in SharedPrefs
         val accountsJSON = Gson().toJson(accounts)
         //LogHelper.debug(TAG, "onUserAccounts()-> $accountsJSON")
@@ -317,6 +363,7 @@ class LoginFragment : Fragment() {
     }
 
     private fun processSingleAccountData(accessToken: String) {
+        LogHelper.debug(TAG, "LoginMode: SingleAccount()")
         // Save access-token
         //LogHelper.debug(TAG, "onUserAccessToken()-> $accessToken")
         SharedPrefHelper.storeUserAccessToken(accessToken)
@@ -334,7 +381,7 @@ class LoginFragment : Fragment() {
     private fun processUserProfileData(userProfile: UserProfile) {
         // Store user-profile data as JSON in SharedPrefs
         val profileJSON = Gson().toJson(userProfile)
-        //LogHelper.debug(TAG, "onUserProfile()-> $profileJSON")
+        LogHelper.debug(TAG, "onUserProfile()-> $profileJSON")
         SharedPrefHelper.storeUserProfile(profileJSON)
         SharedPrefHelper.storeSelectedUserID(userProfile.userID)
         // Now fetch selected account's profile
@@ -342,11 +389,44 @@ class LoginFragment : Fragment() {
         loginViewModel.fetchAccountProfile()
     }
 
-    private fun processUserAccountProfileData(accountProfile: AccountProfileModel) {
+    private fun processUserAccountProfileData(accountProfile: AccountProfile) {
         // Store user account-profile data as JSON in SharedPrefs
         val accountProfileJSON = Gson().toJson(accountProfile)
-        //LogHelper.debug(TAG, "onAccountProfile()-> $accountProfileJSON")
+        LogHelper.debug(TAG, "onAccountProfile()-> $accountProfileJSON")
         SharedPrefHelper.storeUserAccountProfile(accountProfileJSON)
+        // Remove password
+        if(!SharedPrefHelper.getUserPassword().isNullOrBlank()) {
+            SharedPrefHelper.removePassword()
+        }
+        // Store account-information
+        SharedPrefHelper.storeSelectedAccountID(accountProfile.accountID)
+        SharedPrefHelper.storeSelectedAccountName(accountProfile.accountName)
+
+        // Now fetch account-branding-images
+        val accountID = SharedPrefHelper.getSelectedAccountID()
+        val activeTheme = if(SharedPrefHelper.isDarkThemeEnabled()){
+            BrandingTheme.DARK
+        } else {
+            BrandingTheme.LIGHT
+        }
+        loginViewModel.fetchAccountBrandingImages(accountID, activeTheme)
+    }
+
+    private fun processAccountBrandingImagesData(brandingResponse: BrandingImageResponse) {
+        //LogHelper.debug(TAG, "Branding-Images-> ${brandingResponse.brandingImages}")
+
+        // Process brand-logo for now
+        val brandLogoIndex = brandingResponse.brandingImages
+            .indexOf(BrandingImage("", KEY_BRAND_LOGO))
+        val brandLogoURL = brandingResponse.brandingImages[brandLogoIndex].imageURL
+        if(brandLogoURL != null){
+            //LogHelper.debug(TAG, "AccountBrandingLogo: Available, url: $brandLogoURL")
+            SharedPrefHelper.storeSelectedAccountBrandingLogoURL(brandLogoURL)
+            LogHelper.debug(TAG, "AccountBrandingLogo: Available, saved")
+        } else {
+            LogHelper.debug(TAG, "AccountBrandingLogo: Not available")
+            SharedPrefHelper.storeSelectedAccountBrandingLogoURL("")
+        }
     }
 
     private fun navigateToAccountsFragment() {
@@ -358,11 +438,33 @@ class LoginFragment : Fragment() {
         (requireActivity() as AuthActivity).launchHomeActivity()
     }
 
-    private fun processLoginError() {
-        (activity as AuthActivity).showSnackbar(viewBinder.root, "Failed to authenticate")
+    private fun processLoginError(error: ErrorResponse? = null) {
+        LogHelper.debug(TAG, "Login-Error: $error")
+
+        if(error != null){
+            if(error.errorCode == 400 && error.errorType == KEY_VALIDATION_ERROR){
+                showIncorrectAttemptLimitReached()
+            } else {
+                (activity as AuthActivity).showSnackbar(viewBinder.root, "Failed to authenticate")
+            }
+        } else {
+            (activity as AuthActivity).showSnackbar(viewBinder.root, "Failed to authenticate")
+        }
         clearPasswordTextBox()
         showHideProgressbar(false)
         showHideLoginView(true)
+    }
+
+    private fun showIncorrectAttemptLimitReached() {
+        MaterialAlertDialogBuilder(context)
+            .setTitle(resources.getString(R.string.unauthorized_limit_reached_text))
+            .setMessage(resources.getString(R.string.unauthorized_limit_reached_desc))
+            .setPositiveButton(resources.getString(R.string.got_it_text)) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setCancelable(false)
+            .create()
+            .show()
     }
 
     private fun processUserProfileORAccountProfileError() {

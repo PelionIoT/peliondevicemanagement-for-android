@@ -20,24 +20,26 @@ package com.arm.peliondevicemanagement.components.viewholders
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
-import com.arm.peliondevicemanagement.components.models.HelpAndSupportModel
-import kotlinx.android.synthetic.main.layout_item_helpandsupport.view.*
+import com.arm.peliondevicemanagement.components.models.LicenseModel
+import kotlinx.android.synthetic.main.layout_item_license.view.*
 
-class HelpAndSupportViewHolder(itemView: View,
-                               private val itemClickListener: RecyclerItemClickListener): RecyclerView.ViewHolder(itemView) {
+class LicenseViewHolder(itemView: View,
+                        private val itemClickListener: RecyclerItemClickListener):
+    RecyclerView.ViewHolder(itemView) {
 
-    private lateinit var helpAndSupportModel: HelpAndSupportModel
+    private lateinit var licenseModel: LicenseModel
 
     init {
         itemView.setOnClickListener {
-            itemClickListener.onItemClick(helpAndSupportModel)
+            itemClickListener.onItemClick(licenseModel)
         }
     }
 
-    internal fun bind(model: HelpAndSupportModel) {
-        this.helpAndSupportModel = model
+    internal fun bind(model: LicenseModel) {
+        this.licenseModel = model
         itemView.apply {
-            tvName.text = model.title
+            tvTitle.text = model.title
+            tvType.text = model.licenseType
         }
     }
 

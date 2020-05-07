@@ -45,6 +45,7 @@ object SharedPrefConstants {
 
     // Theme
     const val STORE_DARK_THEME_STATUS = "darkThemeStatus"
+    const val STORE_SELECTED_ACCOUNT_LOGO_URL = "selectedAccountLogo"
 
     // Feature Flags
     const val STORE_WORKFLOW_SERVICE_STATUS = "workflowEnabled"

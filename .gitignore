@@ -86,6 +86,7 @@ lint/tmp/
 # lint/reports/
 
 app/libs/*
+app/release
 .idea
 
 .DS_Store

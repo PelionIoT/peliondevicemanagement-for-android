@@ -19,8 +19,17 @@ package com.arm.peliondevicemanagement.constants
 
 object AppConstants {
 
+    // Update this enum-class whenever adding a new third-party library
+    enum class LibrariesWeUse {
+        Okhttp,
+        Retrofit,
+        Glide,
+        Gson
+    }
+
     // About & Licenses
     const val ABOUT_JSON_FILE = "about.json"
+    const val LICENSE_JSON_FILE = "lib-licenses.json"
 
     // Navigation-action constants
     const val IS_ACCOUNT_GRAPH = "isAccountGraph"

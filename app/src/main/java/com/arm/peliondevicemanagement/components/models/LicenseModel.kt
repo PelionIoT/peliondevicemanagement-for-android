@@ -17,7 +17,26 @@
 
 package com.arm.peliondevicemanagement.components.models
 
+import android.os.Parcelable
+import com.google.gson.annotations.SerializedName
+import kotlinx.android.parcel.Parcelize
+
+@Parcelize
 data class LicenseModel(
-    val title: String,
-    val licence: String
-)
+    @SerializedName("title") val title: String,
+    @SerializedName("type") val licenseType: String,
+    @SerializedName("licence") val license: String
+): Parcelable {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as LicenseModel
+        if(title != other.title) return false
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return  title.hashCode()
+    }
+}

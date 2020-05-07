@@ -90,6 +90,12 @@ class HomeActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             .inflateHeaderView(R.layout.layout_drawer_header)
         navigationView = viewBinder.navigationView
 
+        // In-case of single-account, update drawer-menu
+        if(!SharedPrefHelper.isMultiAccountSupported()){
+            navigationView.menu.clear()
+            navigationView.inflateMenu(R.menu.menu_single_account)
+        }
+
         viewPager = viewBinder.contentView.viewPager
         tabLayout = viewBinder.contentView.tabLayout
 
@@ -221,6 +227,11 @@ class HomeActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         SharedPrefHelper.storeMultiAccountStatus(false)
         SharedPrefHelper.clearEverything()
         LogHelper.debug(TAG, "Sign-out complete")
+        fireIntentWithFinish(Intent(this, AuthActivity::class.java), false)
+    }
+
+    fun navigateToLoginForReAuth() {
+        LogHelper.debug(TAG, "Temporary sign-out complete")
         fireIntentWithFinish(Intent(this, AuthActivity::class.java), false)
     }
 

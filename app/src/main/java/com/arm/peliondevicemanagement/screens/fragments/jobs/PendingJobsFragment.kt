@@ -19,11 +19,11 @@ package com.arm.peliondevicemanagement.screens.fragments.jobs
 
 import android.content.Context
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -31,12 +31,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.adapters.WorkflowAdapter
+import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
 import com.arm.peliondevicemanagement.components.models.workflow.Workflow
 import com.arm.peliondevicemanagement.components.viewmodels.WorkflowViewModel
-import com.arm.peliondevicemanagement.helpers.LogHelper
-import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
 import com.arm.peliondevicemanagement.constants.state.LoadState
 import com.arm.peliondevicemanagement.databinding.FragmentPendingJobsBinding
+import com.arm.peliondevicemanagement.helpers.LogHelper
 
 class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
 

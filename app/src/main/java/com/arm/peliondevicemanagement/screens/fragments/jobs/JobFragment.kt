@@ -441,7 +441,7 @@ class JobFragment : Fragment() {
                         initiateJobRun()
                     }
                 } else {
-                    showSnackbar("Failed to run job")
+                    showSnackbar("Failed, try again")
                 }
             } else {
                 showSnackbar("Assets not downloaded")

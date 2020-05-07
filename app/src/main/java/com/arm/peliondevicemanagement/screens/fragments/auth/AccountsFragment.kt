@@ -38,9 +38,13 @@ import com.arm.peliondevicemanagement.components.models.user.Account
 import com.arm.peliondevicemanagement.components.models.user.UserProfile
 import com.arm.peliondevicemanagement.components.viewmodels.LoginViewModel
 import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
-import com.arm.peliondevicemanagement.components.models.user.AccountProfileModel
+import com.arm.peliondevicemanagement.components.models.branding.BrandingImage
+import com.arm.peliondevicemanagement.components.models.user.AccountProfile
+import com.arm.peliondevicemanagement.constants.APIConstants.KEY_BRAND_LOGO
+import com.arm.peliondevicemanagement.constants.BrandingTheme
 import com.arm.peliondevicemanagement.constants.state.NetworkErrorState
 import com.arm.peliondevicemanagement.screens.activities.AuthActivity
+import com.arm.peliondevicemanagement.services.data.BrandingImageResponse
 import com.arm.peliondevicemanagement.utils.PlatformUtils
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.Gson
@@ -146,6 +150,10 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
 
         loginViewModel.getAccountProfileLiveData().observe(viewLifecycleOwner, Observer { response ->
             processUserAccountProfileData(response)
+        })
+
+        loginViewModel.getAccountBrandingImagesLiveData().observe(viewLifecycleOwner, Observer { response ->
+            processAccountBrandingImagesData(response)
             navigateToDashboardFragment()
         })
 
@@ -250,13 +258,40 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
         loginViewModel.fetchAccountProfile()
     }
 
-    private fun processUserAccountProfileData(accountProfile: AccountProfileModel) {
+    private fun processUserAccountProfileData(accountProfile: AccountProfile) {
         // Store user account-profile data as JSON in SharedPrefs
         val accountProfileJSON = Gson().toJson(accountProfile)
         LogHelper.debug(TAG, "onAccountProfile()-> $accountProfileJSON")
         SharedPrefHelper.storeUserAccountProfile(accountProfileJSON)
+        // Remove password
         if(!SharedPrefHelper.getUserPassword().isNullOrBlank()) {
             SharedPrefHelper.removePassword()
+        }
+
+        // Now fetch account-branding-images
+        val accountID = SharedPrefHelper.getSelectedAccountID()
+        val activeTheme = if(SharedPrefHelper.isDarkThemeEnabled()){
+            BrandingTheme.DARK
+        } else {
+            BrandingTheme.LIGHT
+        }
+        loginViewModel.fetchAccountBrandingImages(accountID, activeTheme)
+    }
+
+    private fun processAccountBrandingImagesData(brandingResponse: BrandingImageResponse) {
+        //LogHelper.debug(TAG, "Branding-Images-> ${brandingResponse.brandingImages}")
+
+        // Process brand-logo for now
+        val brandLogoIndex = brandingResponse.brandingImages
+            .indexOf(BrandingImage("", KEY_BRAND_LOGO))
+        val brandLogoURL = brandingResponse.brandingImages[brandLogoIndex].imageURL
+        if(brandLogoURL != null){
+            //LogHelper.debug(TAG, "AccountBrandingLogo: Available, url: $brandLogoURL")
+            SharedPrefHelper.storeSelectedAccountBrandingLogoURL(brandLogoURL)
+            LogHelper.debug(TAG, "AccountBrandingLogo: Available, saved")
+        } else {
+            LogHelper.debug(TAG, "AccountBrandingLogo: Not available")
+            SharedPrefHelper.storeSelectedAccountBrandingLogoURL("")
         }
     }
 

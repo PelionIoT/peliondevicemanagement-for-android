@@ -17,7 +17,7 @@
 
 package com.arm.peliondevicemanagement.services.repository
 
-import com.arm.peliondevicemanagement.components.models.user.AccountProfileModel
+import com.arm.peliondevicemanagement.components.models.user.AccountProfile
 import com.arm.peliondevicemanagement.components.models.LicenseModel
 import com.arm.peliondevicemanagement.components.models.user.UserProfile
 import com.arm.peliondevicemanagement.constants.APIConstants.CONTENT_TYPE_JSON
@@ -26,12 +26,14 @@ import com.arm.peliondevicemanagement.constants.APIConstants.KEY_ACCOUNT_ID
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_GRANT_TYPE
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_PASSWORD
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_USERNAME
+import com.arm.peliondevicemanagement.constants.BrandingTheme
 import com.arm.peliondevicemanagement.services.api.CloudAPIService
 import com.arm.peliondevicemanagement.services.api.CloudAPIService.Companion.createJSONRequestBody
 import com.arm.peliondevicemanagement.services.data.*
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.ResponseBody
+import java.util.*
 
 class CloudRepository(private val cloudAPIService: CloudAPIService): BaseRepository() {
 
@@ -82,7 +84,7 @@ class CloudRepository(private val cloudAPIService: CloudAPIService): BaseReposit
         )
     }
 
-    suspend fun getAccountProfile(): AccountProfileModel? {
+    suspend fun getAccountProfile(): AccountProfile? {
         return doSafeAPIRequest(
             call = { cloudAPIService.getAccountProfile()}
         )
@@ -100,18 +102,6 @@ class CloudRepository(private val cloudAPIService: CloudAPIService): BaseReposit
             doSafeAPIRequest(
                 call = { cloudAPIService
                     .getAssignedWorkflows(itemsPerPage, assigneeID)}
-            )
-        }
-    }
-
-    suspend fun getAllWorkflows(itemsPerPage: Int, after: String? = null): WorkflowsResponse? {
-        return if(after != null){
-            doSafeAPIRequest(
-                call = { cloudAPIService.getAllWorkflows(itemsPerPage, after)}
-            )
-        } else {
-            doSafeAPIRequest(
-                call = { cloudAPIService.getAllWorkflows(itemsPerPage)}
             )
         }
     }
@@ -140,6 +130,13 @@ class CloudRepository(private val cloudAPIService: CloudAPIService): BaseReposit
     suspend fun uploadDeviceRunLogs(json: String): DeviceRunUploadResponse? {
         return doSafeAPIRequest(
             call = { cloudAPIService.uploadRunLogs(json.toRequestBody(CONTENT_TYPE_JSON))}
+        )
+    }
+
+    suspend fun getBrandingImages(accountID: String, theme: BrandingTheme): BrandingImageResponse? {
+        return doSafeAPIRequest(
+            call = { cloudAPIService.getAccountBrandingImages(accountID,
+                theme.name.toLowerCase(Locale.ENGLISH)) }
         )
     }
 

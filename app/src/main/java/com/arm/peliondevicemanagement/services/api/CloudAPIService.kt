@@ -17,15 +17,18 @@
 
 package com.arm.peliondevicemanagement.services.api
 
-import com.arm.peliondevicemanagement.components.models.user.AccountProfileModel
+import com.arm.peliondevicemanagement.components.models.user.AccountProfile
 import com.arm.peliondevicemanagement.components.models.LicenseModel
 import com.arm.peliondevicemanagement.components.models.user.UserProfile
+import com.arm.peliondevicemanagement.constants.APIConstants.API_ACCOUNTS
 import com.arm.peliondevicemanagement.constants.APIConstants.API_ACCOUNTS_ME
 import com.arm.peliondevicemanagement.constants.APIConstants.API_ALL_WORKFLOWS
 import com.arm.peliondevicemanagement.constants.APIConstants.API_LOGIN
 import com.arm.peliondevicemanagement.constants.APIConstants.API_IMPERSONATE
 import com.arm.peliondevicemanagement.constants.APIConstants.API_USER_ME
 import com.arm.peliondevicemanagement.constants.APIConstants.API_ASSIGNED_WORKFLOWS
+import com.arm.peliondevicemanagement.constants.APIConstants.API_BRANDING_COLORS
+import com.arm.peliondevicemanagement.constants.APIConstants.API_BRANDING_IMAGES
 import com.arm.peliondevicemanagement.constants.APIConstants.API_CLOUD_UI_SERVER
 import com.arm.peliondevicemanagement.constants.APIConstants.API_LICENSES
 import com.arm.peliondevicemanagement.constants.APIConstants.API_SDA_TOKEN
@@ -34,6 +37,7 @@ import com.arm.peliondevicemanagement.constants.APIConstants.API_WORKFLOW_FILES
 import com.arm.peliondevicemanagement.constants.APIConstants.API_WORKFLOW_SYNC
 import com.arm.peliondevicemanagement.constants.APIConstants.CONTENT_TYPE_JSON
 import com.arm.peliondevicemanagement.constants.APIConstants.DEFAULT_BASE_URL
+import com.arm.peliondevicemanagement.constants.APIConstants.KEY_ACCOUNT_ID
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_AFTER_ID
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_ASSIGNEE_ID
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_AUTHORIZATION
@@ -42,6 +46,7 @@ import com.arm.peliondevicemanagement.constants.APIConstants.KEY_CONTENT_TYPE
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_CONTENT_TYPE_JSON
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_FILE_ID
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_LIMIT
+import com.arm.peliondevicemanagement.constants.APIConstants.KEY_THEME
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_WORKFLOW_ID
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.services.data.*
@@ -106,18 +111,12 @@ interface CloudAPIService {
     suspend fun getUserProfile(): Response<UserProfile>
 
     @GET(API_ACCOUNTS_ME)
-    suspend fun getAccountProfile(): Response<AccountProfileModel>
+    suspend fun getAccountProfile(): Response<AccountProfile>
 
     @GET(API_ALL_WORKFLOWS)
     suspend fun getAssignedWorkflows(
         @Query(KEY_LIMIT) itemsPerPage: Int,
         @Query(KEY_ASSIGNEE_ID) assignee: String,
-        @Query(KEY_AFTER_ID) after: String? = null
-    ): Response<WorkflowsResponse>
-
-    @GET(API_ALL_WORKFLOWS)
-    suspend fun getAllWorkflows(
-        @Query(KEY_LIMIT) itemsPerPage: Int,
         @Query(KEY_AFTER_ID) after: String? = null
     ): Response<WorkflowsResponse>
 
@@ -142,6 +141,18 @@ interface CloudAPIService {
     suspend fun uploadRunLogs(
         @Body params: RequestBody
     ): Response<DeviceRunUploadResponse>
+
+    @GET("$API_ACCOUNTS/{$KEY_ACCOUNT_ID}$API_BRANDING_IMAGES/{$KEY_THEME}")
+    suspend fun getAccountBrandingImages(
+        @Path(KEY_ACCOUNT_ID) accountID: String,
+        @Path(KEY_THEME) theme: String
+    ): Response<BrandingImageResponse>
+
+    @GET("$API_ACCOUNTS/{$KEY_ACCOUNT_ID}$API_BRANDING_COLORS/{$KEY_THEME}")
+    suspend fun getAccountBrandingColors(
+        @Path(KEY_ACCOUNT_ID) accountID: String,
+        @Path(KEY_THEME) theme: String
+    ): Response<ResponseBody>
 
     @GET(API_CLOUD_UI_SERVER + API_LICENSES)
     suspend fun getLicenses(): Response<List<LicenseModel>>

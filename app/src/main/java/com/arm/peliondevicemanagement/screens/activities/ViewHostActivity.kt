@@ -116,6 +116,9 @@ class ViewHostActivity : BaseActivity() {
                 R.id.licensesFragment -> {
                     updateToolbarText("Libraries we use")
                 }
+                R.id.licenseViewFragment -> {
+                    updateToolbarText("License")
+                }
                 R.id.webViewFragment -> {
                     updateToolbarText("In-App Browsing")
                 }
@@ -157,10 +160,7 @@ class ViewHostActivity : BaseActivity() {
     }
 
     fun navigateToLogin() {
-        WorkflowUtils.deleteWorkflowsCache()
-        SharedPrefHelper.storeMultiAccountStatus(false)
-        SharedPrefHelper.clearEverything()
-        LogHelper.debug(TAG, "Sign-out complete")
+        LogHelper.debug(TAG, "Temporary sign-out complete")
         fireIntentWithFinish(Intent(this, AuthActivity::class.java), false)
     }
 

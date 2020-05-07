@@ -80,6 +80,23 @@
             android:id="@+id/chipLocation"
             android:layout_toEndOf="@id/chipDeviceCount"
             android:layout_marginStart="5dp"
+            android:layout_marginBottom="5dp"
+            android:singleLine="true"
+            android:ellipsize="middle"
+            android:clickable="false"
+            android:focusable="false"
+            android:textColor="?attr/primaryTextColor"
+            app:chipBackgroundColor="?attr/chipColor"
+            android:visibility="gone"
+            />
+
+        <com.google.android.material.chip.Chip
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvName"
+            android:id="@+id/chipExpiryTime"
+            android:layout_toEndOf="@id/chipLocation"
+            android:layout_marginStart="5dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="5dp"
             android:singleLine="true"
