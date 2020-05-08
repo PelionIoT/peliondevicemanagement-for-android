@@ -16,11 +16,11 @@
   ~ limitations under the License.
   -->
 
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/cardWorkflowItem"
     android:layout_marginBottom="5dp"
     android:clickable="true"
@@ -40,7 +40,7 @@
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:id="@+id/iconView"
-            android:layout_marginStart="24dp"
+            android:layout_marginStart="18dp"
             android:layout_marginTop="14dp"
             android:src="?attr/iconWidget"/>
 
@@ -60,51 +60,63 @@
             android:textSize="18sp"
         />
 
-        <com.google.android.material.chip.Chip
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingEnd="5dp"
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp"
+            android:id="@+id/tvDevices"
+            android:text="@string/devices_format"
             android:layout_below="@id/tvName"
-            android:id="@+id/chipDeviceCount"
-            android:layout_marginStart="25dp"
-            android:layout_marginBottom="5dp"
-            android:clickable="false"
-            android:focusable="false"
-            android:textColor="?attr/primaryTextColor"
-            app:chipBackgroundColor="?attr/chipColor"
+            android:layout_toStartOf="@+id/tvDateTime"
+            android:layout_alignParentStart="true"
+            android:fontFamily="@font/lato_regular"
+            android:ellipsize="middle"
+            android:singleLine="true"
+            android:textSize="16sp"
+            android:drawableStart="?attr/iconDevice"
+            android:drawablePadding="10dp"
             />
 
-        <com.google.android.material.chip.Chip
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingStart="5dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp"
+            android:id="@+id/tvDateTime"
             android:layout_below="@id/tvName"
-            android:id="@+id/chipLocation"
-            android:layout_toEndOf="@id/chipDeviceCount"
-            android:layout_marginStart="5dp"
-            android:layout_marginBottom="5dp"
-            android:singleLine="true"
+            android:fontFamily="@font/lato_regular"
             android:ellipsize="middle"
-            android:clickable="false"
-            android:focusable="false"
-            android:textColor="?attr/primaryTextColor"
-            app:chipBackgroundColor="?attr/chipColor"
-            android:visibility="gone"
+            android:singleLine="true"
+            android:textSize="16sp"
+            android:drawableStart="?attr/iconClock"
+            android:drawablePadding="10dp"
+            android:layout_alignParentEnd="true"
+            android:textAlignment="viewEnd"
+            android:text="@string/expired_text"
             />
 
-        <com.google.android.material.chip.Chip
-            android:layout_width="wrap_content"
+        <TextView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/tvName"
-            android:id="@+id/chipExpiryTime"
-            android:layout_toEndOf="@id/chipLocation"
-            android:layout_marginStart="5dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="5dp"
-            android:singleLine="true"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp"
+            android:id="@+id/tvLocation"
+            android:layout_below="@id/tvDevices"
+            android:fontFamily="@font/lato_regular"
             android:ellipsize="middle"
-            android:clickable="false"
-            android:focusable="false"
-            android:textColor="?attr/primaryTextColor"
-            app:chipBackgroundColor="?attr/chipColor"
+            android:singleLine="true"
+            android:textSize="16sp"
+            android:drawableStart="?attr/iconLocation"
+            android:drawablePadding="10dp"
+            tools:text="Austin, Texas"
+            android:layout_marginBottom="10dp"
             />
 
         <ImageView

@@ -65,7 +65,7 @@
                 android:fontFamily="@font/lato_regular"
                 android:ellipsize="middle"
                 android:singleLine="true"
-                android:textSize="14sp"
+                android:textSize="16sp"
                 android:textColor="?attr/primaryInverseTextColor"
                 />
 
@@ -82,7 +82,7 @@
                 android:fontFamily="@font/lato_regular"
                 android:ellipsize="middle"
                 android:singleLine="true"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:textColor="?attr/primaryInverseTextColor"
                 />
 
@@ -111,7 +111,7 @@
                 android:fontFamily="@font/lato_regular"
                 android:ellipsize="middle"
                 android:singleLine="true"
-                android:textSize="14sp"
+                android:textSize="16sp"
                 android:textStyle="bold"
                 />
 
@@ -127,7 +127,7 @@
                 android:fontFamily="@font/lato_regular"
                 android:ellipsize="middle"
                 android:singleLine="true"
-                android:textSize="14sp"
+                android:textSize="16sp"
                 android:textStyle="bold"
                 />
 
@@ -135,7 +135,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/lato_regular"
-                android:textSize="14sp"
+                android:textSize="16sp"
                 android:textStyle="bold"
                 android:layout_below="@id/tvTasks"
                 android:layout_toEndOf="@+id/tvTime"
@@ -240,6 +240,7 @@
         app:elevation="10dp"
         android:textAllCaps="false"
         android:id="@+id/stopButton"
+        android:textSize="16sp"
         android:textColor="?attr/primaryInverseTextColor"
         android:layout_marginBottom="25dp"
         android:layout_centerHorizontal="true"

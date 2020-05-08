@@ -92,7 +92,7 @@
                             android:fontFamily="@font/lato_regular"
                             android:ellipsize="middle"
                             android:singleLine="true"
-                            android:textSize="14sp"
+                            android:textSize="16sp"
                             />
 
                     </RelativeLayout>
@@ -120,8 +120,26 @@
                         android:fontFamily="@font/lato_regular"
                         android:ellipsize="middle"
                         android:singleLine="true"
-                        android:textSize="14sp"
+                        android:textSize="16sp"
                         android:drawableStart="?attr/iconList"
+                        android:drawablePadding="10dp"
+                        />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="16dp"
+                        android:paddingBottom="5dp"
+                        android:paddingTop="5dp"
+                        android:id="@+id/tvDevices"
+                        android:text="@string/total_devices_format"
+                        android:layout_below="@id/tvStatus"
+                        android:fontFamily="@font/lato_regular"
+                        android:ellipsize="middle"
+                        android:singleLine="true"
+                        android:textSize="16sp"
+                        android:drawableStart="?attr/iconDevice"
                         android:drawablePadding="10dp"
                         />
 
@@ -134,11 +152,11 @@
                         android:paddingTop="5dp"
                         android:id="@+id/tvLocation"
                         android:text="@string/location_format"
-                        android:layout_below="@id/tvStatus"
+                        android:layout_below="@id/tvDevices"
                         android:fontFamily="@font/lato_regular"
                         android:ellipsize="middle"
                         android:singleLine="true"
-                        android:textSize="14sp"
+                        android:textSize="16sp"
                         android:drawableStart="?attr/iconLocation"
                         android:drawablePadding="10dp"
                         />
@@ -156,7 +174,7 @@
                         android:fontFamily="@font/lato_regular"
                         android:ellipsize="middle"
                         android:singleLine="true"
-                        android:textSize="14sp"
+                        android:textSize="16sp"
                         android:drawableStart="?attr/iconClock"
                         android:drawablePadding="10dp"
                         />
@@ -332,8 +350,8 @@
                         android:layout_centerVertical="true"/>
 
                     <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
+                        android:layout_width="23dp"
+                        android:layout_height="23dp"
                         android:id="@+id/assetStatusView"
                         android:layout_alignParentEnd="true"
                         android:visibility="gone"
@@ -364,10 +382,10 @@
                     android:layout_height="wrap_content">
 
                     <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
                         android:id="@+id/deviceIconView"
-                        android:layout_marginStart="24dp"
+                        android:layout_marginStart="20dp"
                         android:layout_marginTop="14dp"
                         android:src="?attr/iconDevice"/>
 
@@ -435,6 +453,7 @@
         app:elevation="10dp"
         android:textAllCaps="false"
         android:id="@+id/runJobButton"
+        android:textSize="16sp"
         android:textColor="?attr/primaryInverseTextColor"
         android:layout_marginBottom="25dp"
         android:layout_centerHorizontal="true"

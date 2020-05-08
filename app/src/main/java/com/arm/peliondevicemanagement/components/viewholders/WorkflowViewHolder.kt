@@ -51,12 +51,12 @@ class WorkflowViewHolder(itemView: View,
             val deviceCountText: String
             if(model.workflowAUDs.size == 1){
                 deviceCountText = model.workflowAUDs.size.toString() + " Device"
-                chipDeviceCount.text = deviceCountText
+                tvDevices.text = deviceCountText
             } else {
                 deviceCountText = model.workflowAUDs.size.toString() + " Devices"
-                chipDeviceCount.text = deviceCountText
+                tvDevices.text = deviceCountText
             }
-            //chipLocation.text = model.workflowLocation
+            tvLocation.text = model.workflowLocation
             // Set workflow-status
             when(model.workflowStatus){
                 WorkflowState.COMPLETED.name -> {
@@ -65,7 +65,7 @@ class WorkflowViewHolder(itemView: View,
                 }
                 WorkflowState.SYNCED.name -> {
                     if(model.sdaToken != null){
-                        if(WorkflowUtils.isValidSDAToken(model.sdaToken!!.expiresIn)){
+                        if(isValidSDAToken(model.sdaToken!!.expiresIn)){
                             syncStatusCheckView.background = ContextCompat.getDrawable(context, R.drawable.ic_status_synced)
                             syncStatusCheckView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check_light))
                         } else {
@@ -83,14 +83,18 @@ class WorkflowViewHolder(itemView: View,
             }
             // Set SDA-Expiry time
             if(model.sdaToken != null){
-                val expiresIn = model.sdaToken!!.expiresIn
-                val expiryDate = PlatformUtils.parseJSONTimeString(expiresIn)
-                val expiryTime =
-                    PlatformUtils.parseJSONTimeString(expiresIn, AppConstants.DEFAULT_TIME_FORMAT)
-                val expiryDateTime = "$expiryDate, $expiryTime"
-                chipExpiryTime.text = expiryDateTime
+                if(isValidSDAToken(model.sdaToken!!.expiresIn)){
+                    val expiresIn = model.sdaToken!!.expiresIn
+                    val expiryDate = PlatformUtils.parseJSONTimeString(expiresIn)
+                    val expiryTime =
+                        PlatformUtils.parseJSONTimeString(expiresIn, AppConstants.DEFAULT_TIME_FORMAT)
+                    val expiryDateTime = "$expiryDate, $expiryTime"
+                    tvDateTime.text = expiryDateTime
+                } else {
+                    tvDateTime.text = resources.getText(R.string.expired_text)
+                }
             } else {
-                chipExpiryTime.text = resources.getString(R.string.na)
+                tvDateTime.text = resources.getString(R.string.na)
             }
 
         }

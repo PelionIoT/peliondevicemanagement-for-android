@@ -203,6 +203,8 @@ class JobFragment : Fragment() {
                     R.string.status_format, resources.getString(R.string.reassigned_text))
             }
         }
+        viewBinder.tvDevices.text = requireContext().getString(
+            R.string.total_devices_format, workflowModel.workflowDevices!!.size.toString())
         viewBinder.tvLocation.text = requireContext().getString(
             R.string.location_format, workflowModel.workflowLocation)
         val creationDateTime = parseJSONTimeString(workflowModel.workflowCreatedAt) +

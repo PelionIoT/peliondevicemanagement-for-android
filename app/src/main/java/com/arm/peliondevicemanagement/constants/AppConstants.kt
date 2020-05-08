@@ -56,7 +56,7 @@ object AppConstants {
 
     // Date-Time constants
     const val DEFAULT_DATE_FORMAT = "dd-MM-yyyy"
-    const val DEFAULT_TIME_FORMAT = "HH:mm"
+    const val DEFAULT_TIME_FORMAT = "HH:mm a"
 
     // SDA constants
     const val SDA = "sda"

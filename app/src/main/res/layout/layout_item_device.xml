@@ -69,8 +69,8 @@
             />
 
         <ImageView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="23dp"
+            android:layout_height="23dp"
             android:id="@+id/viewDeviceStatus"
             android:layout_alignParentEnd="true"
             android:contentDescription="@string/logo_description"
@@ -80,10 +80,10 @@
             android:src="@drawable/ic_exclamation"/>
 
         <ProgressBar
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
             android:layout_alignParentEnd="true"
-            android:layout_marginEnd="14dp"
+            android:layout_marginEnd="15dp"
             android:layout_centerVertical="true"
             android:indeterminate="true"
             android:id="@+id/viewProgressbar"
