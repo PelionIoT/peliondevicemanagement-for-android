@@ -71,6 +71,8 @@
         <attr name="iconUpload" format="reference" />
         <attr name="iconClock" format="reference" />
         <attr name="iconList" format="reference" />
+        <attr name="iconPendingJobs" format="reference" />
+        <attr name="iconCompletedJobs" format="reference" />
 
     </declare-styleable>
 </resources>

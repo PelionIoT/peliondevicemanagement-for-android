@@ -146,6 +146,17 @@ class HomeActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         tabLayout.setTabTextColors(normalColor, selectedColor)
         tabLayout.setSelectedTabIndicatorColor(selectedColor)
         tabLayout.tabRippleColor = rippleColor
+
+        // Define ColorStateList
+        val states = arrayOf(
+            intArrayOf(android.R.attr.state_selected),
+            intArrayOf(-android.R.attr.state_selected)
+        )
+        val colors = intArrayOf(
+            selectedColor,
+            normalColor
+        )
+        tabLayout.tabIconTint = ColorStateList(states, colors)
     }
 
     private fun updateDrawerViews() {
@@ -183,6 +194,13 @@ class HomeActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
     private fun setupViewPagerWithTabs() {
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+            if(fragmentNamesList[position] == "Pending"){
+                tab.icon = PlatformUtils
+                    .fetchAttributeDrawable(this, R.attr.iconPendingJobs)
+            } else {
+                tab.icon = PlatformUtils
+                    .fetchAttributeDrawable(this, R.attr.iconCompletedJobs)
+            }
             tab.text = fragmentNamesList[position]
         }.attach()
     }

@@ -253,6 +253,7 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
 
     private fun showHide404View(visibility: Boolean) {
         if (visibility) {
+            viewBinder.notFoundView.errorImage.setImageResource(R.drawable.jobs_uploaded)
             viewBinder.notFoundView.root.visibility = View.VISIBLE
         } else {
             viewBinder.notFoundView.root.visibility = View.GONE

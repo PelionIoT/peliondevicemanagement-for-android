@@ -23,32 +23,19 @@
 
     <ImageView
         android:id="@+id/errorImage"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+        android:layout_width="220dp"
+        android:layout_height="220dp"
         android:layout_gravity="center"
-        android:src="?attr/iconWidget"
+        android:src="@drawable/no_jobs"
         android:contentDescription="@string/logo_description"
         android:layout_centerHorizontal="true"
-
         />
-
-    <ImageView
-        android:id="@+id/viewStatus"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_alignEnd="@id/errorImage"
-        android:layout_marginEnd="-5dp"
-        android:layout_marginBottom="5dp"
-        android:layout_alignBottom="@id/errorImage"
-        android:background="@drawable/ic_status_ok"
-        android:contentDescription="@string/logo_description"
-        android:src="@drawable/ic_check_light" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="30dp"
         android:text="@string/all_complete_text"
         android:id="@+id/errorText"
         android:textSize="18sp"

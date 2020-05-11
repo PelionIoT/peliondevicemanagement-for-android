@@ -106,7 +106,7 @@
             android:id="@+id/notFoundView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
+            android:layout_marginTop="100dp"
             android:visibility="gone"
             tools:visibility="visible"
             />

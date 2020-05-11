@@ -184,7 +184,6 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
 
     private fun showHide404View(visibility: Boolean) {
         if (visibility) {
-            viewBinder.notFoundView.viewStatus.visibility = View.GONE
             viewBinder.notFoundView.errorText.text = resources.getString(R.string.no_jobs_text)
             viewBinder.notFoundView.root.visibility = View.VISIBLE
         } else {

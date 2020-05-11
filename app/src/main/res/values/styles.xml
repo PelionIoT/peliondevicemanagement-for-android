@@ -78,6 +78,8 @@
         <item name="iconUpload">@drawable/ic_upload_dark</item>
         <item name="iconClock">@drawable/ic_clock_dark</item>
         <item name="iconList">@drawable/ic_list_dark</item>
+        <item name="iconPendingJobs">@drawable/pending_jobs_dark</item>
+        <item name="iconCompletedJobs">@drawable/completed_jobs_dark</item>
     </style>
 
     <!-- Launch Theme -->
@@ -149,6 +151,8 @@
         <item name="iconUpload">@drawable/ic_upload_light</item>
         <item name="iconClock">@drawable/ic_clock_light</item>
         <item name="iconList">@drawable/ic_list_light</item>
+        <item name="iconPendingJobs">@drawable/pending_jobs_light</item>
+        <item name="iconCompletedJobs">@drawable/completed_jobs_light</item>
     </style>
 
     <style name="AppTheme.Toolbar">
