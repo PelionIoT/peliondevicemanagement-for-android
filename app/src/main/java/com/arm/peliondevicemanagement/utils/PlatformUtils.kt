@@ -36,7 +36,10 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.arm.peliondevicemanagement.AppController
 import com.arm.peliondevicemanagement.R
+import com.arm.peliondevicemanagement.constants.AppConstants.SDA_CHARACTERISTIC
 import com.arm.peliondevicemanagement.constants.AppConstants.SDA_SERVICE
+import com.arm.peliondevicemanagement.helpers.LogHelper
+import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.services.data.ErrorResponse
 import com.arm.pelionmobiletransportsdk.TransportManager
 import com.arm.pelionmobiletransportsdk.ble.scanner.BleManager
@@ -199,11 +202,33 @@ object PlatformUtils {
         return dateTime.toString()
     }
 
+    fun getSDAServiceUUID(): String {
+        return if(SharedPrefHelper.getSDAServiceUUID().isNotEmpty()){
+            LogHelper.debug(TAG, "Found custom serviceUUID")
+            SharedPrefHelper.getSDAServiceUUID()
+        } else {
+            LogHelper.debug(TAG, "Found default serviceUUID")
+            SDA_SERVICE
+        }
+    }
+
+    fun getSDAServiceCharacteristicUUID(): String {
+        return if(SharedPrefHelper.getSDAServiceCharacteristicUUID().isNotEmpty()){
+            LogHelper.debug(TAG, "Found custom serviceCharacteristicUUID")
+            SharedPrefHelper.getSDAServiceCharacteristicUUID()
+        } else {
+            LogHelper.debug(TAG, "Found default serviceCharacteristicUUID")
+            SDA_CHARACTERISTIC
+        }
+    }
+
     fun isBluetoothEnabled(): Boolean = TransportManager.isBluetoothEnabled()
 
     fun enableBluetooth(context: Context) = TransportManager.enableBluetooth(context)
 
     fun getBleInstance(): BleManager {
+        val sdaServiceUUID = getSDAServiceUUID()
+
         val context = AppController.appController!!.applicationContext
         val scanSettings = ScanSettings.Builder()
             .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
@@ -218,7 +243,7 @@ object PlatformUtils {
         val bleBuilder = TransportManager.getBleBuilder(context)
             .addScanPeriod(TransportManager.DEFAULT_SCAN_PERIOD)
             .addSettingsScan(scanSettings.build())
-            .addFilterServiceUuid(SDA_SERVICE)
+            .addFilterServiceUuid(sdaServiceUUID)
 
         return bleBuilder.build()
     }

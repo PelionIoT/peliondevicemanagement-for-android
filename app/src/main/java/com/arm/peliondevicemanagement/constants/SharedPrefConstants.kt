@@ -59,5 +59,7 @@ object SharedPrefConstants {
 
     // SDA Flags
     const val STORE_SDA_POPPEMPUB_KEY = "sdaPopPemPubKey"
+    const val STORE_SDA_SERVICE_UUID = "sdaServiceUUID"
+    const val STORE_SDA_SERVICE_CHARACTERISTIC_UUID = "sdaServiceCharacteristicUUID"
 
 }

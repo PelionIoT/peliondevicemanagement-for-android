@@ -100,6 +100,29 @@
                 <Button
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:id="@+id/bleScanSetupButton"
+                    android:text="@string/scan_setup_text"
+                    android:textAllCaps="false"
+                    app:icon="?attr/iconBleScan"
+                    app:iconTint="?attr/primaryIconColor"
+                    app:iconPadding="20dp"
+                    android:fontFamily="@font/lato_regular"
+                    android:textColor="?attr/primaryTextColor"
+                    android:gravity="start|center_vertical"
+                    app:rippleColor="?attr/colorAccent"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="?attr/dividerColor"
+                    android:alpha="0.12"
+                    />
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:id="@+id/userActivityButton"
                     android:text="@string/activity_info"
                     android:textAllCaps="false"

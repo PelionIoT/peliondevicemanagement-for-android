@@ -26,10 +26,18 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import com.arm.peliondevicemanagement.BuildConfig
 import com.arm.peliondevicemanagement.R
+import com.arm.peliondevicemanagement.constants.AppConstants.SDA_CHARACTERISTIC
+import com.arm.peliondevicemanagement.constants.AppConstants.SDA_SERVICE
+import com.arm.peliondevicemanagement.constants.AppConstants.SERVICE_UUID_REGEX
 import com.arm.peliondevicemanagement.databinding.FragmentSettingsBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.screens.activities.ViewHostActivity
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
+import java.util.regex.Pattern
 
 class SettingsFragment : Fragment() {
 
@@ -42,6 +50,7 @@ class SettingsFragment : Fragment() {
 
     private var initiatedDModeMs: Long = 0
     private var developerModeStepCounter: Int = 5
+    private var easterEggActionPressed: Boolean = false
 
     private val checkedChangeListener: RadioGroup.OnCheckedChangeListener = RadioGroup.OnCheckedChangeListener { _, checkedId ->
         when (checkedId) {
@@ -77,7 +86,8 @@ class SettingsFragment : Fragment() {
 
         // If debug-build, enable feature-flag
         if(BuildConfig.DEBUG){
-            viewBinder.tvVersion.text = (activity as ViewHostActivity).getAppVersion()
+            val appVersion = (activity as ViewHostActivity).getAppVersion() + " - [ DEBUG ]"
+            viewBinder.tvVersion.text = appVersion
             viewBinder.buildInfoCard.visibility = View.VISIBLE
 
             if(SharedPrefHelper.getDeveloperOptions().isDeveloperModeEnabled()) {
@@ -88,6 +98,10 @@ class SettingsFragment : Fragment() {
 
     private fun setupListeners() {
         viewBinder.rgTheme.setOnCheckedChangeListener(checkedChangeListener)
+
+        viewBinder.bleScanSetupButton.setOnClickListener {
+            openScanSetupDialog()
+        }
 
         viewBinder.userActivityButton.setOnClickListener {
             navigateToActivityInfoFragment()
@@ -101,8 +115,16 @@ class SettingsFragment : Fragment() {
             if(SharedPrefHelper.getDeveloperOptions().isDeveloperModeEnabled()){
                 showToast(resources.getString(R.string.developer_mode_already_enabled_text))
             } else {
-                initiateDeveloperMode()
+                if(easterEggActionPressed){
+                    initiateDeveloperMode()
+                }
             }
+        }
+
+        viewBinder.buildInfoCard.setOnLongClickListener {
+            showToast("Easter egg activated")
+            easterEggActionPressed = true
+            return@setOnLongClickListener true
         }
 
         viewBinder.developerModeCard.setOnClickListener {
@@ -116,7 +138,6 @@ class SettingsFragment : Fragment() {
         } else
             SharedPrefHelper.setDarkThemeStatus(false)
 
-        //(activity as HostActivity).setAppTheme(true)
         (activity as ViewHostActivity).recreate()
     }
 
@@ -137,6 +158,112 @@ class SettingsFragment : Fragment() {
 
     private fun showToast(message: String){
         (activity as ViewHostActivity).showToast(message)
+    }
+
+    private fun openScanSetupDialog() {
+        val scanSetupDialog = BottomSheetDialog(requireContext(),
+            R.style.TransparentSheetDialog)
+        // Inflate-view
+        val sheetView = requireActivity()
+            .layoutInflater.inflate(R.layout.layout_scan_setup_dialog, null)
+
+        val serviceUUIDLayout = sheetView.findViewById<TextInputLayout>(R.id.txtServiceUUIDHeader)
+        val serviceCharUUIDLayout = sheetView.findViewById<TextInputLayout>(R.id.txtServiceCharUUIDHeader)
+
+        val serviceUUIDText = sheetView.findViewById<TextInputEditText>(R.id.txtServiceUUID)
+        val serviceCharUUIDText = sheetView.findViewById<TextInputEditText>(R.id.txtServiceCharUUID)
+
+        if(SharedPrefHelper.getSDAServiceUUID().isNotEmpty()
+            && SharedPrefHelper.getSDAServiceCharacteristicUUID().isNotEmpty()){
+            LogHelper.debug(TAG, "->scanSetup() Found custom serviceUUIDs")
+            serviceUUIDText.setText(SharedPrefHelper.getSDAServiceUUID())
+            serviceCharUUIDText.setText(SharedPrefHelper.getSDAServiceCharacteristicUUID())
+        } else {
+            LogHelper.debug(TAG, "->scanSetup() Found default serviceUUIDs")
+            serviceUUIDText.setText(SDA_SERVICE)
+            serviceCharUUIDText.setText(SDA_CHARACTERISTIC)
+        }
+
+        val restoreButton = sheetView.findViewById<MaterialButton>(R.id.restoreButton)
+        val saveButton = sheetView.findViewById<MaterialButton>(R.id.saveButton)
+
+        restoreButton.setOnClickListener {
+            SharedPrefHelper.restoreSDAServiceUUIDsToDefaults()
+            LogHelper.debug(TAG, "->scanSetup() Restored serviceUUIDs to defaults")
+            scanSetupDialog.dismiss()
+            showToast("Restore complete")
+        }
+
+        saveButton.setOnClickListener {
+            val serviceUUID = serviceUUIDText.text.toString()
+            val serviceCharUUID = serviceCharUUIDText.text.toString()
+
+            if (!validateForm(serviceUUIDLayout,
+                    serviceCharUUIDLayout,
+                    serviceUUID,
+                    serviceCharUUID)) {
+                return@setOnClickListener
+            }
+            SharedPrefHelper.storeSDAServiceUUIDs(serviceUUID, serviceCharUUID)
+            LogHelper.debug(TAG, "->scanSetup() Custom serviceUUIDs saved")
+            scanSetupDialog.dismiss()
+            showToast("Save complete")
+        }
+
+        scanSetupDialog.setContentView(sheetView)
+        scanSetupDialog.show()
+    }
+
+    private fun validateForm(serviceUUIDLayout: TextInputLayout,
+                             serviceCharUUIDLayout: TextInputLayout,
+                             serviceUUIDText: String,
+                             serviceCharUUIDText: String): Boolean {
+        var valid = true
+
+        serviceUUIDLayout.error = when {
+            serviceUUIDText.isBlank() -> {
+                valid = false
+                "Required"
+            }
+
+            !isValidUUID(serviceUUIDText.trim()) -> {
+                valid = false
+                "Invalid UUID"
+            }
+
+            else -> null
+        }
+
+        serviceCharUUIDLayout.error = when {
+            serviceCharUUIDText.isBlank() -> {
+                valid = false
+                "Required"
+            }
+
+            !isValidUUID(serviceCharUUIDText.trim()) -> {
+                valid = false
+                "Invalid UUID"
+            }
+
+            else -> null
+        }
+
+        return valid
+    }
+
+    private fun isValidUUID(uuid: String): Boolean {
+        var valid = true
+
+        if(uuid.length != 36){
+            valid = false
+            return valid
+        }
+
+        if(!Pattern.matches(SERVICE_UUID_REGEX, uuid)){
+            valid = false
+        }
+
+        return valid
     }
 
     private fun navigateToActivityInfoFragment() {

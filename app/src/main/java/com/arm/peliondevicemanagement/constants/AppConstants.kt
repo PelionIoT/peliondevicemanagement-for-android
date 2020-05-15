@@ -68,6 +68,7 @@ object AppConstants {
     // Service & Characteristic IDs for SDA
     const val SDA_SERVICE: String = "6e400001-b5a3-f393-e0a9-e50e24dcca9e"
     const val SDA_CHARACTERISTIC: String = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
+    const val SERVICE_UUID_REGEX = "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
 
     // Device states
     const val DEVICE_STATE_PENDING = "Pending"

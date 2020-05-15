@@ -89,6 +89,8 @@
     <string name="finish_text">Finish</string>
     <string name="stop_text">Stop</string>
     <string name="retry_text">Retry</string>
+    <string name="restore_default_text">Restore Defaults</string>
+    <string name="save_text">Save</string>
 
     <string name="attention_text">Attention Required</string>
     <string name="location_perm_desc">This app needs location permission for scanning nearby BLE devices</string>
@@ -122,6 +124,11 @@
     <string name="asset_downloaded_text">Assets available</string>
     <string name="asset_checking_text">Looking for downloaded assets</string>
     <string name="asset_not_found_text">No assets downloaded</string>
+
+    <string name="scan_setup_text">Scan Setup</string>
+    <string name="scan_setup_desc">Configure the device scan policy to look for devices using a custom Service-UUID instead of the default one.</string>
+    <string name="scan_service_uuid_text">Service-UUID</string>
+    <string name="scan_service_characteristic_uuid_text">Service-Characteristic-UUID</string>
 
     <!-- Developer Options strings -->
     <string name="build_info_text">Build Info</string>

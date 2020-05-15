@@ -80,6 +80,7 @@
         <item name="iconList">@drawable/ic_list_dark</item>
         <item name="iconPendingJobs">@drawable/pending_jobs_dark</item>
         <item name="iconCompletedJobs">@drawable/completed_jobs_dark</item>
+        <item name="iconBleScan">@drawable/ic_ble_dark</item>
     </style>
 
     <!-- Launch Theme -->
@@ -153,6 +154,7 @@
         <item name="iconList">@drawable/ic_list_light</item>
         <item name="iconPendingJobs">@drawable/pending_jobs_light</item>
         <item name="iconCompletedJobs">@drawable/completed_jobs_light</item>
+        <item name="iconBleScan">@drawable/ic_ble_light</item>
     </style>
 
     <style name="AppTheme.Toolbar">

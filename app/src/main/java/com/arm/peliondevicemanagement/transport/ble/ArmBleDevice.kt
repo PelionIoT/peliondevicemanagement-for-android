@@ -22,10 +22,7 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattService
 import android.content.Context
 import android.util.Log
-import com.arm.mbed.sda.proxysdk.devices.AbstractDevice
 import com.arm.peliondevicemanagement.BuildConfig
-import com.arm.peliondevicemanagement.constants.AppConstants.SDA_CHARACTERISTIC
-import com.arm.peliondevicemanagement.constants.AppConstants.SDA_SERVICE
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.transport.ISerialDataSink
@@ -35,6 +32,7 @@ import com.arm.pelionmobiletransportsdk.ble.callbacks.BleGattWriteCallback
 import com.arm.pelionmobiletransportsdk.ble.callbacks.BleMtuChangedCallback
 import com.arm.pelionmobiletransportsdk.ble.scanner.BleManager
 import com.arm.peliondevicemanagement.utils.ByteFactory
+import com.arm.peliondevicemanagement.utils.PlatformUtils
 import com.arm.pelionmobiletransportsdk.ble.callbacks.BleGattReadCallback
 import com.arm.pelionmobiletransportsdk.ble.commons.GattAttributes
 import com.arm.pelionmobiletransportsdk.ble.commons.HexUtils
@@ -67,6 +65,9 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
     private var globalNumber: Int = 0
     private var isAckReceived: Boolean = false
     private var isFinalResponseReceived: Boolean = false
+
+    private var _sdaSERVICE: String
+    private var _sdaCHARACTERISTIC: String
 
     private var bleConnectionCallback: BleConnectionCallback? = null
 
@@ -111,6 +112,10 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
     init {
         LogHelper.debug(TAG, "->init() getBleInstance")
         mBleManager = BleManager.Builder().build()
+
+        // Fetch serviceUUIDs
+        _sdaSERVICE = PlatformUtils.getSDAServiceUUID()
+        _sdaCHARACTERISTIC = PlatformUtils.getSDAServiceCharacteristicUUID()
     }
 
     private fun isConnected(): Boolean {
@@ -119,7 +124,6 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
 
     override suspend fun connect(callback: BleConnectionCallback): Boolean {
         return suspendCoroutine {
-            //mBleManager = BleManager.Builder().build()
             isInvokedByConnect = true
             processController = it
             bleConnectionCallback = callback
@@ -151,12 +155,12 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
 
     private fun startNotify(): Boolean {
         if(!isConnected()) return false
-        return mBleManager!!.startNotify(SDA_SERVICE, SDA_CHARACTERISTIC)
+        return mBleManager!!.startNotify(_sdaSERVICE, _sdaCHARACTERISTIC)
     }
 
     private fun stopNotify(): Boolean {
         if(!isConnected()) return false
-        return mBleManager!!.stopNotify(SDA_SERVICE, SDA_CHARACTERISTIC)
+        return mBleManager!!.stopNotify(_sdaSERVICE, _sdaCHARACTERISTIC)
     }
 
     override suspend fun requestHigherMtu(size: Int): Boolean {
@@ -191,14 +195,14 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
     private suspend fun write(packet: ByteArray): Boolean {
         if(!isConnected()) return false
         return suspendCoroutine {
-            mBleManager!!.write(SDA_SERVICE,
-                SDA_CHARACTERISTIC,
+            mBleManager!!.write(_sdaSERVICE,
+                _sdaCHARACTERISTIC,
                     packet,
                     object : BleGattWriteCallback {
                         override fun onWrite(hexString: String, buffer: ByteArray, characteristic: BluetoothGattCharacteristic) {
                             //Log.d(TAG, "->onAir() $hexString")
                             currentPosition = totalPacketsToWrite - dataOutQueue.size
-                            //Log.d(TAG, "->onWrite() currentQueuePosition: $currentPosition, remainingItemsInQueue: ${dataOutQueue.size}")
+                            Log.d(TAG, "->onWrite() currentQueuePosition: $currentPosition, remainingItemsInQueue: ${dataOutQueue.size}")
                             isAckReceived = true
                             it.resume(true)
                         }
@@ -219,9 +223,9 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
         }
 
         Log.d(TAG, "->doWrite() MaxTransmissionMTU: $transmissionMtuSize bytes")
-        /*Log.d(TAG, "->doWrite() protocolMessage" +
+        Log.d(TAG, "->doWrite() protocolMessage" +
                 "\nsize: ${protocolMessage.size}," +
-                "\ndata: ${protocolMessage.contentToString()}")*/
+                "\ndata: ${protocolMessage.contentToString()}")
 
         var packetBuffer: ByteArray = byteArrayOf()
 
@@ -241,8 +245,8 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
                 hasMore = 0
             }
 
-            /*Log.d(TAG, "->doWrite() sN: $globalNumber, " +
-                    "fN: $packetNumber, isMoreFragment: $hasMore")*/
+            Log.d(TAG, "->doWrite() sN: $globalNumber, " +
+                    "fN: $packetNumber, isMoreFragment: $hasMore")
 
             val newPacket = PacketFactory(
                 globalNumber,
@@ -300,9 +304,9 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
     override fun sendMessage(operationMessage: ByteArray): ByteArray {
         operationResponse = byteArrayOf()
 
-        /*Log.d(TAG, "->sendMessage() operationMessage" +
+        Log.d(TAG, "->sendMessage() operationMessage" +
                 "\nsize: ${operationMessage.size}," +
-                "\ndata: ${operationMessage.contentToString()}")*/
+                "\ndata: ${operationMessage.contentToString()}")
 
         val serialProtocolMessage = SerialMessage.formatSerialProtocolMessage(operationMessage)
         Log.d(TAG, "->sendMessage() Starting write operation.")

@@ -73,6 +73,7 @@
         <attr name="iconList" format="reference" />
         <attr name="iconPendingJobs" format="reference" />
         <attr name="iconCompletedJobs" format="reference" />
+        <attr name="iconBleScan" format="reference"/>
 
     </declare-styleable>
 </resources>

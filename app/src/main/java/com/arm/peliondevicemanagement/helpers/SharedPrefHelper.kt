@@ -73,6 +73,14 @@ object SharedPrefHelper {
         SharedPrefManager.with(context = AppController.appController!!)!!
             .getString(SharedPrefConstants.STORE_SDA_POPPEMPUB_KEY, "")!!
 
+    internal fun getSDAServiceUUID(): String =
+        SharedPrefManager.with(context = AppController.appController!!)!!
+            .getString(SharedPrefConstants.STORE_SDA_SERVICE_UUID, "")!!
+
+    internal fun getSDAServiceCharacteristicUUID(): String =
+        SharedPrefManager.with(context = AppController.appController!!)!!
+            .getString(SharedPrefConstants.STORE_SDA_SERVICE_CHARACTERISTIC_UUID, "")!!
+
     internal fun isMultiAccountSupported(): Boolean =
         SharedPrefManager.with(context = AppController.appController!!)!!
             .getBoolean(SharedPrefConstants.STORE_SUPPORTS_MULTI_ACCOUNTS, false)
@@ -144,6 +152,12 @@ object SharedPrefHelper {
             .putString(SharedPrefConstants.STORE_SDA_POPPEMPUB_KEY, popPemPubKey)
             .apply()
 
+    internal fun storeSDAServiceUUIDs(serviceUUID: String, characteristicUUID: String) =
+        SharedPrefManager.with(context = AppController.appController!!)!!.edit()
+            .putString(SharedPrefConstants.STORE_SDA_SERVICE_UUID, serviceUUID)
+            .putString(SharedPrefConstants.STORE_SDA_SERVICE_CHARACTERISTIC_UUID, characteristicUUID)
+            .apply()
+
     internal fun setDarkThemeStatus(enabled: Boolean) =
         SharedPrefManager.with(context = AppController.appController!!)!!.edit()
             .putBoolean(SharedPrefConstants.STORE_DARK_THEME_STATUS, enabled)
@@ -170,6 +184,14 @@ object SharedPrefHelper {
     internal fun removeAccessToken(){
         val editor = SharedPrefManager.with(context = AppController.appController!!)!!.edit()
         editor.remove(SharedPrefConstants.STORE_USER_ACCESS_TOKEN)
+        editor.apply()
+    }
+
+    // Remove these keys in-order to use defaults
+    internal fun restoreSDAServiceUUIDsToDefaults() {
+        val editor = SharedPrefManager.with(context = AppController.appController!!)!!.edit()
+        editor.remove(SharedPrefConstants.STORE_SDA_SERVICE_UUID)
+        editor.remove(SharedPrefConstants.STORE_SDA_SERVICE_CHARACTERISTIC_UUID)
         editor.apply()
     }
 
