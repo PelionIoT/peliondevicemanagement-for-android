@@ -181,6 +181,13 @@ class LoginFragment : Fragment() {
                 LoginState.ACTION_USER_ACCOUNT_PROFILE -> {
                     processUserProfileORAccountProfileError()
                 }
+                LoginState.ACTION_ACCOUNT_BRANDING -> {
+                    // In-case of error, skip branding and proceed
+                    // {"code":403,"message":"Actor must be an administrator of the account.","type":"access_denied"}
+                    LogHelper.debug(TAG, "AccountBrandingLogo: N/A, Actor must be an administrator of the account")
+                    SharedPrefHelper.storeSelectedAccountBrandingLogoURL("")
+                    navigateToDashboardFragment()
+                }
             }
         })
     }
@@ -403,6 +410,7 @@ class LoginFragment : Fragment() {
         SharedPrefHelper.storeSelectedAccountName(accountProfile.accountName)
 
         // Now fetch account-branding-images
+        setLoginActionState(LoginState.ACTION_ACCOUNT_BRANDING)
         val accountID = SharedPrefHelper.getSelectedAccountID()
         val activeTheme = if(SharedPrefHelper.isDarkThemeEnabled()){
             BrandingTheme.DARK

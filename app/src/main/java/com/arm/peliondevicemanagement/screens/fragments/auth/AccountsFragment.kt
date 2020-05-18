@@ -157,8 +157,20 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
             navigateToDashboardFragment()
         })
 
-        loginViewModel.getErrorResponseLiveData().observe(viewLifecycleOwner, Observer {
-            processErrorResponse()
+        loginViewModel.getErrorResponseLiveData().observe(viewLifecycleOwner, Observer { error ->
+            if(error != null){
+                if(error.errorCode == 403){
+                    // In-case of error, skip branding and proceed
+                    // {"code":403,"message":"Actor must be an administrator of the account.","type":"access_denied"}
+                    LogHelper.debug(TAG, "AccountBrandingLogo: N/A, Actor must be an administrator of the account")
+                    SharedPrefHelper.storeSelectedAccountBrandingLogoURL("")
+                    navigateToDashboardFragment()
+                } else {
+                    processErrorResponse()
+                }
+            } else {
+                processErrorResponse()
+            }
         })
     }
 
