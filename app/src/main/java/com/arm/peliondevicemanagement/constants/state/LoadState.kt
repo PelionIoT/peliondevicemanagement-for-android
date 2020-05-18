@@ -23,5 +23,7 @@ enum class LoadState {
     LOADED,
     DOWNLOADED,
     DOWNLOADING,
-    FAILED
+    FAILED,
+    UNAUTHORIZED,
+    NO_NETWORK
 }

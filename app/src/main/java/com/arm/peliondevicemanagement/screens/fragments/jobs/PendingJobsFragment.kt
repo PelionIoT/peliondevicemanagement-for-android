@@ -37,6 +37,9 @@ import com.arm.peliondevicemanagement.components.viewmodels.WorkflowViewModel
 import com.arm.peliondevicemanagement.constants.state.LoadState
 import com.arm.peliondevicemanagement.databinding.FragmentPendingJobsBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
+import com.arm.peliondevicemanagement.screens.activities.HomeActivity
+import com.arm.peliondevicemanagement.utils.PlatformUtils
+import com.google.android.material.bottomsheet.BottomSheetDialog
 
 class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
 
@@ -51,6 +54,9 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
     private var workflowAdapter = WorkflowAdapter(this)
 
     private lateinit var itemClickListener: RecyclerItemClickListener
+
+    private lateinit var errorBottomSheetDialog: BottomSheetDialog
+    private lateinit var retryButtonClickListener: View.OnClickListener
 
     private val queryTextListener = object : SearchView.OnQueryTextListener {
         override fun onQueryTextSubmit(query: String?): Boolean = false
@@ -112,6 +118,11 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
         viewBinder.swipeRefreshLayout.setOnRefreshListener(refreshListener)
         viewBinder.searchBar.searchTextBox.setOnQueryTextListener(queryTextListener)
 
+        retryButtonClickListener = View.OnClickListener {
+            errorBottomSheetDialog.dismiss()
+            navigateToLogin()
+        }
+
         workflowViewModel.getPendingWorkflows().observe(viewLifecycleOwner, Observer {
             if(it != null && it.isNotEmpty()){
                 setSwipeRefreshStatus(false)
@@ -137,6 +148,16 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
                 }
                 LoadState.FAILED -> {
                     updateSyncView(true, "Download failed")
+                }
+                LoadState.UNAUTHORIZED -> {
+                    updateSyncView(false)
+                    setSwipeRefreshStatus(false)
+                    // Show unauthorized dialog
+                    showUnauthorizedErrorDialog()
+                }
+                LoadState.NO_NETWORK -> {
+                    updateSyncView(false)
+                    setSwipeRefreshStatus(false)
                 }
                 else -> {
                     updateSyncView(false)
@@ -199,6 +220,21 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
                 "workflowID: ${model.workflowID}")
         // Pass it to Home-Activity for launch
         itemClickListener.onItemClick(model.workflowID)
+    }
+
+    private fun showUnauthorizedErrorDialog() {
+        errorBottomSheetDialog = PlatformUtils.buildErrorBottomSheetDialog(
+            requireActivity(),
+            resources.getString(R.string.unauthorized_text),
+            resources.getString(R.string.unauthorized_desc),
+            retryButtonClickListener,
+            resources.getString(R.string.re_login_text)
+        )
+        errorBottomSheetDialog.show()
+    }
+
+    private fun navigateToLogin() {
+        (requireActivity() as HomeActivity).initiateTemporarySignOut()
     }
 
     override fun onDestroyView() {

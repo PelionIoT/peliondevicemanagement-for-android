@@ -32,6 +32,7 @@ import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.services.repository.CloudRepository
 import com.arm.peliondevicemanagement.services.cache.LocalCache
 import com.arm.peliondevicemanagement.services.data.SDATokenResponse
+import com.arm.peliondevicemanagement.utils.PlatformUtils
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.downloadTaskAssets
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.fetchSDAToken
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.getAudienceListFromDevices
@@ -158,6 +159,12 @@ class PendingWorkflowDataSource(
             }
         } catch (e: Throwable){
             LogHelper.debug(TAG, "Exception occurred: ${e.message}")
+            val errorResponse = PlatformUtils.parseErrorResponseFromJson(e.message!!)
+            if(errorResponse != null){
+                stateLiveData.postValue(LoadState.UNAUTHORIZED)
+            } else {
+                stateLiveData.postValue(LoadState.NO_NETWORK)
+            }
             saveFinished()
         }
     }

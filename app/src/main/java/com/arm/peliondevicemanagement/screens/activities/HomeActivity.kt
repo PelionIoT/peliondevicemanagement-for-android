@@ -248,6 +248,11 @@ class HomeActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         fireIntentWithFinish(Intent(this, AuthActivity::class.java), false)
     }
 
+    fun initiateTemporarySignOut() {
+        LogHelper.debug(TAG, "Temporary sign-out complete")
+        fireIntentWithFinish(Intent(this, AuthActivity::class.java), false)
+    }
+
     fun navigateToLoginForReAuth() {
         LogHelper.debug(TAG, "Temporary sign-out complete")
         fireIntentWithFinish(Intent(this, AuthActivity::class.java), false)
