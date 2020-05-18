@@ -39,6 +39,7 @@ import com.arm.peliondevicemanagement.services.data.ErrorResponse
 import com.arm.peliondevicemanagement.services.data.FileUploadResponse
 import com.arm.peliondevicemanagement.services.data.SDATokenResponse
 import com.arm.peliondevicemanagement.utils.PlatformUtils
+import com.arm.peliondevicemanagement.utils.WorkflowUtils
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.convertDeviceRunLogsToJson
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.downloadTaskAssets
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.fetchSDAToken
@@ -138,17 +139,18 @@ class WorkflowViewModel : ViewModel() {
 
     fun refreshSDAToken(permissionScope: String, audienceList: List<String>) {
         scope.launch {
-            val tokenResponse = fetchSDAToken(
-                cloudRepository,
-                permissionScope,
-                audienceList)
-            if(tokenResponse != null){
+            try {
+                val popPemPubKey = WorkflowUtils.getSDAPopPemPubKey()
+                val request = WorkflowUtils.createSDATokenRequest(popPemPubKey, permissionScope, audienceList)
+                //LogHelper.debug(TAG, "SDA_Token_Request-> $request")
+                val tokenResponse = cloudRepository.getSDAToken(request)
+                WorkflowUtils.validateSDATokenSanity(tokenResponse?.accessToken!!, popPemPubKey)
+                //LogHelper.debug(TAG, "TokenSanity->Passed")
                 _refreshedSDATokenLiveData.postValue(tokenResponse)
-            } else {
-                _errorResponseLiveData.postValue(
-                    ErrorResponse(401,
-                        "invalid_token",
-                        "Unauthorized"))
+            } catch (e: Throwable){
+                LogHelper.debug(TAG, "Exception occurred: ${e.message}")
+                val errorResponse = PlatformUtils.parseErrorResponseFromJson(e.message!!)
+                _errorResponseLiveData.postValue(errorResponse)
             }
         }
     }

@@ -78,7 +78,7 @@ object WorkflowUtils {
         }
     }
 
-    private fun createSDATokenRequest(popPemKey: String, scope: String, audience: List<String>): String {
+    fun createSDATokenRequest(popPemKey: String, scope: String, audience: List<String>): String {
         val request = CreateAccessTokenRequest()
         request.grantType = SDA_GRANT_TYPE
         request.cnf = popPemKey
@@ -89,7 +89,7 @@ object WorkflowUtils {
         return request.toString()
     }
 
-    private fun getSDAPopPemPubKey(): String {
+    fun getSDAPopPemPubKey(): String {
         if(SharedPrefHelper.getSDAPopPemPubKey().isEmpty()){
             val popPemPubKey = SdkUtil.getPopPemPubKey()
             SharedPrefHelper.storeSDAPopPemPubKey(popPemPubKey)
@@ -97,7 +97,7 @@ object WorkflowUtils {
         return SharedPrefHelper.getSDAPopPemPubKey().trim()
     }
 
-    private fun validateSDATokenSanity(accessToken: String, popPemKey: String) {
+    fun validateSDATokenSanity(accessToken: String, popPemKey: String) {
         //LogHelper.debug(TAG, "DoSanityCheck-> accessToken: $accessToken, popPemKey: $popPemKey")
         SdkUtil.validateTokenSanity(accessToken, popPemKey)
     }

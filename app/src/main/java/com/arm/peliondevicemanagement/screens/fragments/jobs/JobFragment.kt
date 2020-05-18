@@ -293,9 +293,22 @@ class JobFragment : Fragment() {
         })
 
         workflowViewModel.getErrorResponseLiveData().observe(viewLifecycleOwner, Observer { error ->
-            if(error != null){
-                LogHelper.debug(TAG, "Network-Error: $error")
-                processErrorResponse()
+            if(error != null) {
+                when (error.errorCode) {
+                    401 -> {
+                        // Invalid-token
+                        processErrorUnauthorized()
+                    }
+                    400 -> {
+                        // Invalid-request
+                        processErrorInvalidDevices()
+                    }
+                    else -> {
+                        processErrorUnknown()
+                    }
+                }
+            } else {
+                processErrorUnknown()
             }
         })
 
@@ -373,12 +386,24 @@ class JobFragment : Fragment() {
         }
     }
 
-    private fun processErrorResponse() {
+    private fun processErrorUnauthorized() {
         showHideSDAProgressbar(false)
         verifySDAToken()
 
         setDownloadAction(DownloadActionState.UNAUTHORIZED)
         showErrorMessageDialog(NetworkErrorState.UNAUTHORIZED)
+    }
+
+    private fun processErrorInvalidDevices() {
+        showHideSDAProgressbar(false)
+        verifySDAToken()
+        showSnackbar("Invalid devices, token not available")
+    }
+
+    private fun processErrorUnknown() {
+        showHideSDAProgressbar(false)
+        verifySDAToken()
+        showSnackbar("Something went wrong")
     }
 
     private fun navigateToLogin() {
