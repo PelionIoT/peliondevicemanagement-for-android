@@ -135,9 +135,6 @@ android {
     }
 }
 
-// Download the TransportSDK and place it inside /libs directory.
-//apply from:'download.gradle'
-
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
 
@@ -176,7 +173,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
     // External dependencies
-    implementation project(':proxy')
+    implementation files('libs/proxy.jar')
     implementation files('libs/pmtsdk.aar')
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'com.squareup.okhttp3:okhttp:4.4.0'
@@ -187,6 +184,5 @@ dependencies {
 
 afterEvaluate {
     // Enable documentation generation after successful release-build
-    //assembleDebug.finalizedBy(dokka)
     assembleRelease.finalizedBy(dokka)
 }

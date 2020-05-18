@@ -41,7 +41,7 @@ class DummyBleDevice(private val deviceMac: String):
         // Device MAC
         private const val DUMMY_MAC: String = "DD:7E:7E:BD:AB:78"
         // Device endpoint to be used for matching devices
-        private const val DUMMY_ENDPOINT: String = "016eead293eb926ca57ba92703c00000"
+        private const val DUMMY_ENDPOINT: String = "0171cb1bf2d776307e36719503c00000"
         // Nonce response returned by the device
         private val DUMMY_NONCE_RESPONSE: ByteArray
                 = byteArrayOf(0, 73, 16, 16, 0, 0, 0, 0, -65, 3, 27,

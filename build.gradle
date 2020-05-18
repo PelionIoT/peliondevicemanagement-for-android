@@ -39,8 +39,9 @@ buildscript {
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$safe_nav_args_version"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
 
+        // FixME [ To be removed later ]
         // ShadowJAR plugin, required by proxy-sdk
-        classpath "com.github.jengelman.gradle.plugins:shadow:2.0.2"
+        //classpath "com.github.jengelman.gradle.plugins:shadow:2.0.2"
     }
 }
 
