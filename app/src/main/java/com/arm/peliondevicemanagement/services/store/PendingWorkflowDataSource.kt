@@ -37,6 +37,7 @@ import com.arm.peliondevicemanagement.utils.WorkflowUtils.downloadTaskAssets
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.fetchSDAToken
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.getAudienceListFromDevices
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.getPermissionScopeFromTasks
+import com.arm.peliondevicemanagement.utils.WorkflowUtils.isValidSDAToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -70,6 +71,7 @@ class PendingWorkflowDataSource(
                             WorkflowState.PENDING.name, WorkflowState.SYNCED.name)
 
                     if(workflowList.isNotEmpty()){
+                        workflowList = processSDATokenValidity(workflowList)
                         val lastItem = workflowList.last()
                         LogHelper.debug(TAG, "loadInitial() loadedItems: ${workflowList.size}, " +
                                 "afterID: ${lastItem.workflowID}")
@@ -82,6 +84,7 @@ class PendingWorkflowDataSource(
                 }
             }
         } else {
+            workflowList = processSDATokenValidity(workflowList)
             val lastItem = workflowList.last()
             LogHelper.debug(TAG, "loadInitial() loadedItems: ${workflowList.size}, " +
                     "afterID: ${lastItem.workflowID}")
@@ -112,6 +115,7 @@ class PendingWorkflowDataSource(
                             WorkflowState.PENDING.name, WorkflowState.SYNCED.name, params.key)
 
                     if(workflowList.isNotEmpty()){
+                        workflowList = processSDATokenValidity(workflowList)
                         val lastItem = workflowList.last()
                         LogHelper.debug(TAG, "loadAfter() loadedItems: ${workflowList.size}, " +
                                 "afterID: ${lastItem.workflowID}")
@@ -123,6 +127,7 @@ class PendingWorkflowDataSource(
                 }
             }
         } else {
+            workflowList = processSDATokenValidity(workflowList)
             val lastItem = workflowList.last()
             LogHelper.debug(TAG, "loadAfter() loadedItems: ${workflowList.size}, " +
                     "afterID: ${lastItem.workflowID}")
@@ -267,5 +272,30 @@ class PendingWorkflowDataSource(
         val audienceList = getAudienceListFromDevices(workflow.workflowDevices!!)
         // Call access-token request
         return fetchSDAToken(cloudRepository, permissionScope, audienceList)
+    }
+
+    private fun processSDATokenValidity(workflowList: List<Workflow>): List<Workflow> {
+        LogHelper.debug(TAG, "processSDATokenValidity() processing token-validity")
+        var validCount = 0
+        workflowList.forEach { workflow ->
+            if(workflow.sdaToken != null) {
+                if(isValidSDAToken(workflow.sdaToken!!.expiresIn)){
+                    // Set validity
+                    workflow.sdaToken!!.isValid = true
+                    // Process readable date-time
+                    val expiresIn = workflow.sdaToken!!.expiresIn
+                    val expiryDate = PlatformUtils.parseJSONTimeString(expiresIn)
+                    val expiryTime =
+                        PlatformUtils.parseJSONTimeString(expiresIn, AppConstants.DEFAULT_TIME_FORMAT)
+                    val expiryDateTime = "$expiryDate, $expiryTime"
+                    workflow.sdaToken!!.readableDateTime = expiryDateTime
+                    validCount++
+                } else {
+                    workflow.sdaToken!!.isValid = false
+                }
+            }
+        }
+        LogHelper.debug(TAG, "processSDATokenValidity() found $validCount workflow with valid-token")
+        return workflowList
     }
 }

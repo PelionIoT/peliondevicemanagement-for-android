@@ -65,7 +65,7 @@ class WorkflowViewHolder(itemView: View,
                 }
                 WorkflowState.SYNCED.name -> {
                     if(model.sdaToken != null){
-                        if(isValidSDAToken(model.sdaToken!!.expiresIn)){
+                        if(model.sdaToken!!.isValid){
                             syncStatusCheckView.background = ContextCompat.getDrawable(context, R.drawable.ic_status_synced)
                             syncStatusCheckView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check_light))
                         } else {
@@ -83,13 +83,8 @@ class WorkflowViewHolder(itemView: View,
             }
             // Set SDA-Expiry time
             if(model.sdaToken != null){
-                if(isValidSDAToken(model.sdaToken!!.expiresIn)){
-                    val expiresIn = model.sdaToken!!.expiresIn
-                    val expiryDate = PlatformUtils.parseJSONTimeString(expiresIn)
-                    val expiryTime =
-                        PlatformUtils.parseJSONTimeString(expiresIn, AppConstants.DEFAULT_TIME_FORMAT)
-                    val expiryDateTime = "$expiryDate, $expiryTime"
-                    tvDateTime.text = expiryDateTime
+                if(model.sdaToken!!.isValid){
+                    tvDateTime.text = model.sdaToken!!.readableDateTime
                 } else {
                     tvDateTime.text = resources.getText(R.string.expired_text)
                 }

@@ -24,5 +24,7 @@ import kotlinx.android.parcel.Parcelize
 @Parcelize
 data class SDATokenResponse(
     @SerializedName("access_token") val accessToken: String,
-    @SerializedName("granted_until") val expiresIn: String
+    @SerializedName("granted_until") val expiresIn: String,
+    @SerializedName("token_state") var isValid: Boolean,
+    @SerializedName("date_time") var readableDateTime: String
 ): Parcelable
