@@ -104,6 +104,8 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
                 RecyclerView.VERTICAL, false)
             itemAnimator = DefaultItemAnimator()
             adapter = workflowAdapter
+            setHasFixedSize(true)
+            setItemViewCacheSize(20)
         }
 
         @Suppress("DEPRECATION")

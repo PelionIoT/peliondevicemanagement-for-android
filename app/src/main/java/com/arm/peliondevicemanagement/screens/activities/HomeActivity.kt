@@ -190,6 +190,7 @@ class HomeActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         viewPagerAdapter = ViewPagerAdapter(this, fragmentList)
         // Add adapter to view-pager
         viewPager.adapter = viewPagerAdapter
+        viewPager.isUserInputEnabled = false
     }
 
     private fun setupViewPagerWithTabs() {
