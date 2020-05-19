@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2018, Arm Limited and affiliates.
+  ~ SPDX-License-Identifier: Apache-2.0
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<resources>
+    <color name="colorPrimary">@color/arm_black</color>
+    <color name="colorPrimaryDark">@color/arm_black</color>
+    <color name="colorAccent">@color/arm_blue</color>
+
+    // Light Colors
+    <color name="colorPrimaryForLight">@color/arm_light_medium</color>
+    <color name="colorPrimaryDarkForLight">@color/arm_light_low</color>
+    <color name="colorAccentForLight">@color/arm_blue</color>
+    <color name="colorBackgroundForLight">@color/arm_quartz_white</color>
+
+    // Dark Colors
+    <color name="colorPrimaryForDark">@color/arm_dark_medium</color>
+    <color name="colorPrimaryDarkForDark">@color/arm_dark_high</color>
+    <color name="colorAccentForDark">@color/arm_yellow</color>
+    <color name="colorBackgroundForDark">@color/arm_jet_black</color>
+
+    // ARM's Color Derived Palette
+
+    // Dark
+    <color name="arm_dark_high">@color/arm_black</color>
+    <color name="arm_dark_medium">@color/arm_black</color>
+    <color name="arm_dark_low">@color/arm_selected</color>
+
+    //Light
+    <color name="arm_light_high">#ffffff</color>
+    <color name="arm_light_medium">@color/arm_light_gray</color>
+    <color name="arm_light_low">#8B97B7</color>
+
+
+    // ARM's Original Color Palette
+    <color name="arm_black">#333e48</color>
+    <color name="arm_black_alt">#46535f</color>
+    <color name="arm_black_alt_2">#3e4a56</color>
+    <color name="arm_gray_alt">#5d6c7a</color>
+    <color name="arm_selected">#5A646D</color>
+    <color name="arm_green">#95d600</color>
+    <color name="arm_tab_light">#11809f</color>
+    <color name="arm_dark_gray">#7d868c</color>
+    <color name="arm_light_gray">#e5eceb</color>
+    <color name="arm_dark_blue">#002b49</color>
+    <color name="arm_blue">#0091bd</color>
+    <color name="arm_light_blue">#00c1de</color>
+    <color name="arm_yellow">#ffc700</color>
+    <color name="arm_orange">#ff6b00</color>
+    <color name="arm_red">#e03030</color>
+    <color name="arm_dark_black">#000000</color>
+    <color name="arm_jet_black">#222a30</color>
+    <color name="arm_quartz_white">#f7f7f7</color>
+
+
+</resources>

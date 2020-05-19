@@ -1,8 +1,9 @@
 # Built application files
 *.apk
-*.aar
+# *.aar
 *.ap_
 *.aab
+# *.jar
 
 # Files for the ART/Dalvik VM
 *.dex
@@ -19,6 +20,7 @@ out/
 
 # Gradle files
 .gradle/
+gradle/wrapper/gradle-wrapper.jar
 build/
 
 # Local configuration file (sdk path, etc)
@@ -83,3 +85,11 @@ lint/generated/
 lint/outputs/
 lint/tmp/
 # lint/reports/
+
+# app/libs/*
+app/release
+.idea
+
+.DS_Store
+
+sda_proxy/

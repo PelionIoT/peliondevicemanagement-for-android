@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2018, Arm Limited and affiliates.
+  ~ SPDX-License-Identifier: Apache-2.0
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cardWorkflowItem"
+    android:layout_marginBottom="5dp"
+    android:clickable="true"
+    android:focusable="true"
+    app:cardBackgroundColor="?attr/cardColor"
+    app:rippleColor="?attr/colorAccent"
+    app:strokeColor="@drawable/stroke_color"
+    app:strokeWidth="1dp"
+    app:cardElevation="0dp">
+
+    <RelativeLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:id="@+id/iconView"
+            android:layout_marginStart="18dp"
+            android:layout_marginTop="14dp"
+            android:src="?attr/iconWidget"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="20dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            android:layout_toEndOf="@+id/iconView"
+            android:id="@+id/tvName"
+            android:fontFamily="@font/lato_regular"
+            android:layout_toStartOf="@id/syncStatusCheckView"
+            android:ellipsize="middle"
+            android:singleLine="true"
+            android:textSize="18sp"
+        />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingEnd="2dp"
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp"
+            android:id="@+id/tvDevices"
+            android:text="@string/devices_format"
+            android:layout_below="@id/tvName"
+            android:layout_toStartOf="@+id/tvDateTime"
+            android:layout_alignParentStart="true"
+            android:fontFamily="@font/lato_regular"
+            android:ellipsize="middle"
+            android:singleLine="true"
+            android:textSize="14sp"
+            android:drawableStart="?attr/iconDevice"
+            android:drawablePadding="10dp"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="0dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp"
+            android:id="@+id/tvDateTime"
+            android:layout_below="@id/tvName"
+            android:fontFamily="@font/lato_regular"
+            android:ellipsize="middle"
+            android:singleLine="true"
+            android:textSize="14sp"
+            android:drawableStart="?attr/iconClock"
+            android:drawablePadding="10dp"
+            android:layout_alignParentEnd="true"
+            android:textAlignment="viewEnd"
+            android:text="@string/expired_text"
+            />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp"
+            android:id="@+id/tvLocation"
+            android:layout_below="@id/tvDevices"
+            android:fontFamily="@font/lato_regular"
+            android:ellipsize="middle"
+            android:singleLine="true"
+            android:textSize="14sp"
+            android:drawableStart="?attr/iconLocation"
+            android:drawablePadding="10dp"
+            tools:text="Austin, Texas"
+            android:layout_marginBottom="10dp"
+            />
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:id="@+id/syncStatusCheckView"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/ic_status_ok"
+            android:src="@drawable/ic_check_light"/>
+
+    </RelativeLayout>
+</com.google.android.material.card.MaterialCardView>

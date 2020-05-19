@@ -1,0 +1,153 @@
+<!--
+  ~ Copyright (c) 2018, Arm Limited and affiliates.
+  ~ SPDX-License-Identifier: Apache-2.0
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <string name="app_name">Pelion DM</string>
+    <string name="version_format">Version: <xliff:g id="view">%1$s</xliff:g></string>
+    <string name="logo_description">App Logo</string>
+
+    <string name="email_header">Email/Username</string>
+    <string name="password_header">Password</string>
+    <string name="signin_text">Sign In</string>
+    <string name="signout_text">Sign Out</string>
+    <string name="signed_in_as">Signed In As</string>
+    <string name="home">Home</string>
+    <string name="account">Account</string>
+
+    <string name="switch_account">Switch Account</string>
+    <string name="profile">Profile</string>
+    <string name="settings">Settings</string>
+    <string name="progress_text">Please wait</string>
+    <string name="not_found_text">Oops, there\'s some trouble!</string>
+    <string name="no_jobs_text">No jobs assigned</string>
+    <string name="all_complete_text">You\'re all set!</string>
+    <string name="theme">Theme</string>
+    <string name="dark">Dark</string>
+    <string name="light">Light</string>
+    <string name="activity_info">Activity Info</string>
+    <string name="help_and_support">Help &amp; Support</string>
+    <string name="no_login_history">No login history found</string>
+    <string name="tasks">Tasks</string>
+    <string name="devices">Devices</string>
+    <string name="pending_text">Pending</string>
+    <string name="running_text">Running</string>
+    <string name="stopped_text">Stopped</string>
+    <string name="ongoing_text">Ongoing</string>
+    <string name="connecting_text">Connecting</string>
+    <string name="failed_text">Failed</string>
+    <string name="secure_text">Secure Device Access</string>
+    <string name="refresh">Refresh</string>
+    <string name="na">Not available</string>
+    <string name="syncing_jobs_text">Syncing Jobs</string>
+    <string name="downloading_asset_text">Downloading assets</string>
+    <string name="uploading_asset_text">Uploading logs &amp; assets</string>
+    <string name="sync_pending_text">Awaiting sync</string>
+    <string name="upload_text">Upload</string>
+    <string name="ready_text">Ready</string>
+    <string name="completed_text">Completed</string>
+    <string name="reassigned_text">Re-assigned</string>
+    <string name="sync_now_text">Sync Now</string>
+    <string name="expired_text">Expired</string>
+
+    <string name="device_format"><xliff:g id="view">%1$s</xliff:g> Device</string>
+    <string name="devices_format"><xliff:g id="view">%1$s</xliff:g> Devices</string>
+    <string name="ip_format">IP: <xliff:g id="view">%1$s</xliff:g></string>
+    <string name="date_format">Date: <xliff:g id="view">%1$s</xliff:g></string>
+    <string name="status_format">Status: <xliff:g id="view">%1$s</xliff:g></string>
+    <string name="total_devices_format">Total Devices: <xliff:g id="view">%1$s</xliff:g></string>
+    <string name="user_agent_format">User Agent: <xliff:g id="view">%1$s</xliff:g></string>
+    <string name="location_format">Location: <xliff:g id="view">%1$s</xliff:g></string>
+    <string name="created_at_format">Created: <xliff:g id="view">%1$s</xliff:g></string>
+    <string name="last_executed_format">Last Updated: <xliff:g id="view">%1$s</xliff:g></string>
+    <string name="devices_completed_format">Completed: <xliff:g id="view">%1$s</xliff:g></string>
+    <string name="total_tasks_format">Total Tasks: <xliff:g id="view">%1$s</xliff:g></string>
+    <string name="active_format">Active till: <xliff:g id="view">%1$s</xliff:g></string>
+    <string name="expired_format">Expired on: <xliff:g id="view">%1$s</xliff:g></string>
+    <string name="failed_device_format">Unable to connect <xliff:g id="view">%1$s</xliff:g> device</string>
+    <string name="failed_devices_format">Unable to connect <xliff:g id="view">%1$s</xliff:g> devices</string>
+    <string name="elapsed_time_text">Time Elapsed:</string>
+
+    <string name="hello_blank_fragment">Hello</string>
+    <string name="run_job">Run Job</string>
+    <string name="fab_description">Run Job Button</string>
+    <string name="cancel_text">Cancel</string>
+    <string name="finish_text">Finish</string>
+    <string name="stop_text">Stop</string>
+    <string name="retry_text">Retry</string>
+    <string name="restore_default_text">Restore Defaults</string>
+    <string name="save_text">Save</string>
+
+    <string name="attention_text">Attention Required</string>
+    <string name="location_perm_desc">This app needs location permission for scanning nearby BLE devices</string>
+    <string name="location_perm_denied_desc">You\'ve denied location permission, we need that for scanning nearby BLE devices\n\nAllow at [Settings] > [Permissions]</string>
+    <string name="location_service_denied_desc">You\'ve disabled location services, we need that for scanning nearby BLE devices\n\nAllow at [Settings] > [Location]</string>
+    <string name="grant_text">Grant</string>
+    <string name="deny_text">Deny</string>
+    <string name="open_settings_text">Open Settings</string>
+
+    <string name="job_completed_text">Job Completed</string>
+    <string name="job_completed_desc">This job is already completed\nYou\'re good to go!</string>
+    <string name="re_run_text">Re-Run</string>
+    <string name="job_cancel_text">You\'re about to cancel a running job,\nAre you sure?</string>
+    <string name="yes_stop_text">Yes, Stop</string>
+    <string name="no_text">No</string>
+
+    <string name="cloud_down_text">Cloud connectivity down</string>
+    <string name="no_internet_text">No network connection</string>
+    <string name="check_connection_text">Check your Internet connection</string>
+
+    <string name="unauthorized_text">Unauthorized</string>
+    <string name="unauthorized_desc">You need to re-login</string>
+    <string name="re_login_text">Re-Login</string>
+
+    <string name="unauthorized_limit_reached_text">Account locked</string>
+    <string name="unauthorized_limit_reached_desc">You\'ve made more than 5 incorrect attempts while logging-in, please re-configure your account using portal on a desktop and then try again.</string>
+    <string name="got_it_text">Got, it</string>
+
+    <!-- Workflow asset strings-->
+    <string name="asset_downloading_text">Downloading assets</string>
+    <string name="asset_downloaded_text">Assets available</string>
+    <string name="asset_checking_text">Looking for downloaded assets</string>
+    <string name="asset_not_found_text">No assets downloaded</string>
+
+    <string name="scan_setup_text">Scan Setup</string>
+    <string name="scan_setup_desc">Configure the device scan policy to look for devices using a custom Service-UUID instead of the default one.</string>
+    <string name="scan_service_uuid_text">Service-UUID</string>
+    <string name="scan_service_characteristic_uuid_text">Service-Characteristic-UUID</string>
+
+    <!-- Developer Options strings -->
+    <string name="build_info_text">Build Info</string>
+    <string name="developer_mode_format">You are now <xliff:g id="view">%1$s</xliff:g> step away from being a developer</string>
+    <string name="developer_mode_enabled_text">Developer mode enabled</string>
+    <string name="developer_mode_already_enabled_text">Developer mode already enabled</string>
+    <string name="developer_options_text">Developer Options</string>
+
+    <string name="feature_flags_text">Feature Flags</string>
+    <string name="feature_flags_desc_text">Warning these flags are for development-use only, app may crash also, try at your own risk</string>
+    <string name="auth_flags_text">Authentication</string>
+    <string name="sda_flags_text">Secure Device Access</string>
+    <string name="job_flags_text">Job</string>
+    <string name="auth_disable_reauth_text">Disable Re-Auth</string>
+    <string name="sda_virtual_mode_text">Virtual Device Mode</string>
+    <string name="sda_disable_max_mtu_text">Disable Max MTU</string>
+    <string name="job_disable_workflow_sync_text">Disable Job auto-sync</string>
+    <string name="job_disable_asset_download_text">Disable asset-download</string>
+    <string name="job_sda_token_download_text">Disable SDA-Token download</string>
+
+
+</resources>

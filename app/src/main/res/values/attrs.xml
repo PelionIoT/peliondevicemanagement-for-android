@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2018, Arm Limited and affiliates.
+  ~ SPDX-License-Identifier: Apache-2.0
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<resources>
+    <declare-styleable name="GlobalAttrs">
+
+        <!-- Generic Visual Components -->
+        <attr name="colorBackground" format="color" />
+
+        <!-- Icon Colors -->
+        <attr name="primaryIconColor" format="color"/>
+        <attr name="primaryInverseIconColor" format="color"/>
+
+        <!-- Text Colors -->
+        <attr name="primaryTextColor" format="color"/>
+        <attr name="secondaryTextColor" format="color"/>
+
+        <attr name="primaryInverseTextColor" format="color"/>
+        <attr name="secondaryInverseTextColor" format="color"/>
+
+        <!-- Component Colors -->
+        <attr name="dividerColor" format="color"/>
+        <attr name="primaryButtonColor" format="color" />
+        <attr name="cardColor" format="color"/>
+        <attr name="chipColor" format="color"/>
+
+        <!-- Icons -->
+        <attr name="iconAccount" format="reference"/>
+        <attr name="iconEmail" format="reference" />
+        <attr name="iconLock" format="reference"/>
+        <attr name="iconSearch" format="reference"/>
+        <attr name="iconWidget" format="reference"/>
+        <attr name="iconWidgetInverse" format="reference"/>
+        <attr name="iconLocation" format="reference"/>
+        <attr name="iconDevice" format="reference"/>
+        <attr name="iconClose" format="reference"/>
+        <attr name="iconSwitch" format="reference"/>
+        <attr name="iconSettings" format="reference"/>
+        <attr name="iconExit" format="reference"/>
+        <attr name="iconUserActivity" format="reference"/>
+        <attr name="iconHelp" format="reference" />
+        <attr name="iconPC" format="reference"/>
+        <attr name="iconForward" format="reference"/>
+        <attr name="iconPlay" format="reference"/>
+        <attr name="iconArrowUp" format="reference"/>
+        <attr name="iconArrowDown" format="reference"/>
+        <attr name="iconShieldGreen" format="reference"/>
+        <attr name="iconShieldYellow" format="reference"/>
+        <attr name="iconShieldRed" format="reference"/>
+        <attr name="iconRefresh" format="reference" />
+        <attr name="iconStop" format="reference"/>
+        <attr name="iconDeveloper" format="reference"/>
+        <attr name="iconDownload" format="reference"/>
+        <attr name="iconAsset" format="reference"/>
+        <attr name="iconSync" format="reference" />
+        <attr name="iconUpload" format="reference" />
+        <attr name="iconClock" format="reference" />
+        <attr name="iconList" format="reference" />
+        <attr name="iconPendingJobs" format="reference" />
+        <attr name="iconCompletedJobs" format="reference" />
+        <attr name="iconBleScan" format="reference"/>
+
+    </declare-styleable>
+</resources>

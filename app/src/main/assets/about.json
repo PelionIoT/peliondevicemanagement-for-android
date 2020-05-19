@@ -1,0 +1,42 @@
+[
+  {
+    "title":"Pelion Device Management",
+    "url":"https://cloud.mbed.com"
+  },
+  {
+    "title":"Website Terms",
+    "url":"https://www.arm.com/company/policies/terms-and-conditions"
+  },
+  {
+    "title":"Mbed Cloud Terms",
+    "url":"https://cloud.mbed.com/terms"
+  },
+  {
+    "title":"Privacy",
+    "url":"https://www.arm.com/company/policies/privacy"
+  },
+  {
+    "title":"Cookies",
+    "url":"https://www.arm.com/company/policies/cookies"
+  },
+  {
+    "title":"Trademarks",
+    "url":"https://www.arm.com/company/policies/trademarks"
+  },
+  {
+    "title":"Device Management Forums",
+    "url":"https://forums.mbed.com/c/mbed-cloud"
+  },
+  {
+    "title":"Support",
+    "url":"https://cloud.mbed.com/support"
+  },
+  {
+    "title":"Documentation",
+    "url":"https://cloud.mbed.com/docs/current/welcome/index.html"
+  },
+  {
+    "title":"Libraries we use",
+    "url":"redirect_cuis_licenses"
+  }
+]
