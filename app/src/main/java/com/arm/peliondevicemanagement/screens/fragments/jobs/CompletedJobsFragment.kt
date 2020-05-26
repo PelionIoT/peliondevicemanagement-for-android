@@ -58,7 +58,7 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
 
     private var totalItemsForUpload: Int = 0
 
-    private lateinit var errorBottomSheetDialog: BottomSheetDialog
+    private var errorBottomSheetDialog: BottomSheetDialog? = null
     private lateinit var retryButtonClickListener: View.OnClickListener
 
     private lateinit var activeActionState: ActionState
@@ -116,7 +116,8 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
         viewBinder.swipeRefreshLayout.setOnRefreshListener(refreshListener)
 
         retryButtonClickListener = View.OnClickListener {
-            errorBottomSheetDialog.dismiss()
+            errorBottomSheetDialog!!.dismiss()
+            errorBottomSheetDialog = null
             when(activeActionState){
                 ActionState.UNAUTHORIZED -> {
                     (requireActivity() as HomeActivity).navigateToLoginForReAuth()
@@ -271,6 +272,12 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
     }
 
     private fun showErrorMessageDialog(state: NetworkErrorState) {
+        if(errorBottomSheetDialog != null) {
+            // If previous dialog is already visible
+            errorBottomSheetDialog!!.dismiss()
+            errorBottomSheetDialog = null
+        }
+
         when(state){
             NetworkErrorState.NO_NETWORK -> {
                 errorBottomSheetDialog = PlatformUtils.buildErrorBottomSheetDialog(
@@ -290,7 +297,7 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
                 )
             }
         }
-        errorBottomSheetDialog.show()
+        errorBottomSheetDialog!!.show()
     }
 
     override fun onDestroyView() {

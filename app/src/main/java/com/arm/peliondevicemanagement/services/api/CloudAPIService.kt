@@ -29,8 +29,6 @@ import com.arm.peliondevicemanagement.constants.APIConstants.API_USER_ME
 import com.arm.peliondevicemanagement.constants.APIConstants.API_ASSIGNED_WORKFLOWS
 import com.arm.peliondevicemanagement.constants.APIConstants.API_BRANDING_COLORS
 import com.arm.peliondevicemanagement.constants.APIConstants.API_BRANDING_IMAGES
-import com.arm.peliondevicemanagement.constants.APIConstants.API_CLOUD_UI_SERVER
-import com.arm.peliondevicemanagement.constants.APIConstants.API_LICENSES
 import com.arm.peliondevicemanagement.constants.APIConstants.API_SDA_TOKEN
 import com.arm.peliondevicemanagement.constants.APIConstants.API_WORKFLOW_DEVICE_RUNS
 import com.arm.peliondevicemanagement.constants.APIConstants.API_WORKFLOW_FILES

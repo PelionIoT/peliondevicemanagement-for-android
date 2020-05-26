@@ -93,7 +93,7 @@ class JobFragment : Fragment() {
     private var isSyncInProgress: Boolean = false
     private lateinit var _downloadActionState: DownloadActionState
 
-    private lateinit var errorBottomSheetDialog: BottomSheetDialog
+    private var errorBottomSheetDialog: BottomSheetDialog? = null
     private lateinit var retryButtonClickListener: View.OnClickListener
 
     private val swipeListener = object: RecyclerItemSwipeListener {
@@ -240,7 +240,8 @@ class JobFragment : Fragment() {
     private fun setupListeners() {
 
         retryButtonClickListener = View.OnClickListener {
-            errorBottomSheetDialog.dismiss()
+            errorBottomSheetDialog!!.dismiss()
+            errorBottomSheetDialog = null
             when(_downloadActionState){
                 DownloadActionState.SDA_DOWNLOAD -> {
                     refreshSDAToken()
@@ -776,6 +777,12 @@ class JobFragment : Fragment() {
     }
 
     private fun showErrorMessageDialog(state: NetworkErrorState) {
+        if(errorBottomSheetDialog != null) {
+            // If previous dialog is already visible
+            errorBottomSheetDialog!!.dismiss()
+            errorBottomSheetDialog = null
+        }
+
         when(state){
             NetworkErrorState.NO_NETWORK -> {
                 errorBottomSheetDialog = PlatformUtils.buildErrorBottomSheetDialog(
@@ -795,7 +802,7 @@ class JobFragment : Fragment() {
                 )
             }
         }
-        errorBottomSheetDialog.show()
+        errorBottomSheetDialog!!.show()
     }
 
     override fun onDestroyView() {

@@ -55,7 +55,7 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
 
     private lateinit var itemClickListener: RecyclerItemClickListener
 
-    private lateinit var errorBottomSheetDialog: BottomSheetDialog
+    private var errorBottomSheetDialog: BottomSheetDialog? = null
     private lateinit var retryButtonClickListener: View.OnClickListener
 
     private val queryTextListener = object : SearchView.OnQueryTextListener {
@@ -121,7 +121,8 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
         viewBinder.searchBar.searchTextBox.setOnQueryTextListener(queryTextListener)
 
         retryButtonClickListener = View.OnClickListener {
-            errorBottomSheetDialog.dismiss()
+            errorBottomSheetDialog!!.dismiss()
+            errorBottomSheetDialog = null
             navigateToLogin()
         }
 
@@ -225,6 +226,12 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
     }
 
     private fun showUnauthorizedErrorDialog() {
+        if(errorBottomSheetDialog != null) {
+            // If previous dialog is already visible
+            errorBottomSheetDialog!!.dismiss()
+            errorBottomSheetDialog = null
+        }
+
         errorBottomSheetDialog = PlatformUtils.buildErrorBottomSheetDialog(
             requireActivity(),
             resources.getString(R.string.unauthorized_text),
@@ -232,7 +239,7 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
             retryButtonClickListener,
             resources.getString(R.string.re_login_text)
         )
-        errorBottomSheetDialog.show()
+        errorBottomSheetDialog!!.show()
     }
 
     private fun navigateToLogin() {
