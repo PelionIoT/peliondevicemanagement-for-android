@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited and affiliates.
+ * Copyright 2020 ARM Ltd.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,14 +18,6 @@
 package com.arm.peliondevicemanagement.constants
 
 object AppConstants {
-
-    // Update this enum-class whenever adding a new third-party library
-    enum class LibrariesWeUse {
-        Okhttp,
-        Retrofit,
-        Glide,
-        Gson
-    }
 
     // About & Licenses
     const val ABOUT_JSON_FILE = "about.json"

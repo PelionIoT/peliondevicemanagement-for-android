@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited and affiliates.
+ * Copyright 2020 ARM Ltd.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -139,11 +139,4 @@ class CloudRepository(private val cloudAPIService: CloudAPIService): BaseReposit
                 theme.name.toLowerCase(Locale.ENGLISH)) }
         )
     }
-
-    suspend fun getLicenses(): List<LicenseModel>? {
-        return doSafeAPIRequest(
-            call = { cloudAPIService.getLicenses()}
-        )
-    }
-
 }

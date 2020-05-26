@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited and affiliates.
+ * Copyright 2020 ARM Ltd.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,8 +22,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -31,19 +29,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.components.adapters.LicenseAdapter
 import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
 import com.arm.peliondevicemanagement.components.models.LicenseModel
-import com.arm.peliondevicemanagement.components.viewmodels.LicensesViewModel
 import com.arm.peliondevicemanagement.constants.AppConstants.LICENSE_JSON_FILE
-import com.arm.peliondevicemanagement.constants.AppConstants.LibrariesWeUse
-
 import com.arm.peliondevicemanagement.databinding.FragmentLicensesBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.utils.PlatformUtils
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
-/**
- * A simple [Fragment] subclass.
- */
 class LicensesFragment : Fragment(), RecyclerItemClickListener {
 
     companion object {
@@ -56,12 +48,6 @@ class LicensesFragment : Fragment(), RecyclerItemClickListener {
     private var licenseAdapter: LicenseAdapter? = null
     private var licenseList = arrayListOf<LicenseModel>()
 
-    private lateinit var licensesViewModel: LicensesViewModel
-
-    private val refreshListener: androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener = androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener {
-        refreshContent()
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -73,15 +59,15 @@ class LicensesFragment : Fragment(), RecyclerItemClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         init()
-        setupListeners()
-        refreshContent()
     }
 
     private fun init() {
-        licensesViewModel = ViewModelProvider(this).get(LicensesViewModel::class.java)
-
-        viewBinder.swipeRefreshLayout.setOnRefreshListener(refreshListener)
-
+        licenseList.clear()
+        // Load from local-assets
+        val fetchedLicenses = loadLicensesFromAssets()
+        LogHelper.debug(TAG, "Fetched ${fetchedLicenses.size} license from assets")
+        licenseList.addAll(fetchedLicenses)
+        // Setup adapter and recycler-view
         licenseAdapter = LicenseAdapter(licenseList, this)
         viewBinder.rvLicenseList.apply {
             layoutManager = LinearLayoutManager(context,
@@ -89,56 +75,6 @@ class LicensesFragment : Fragment(), RecyclerItemClickListener {
             itemAnimator = DefaultItemAnimator()
             adapter = licenseAdapter
         }
-    }
-
-    private fun setupListeners() {
-        licensesViewModel.getLicensesLiveData().observe(viewLifecycleOwner, Observer { licensesResponse ->
-            processLicenseData(licensesResponse)
-        })
-
-        licensesViewModel.getErrorResponseLiveData().observe(viewLifecycleOwner, Observer { _ ->
-            processLicenseData(null)
-        })
-    }
-
-    private fun processLicenseData(listOfLicenses: List<LicenseModel>?) {
-        viewBinder.swipeRefreshLayout.isRefreshing = false
-
-        licenseList.clear()
-        if(listOfLicenses != null){
-            LogHelper.debug(TAG, "Fetched ${listOfLicenses.size} license from cloud")
-            listOfLicenses.forEach { license ->
-                when(license.title) {
-                    LibrariesWeUse.Okhttp.name -> {
-                        licenseList.add(license)
-                    }
-                    LibrariesWeUse.Retrofit.name -> {
-                        licenseList.add(license)
-                    }
-                    LibrariesWeUse.Glide.name -> {
-                        licenseList.add(license)
-                    }
-                    LibrariesWeUse.Gson.name -> {
-                        licenseList.add(license)
-                    }
-                }
-            }
-        } else {
-            val fetchedLicenses = loadLicensesFromAssets()
-            LogHelper.debug(TAG, "Fetched ${fetchedLicenses.size} license from assets")
-            licenseList.addAll(fetchedLicenses)
-        }
-
-        licenseAdapter!!.notifyDataSetChanged()
-        LogHelper.debug(TAG, "Total processed licenses: ${licenseList.size}")
-    }
-
-    private fun refreshContent() {
-        LogHelper.debug(TAG, "refreshContent()")
-
-        licenseList.clear()
-        viewBinder.swipeRefreshLayout.isRefreshing = true
-        licensesViewModel.loadLicensesFromCloud()
     }
 
     private fun loadLicensesFromAssets(): List<LicenseModel> {
@@ -163,7 +99,6 @@ class LicensesFragment : Fragment(), RecyclerItemClickListener {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        licensesViewModel.cancelAllRequests()
         _viewBinder = null
     }
 

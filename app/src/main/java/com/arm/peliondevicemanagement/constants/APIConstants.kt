@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited and affiliates.
+ * Copyright 2020 ARM Ltd.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,10 +42,6 @@ object APIConstants {
     const val API_USER_ME = "/v3/users/me"
     const val API_ACCOUNTS = "/v3/accounts"
     const val API_ACCOUNTS_ME = "$API_ACCOUNTS/me?include=policies"
-
-    // WigWag-Cloud-UI-Server APIs
-    const val API_CLOUD_UI_SERVER = "/wigwag/cloud-ui-server/v2"
-    const val API_LICENSES = "/licenses?type=android"
 
     // Workflow Service Endpoints
     const val API_ALL_WORKFLOWS = "/v3/pdm-workflows"

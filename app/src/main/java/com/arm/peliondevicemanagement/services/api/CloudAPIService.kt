@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited and affiliates.
+ * Copyright 2020 ARM Ltd.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -153,8 +153,5 @@ interface CloudAPIService {
         @Path(KEY_ACCOUNT_ID) accountID: String,
         @Path(KEY_THEME) theme: String
     ): Response<ResponseBody>
-
-    @GET(API_CLOUD_UI_SERVER + API_LICENSES)
-    suspend fun getLicenses(): Response<List<LicenseModel>>
 
 }

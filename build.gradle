@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited and affiliates.
+ * Copyright 2020 ARM Ltd.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,10 +38,6 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$safe_nav_args_version"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
-
-        // FixME [ To be removed later ]
-        // ShadowJAR plugin, required by proxy-sdk
-        //classpath "com.github.jengelman.gradle.plugins:shadow:2.0.2"
     }
 }
 
