@@ -128,6 +128,7 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
 
         workflowViewModel.getPendingWorkflows().observe(viewLifecycleOwner, Observer {
             if(it != null && it.isNotEmpty()){
+                workflowViewModel.setNetworkFetchMandatoryStatus(false)
                 setSwipeRefreshStatus(false)
             }
             workflowAdapter.submitList(it)
@@ -139,10 +140,12 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
                     setSwipeRefreshStatus(true)
                 }
                 LoadState.LOADED -> {
+                    workflowViewModel.setNetworkFetchMandatoryStatus(false)
                     setSwipeRefreshStatus(false)
                     updateSyncView(false)
                 }
                 LoadState.DOWNLOADING -> {
+                    workflowViewModel.setNetworkFetchMandatoryStatus(false)
                     setSwipeRefreshStatus(false)
                     updateSyncView(true, "Downloading Assets")
                 }
@@ -153,6 +156,7 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
                     updateSyncView(true, "Download failed")
                 }
                 LoadState.UNAUTHORIZED -> {
+                    workflowViewModel.setNetworkFetchMandatoryStatus(false)
                     updateSyncView(false)
                     setSwipeRefreshStatus(false)
                     // Show unauthorized dialog
@@ -176,7 +180,9 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
 
         showHideSearchBar(false)
         showHide404View(false)
-        workflowViewModel.refreshPendingWorkflows()
+
+        workflowAdapter.submitList(null)
+        workflowViewModel.refreshPendingWorkflows(requireContext())
     }
 
     private fun updateSyncView(visibility: Boolean, text: String? = null) {

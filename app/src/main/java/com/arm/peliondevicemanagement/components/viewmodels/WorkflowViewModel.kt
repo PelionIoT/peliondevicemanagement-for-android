@@ -17,6 +17,7 @@
 
 package com.arm.peliondevicemanagement.components.viewmodels
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -42,7 +43,6 @@ import com.arm.peliondevicemanagement.utils.PlatformUtils
 import com.arm.peliondevicemanagement.utils.WorkflowUtils
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.convertDeviceRunLogsToJson
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.downloadTaskAssets
-import com.arm.peliondevicemanagement.utils.WorkflowUtils.fetchSDAToken
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.fetchTaskOutputAsset
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.getWorkflowTaskIDs
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.isWorkflowAssetsDownloaded
@@ -58,6 +58,7 @@ class WorkflowViewModel : ViewModel() {
 
     companion object {
         private val TAG: String = WorkflowViewModel::class.java.simpleName
+        var isNetworkFetchMandatory: Boolean = false
     }
 
     private val parentJob = Job()
@@ -129,8 +130,20 @@ class WorkflowViewModel : ViewModel() {
     fun getAssetUploadLiveData(): LiveData<Int> = _assetUploadResponseLiveData
     fun getErrorResponseLiveData(): LiveData<ErrorResponse> = _errorResponseLiveData
 
-    fun refreshPendingWorkflows() {
-        _pendingWorkflowsLiveData.value?.dataSource?.invalidate()
+    fun setNetworkFetchMandatoryStatus(isMandatory: Boolean) {
+        isNetworkFetchMandatory = isMandatory
+    }
+
+    fun refreshPendingWorkflows(context: Context) {
+        if(!PlatformUtils.isNetworkAvailable(context)){
+            setNetworkFetchMandatoryStatus(false)
+            LogHelper.debug(TAG, "Invalidate data using local-cache")
+            _pendingWorkflowsLiveData.value?.dataSource?.invalidate()
+        } else {
+            setNetworkFetchMandatoryStatus(true)
+            LogHelper.debug(TAG, "Invalidate data using network")
+            _pendingWorkflowsLiveData.value?.dataSource?.invalidate()
+        }
     }
 
     fun refreshCompletedWorkflows() {
@@ -192,14 +205,18 @@ class WorkflowViewModel : ViewModel() {
     fun getRefreshedSDAToken(): LiveData<SDATokenResponse> = _refreshedSDATokenLiveData
 
     private fun getPendingWorkflowsLiveData(): LiveData<PagedList<Workflow>> {
+        //LogHelper.debug(TAG, "Constructing pending-workflows live-data")
         val pageConfig = PagedList.Config.Builder()
             .setPageSize(5)
             .setInitialLoadSizeHint(10)
             .setEnablePlaceholders(false)
             .build()
+        //LogHelper.debug(TAG, "PageConfig constructed")
 
         // Fetch data from the local-cache and return a factory
-        val dataSourceFactory = localRepository.fetchPendingWorkflowsFactory(_refreshStateLiveData)
+        val dataSourceFactory = localRepository
+            .fetchPendingWorkflowsFactory(_refreshStateLiveData)
+        //LogHelper.debug(TAG, "DataSourceFactory constructed")
 
         // Get the paged list
         return LivePagedListBuilder(dataSourceFactory, pageConfig)

@@ -22,6 +22,7 @@ import androidx.paging.PageKeyedDataSource
 import com.arm.peliondevicemanagement.BuildConfig
 import com.arm.peliondevicemanagement.components.models.workflow.device.WorkflowDevice
 import com.arm.peliondevicemanagement.components.models.workflow.Workflow
+import com.arm.peliondevicemanagement.components.viewmodels.WorkflowViewModel
 import com.arm.peliondevicemanagement.constants.AppConstants
 import com.arm.peliondevicemanagement.constants.AppConstants.DATABASE_PAGE_SIZE
 import com.arm.peliondevicemanagement.constants.AppConstants.NETWORK_PAGE_SIZE
@@ -33,6 +34,7 @@ import com.arm.peliondevicemanagement.services.repository.CloudRepository
 import com.arm.peliondevicemanagement.services.cache.LocalCache
 import com.arm.peliondevicemanagement.services.data.SDATokenResponse
 import com.arm.peliondevicemanagement.utils.PlatformUtils
+import com.arm.peliondevicemanagement.utils.WorkflowUtils
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.downloadTaskAssets
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.fetchSDAToken
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.getAudienceListFromDevices
@@ -57,41 +59,65 @@ class PendingWorkflowDataSource(
         callback: LoadInitialCallback<String, Workflow>
     ) {
         var workflowList: List<Workflow>
-        workflowList = localCache
-            .fetchWorkflowsByMultiStatus(DATABASE_PAGE_SIZE,
-                WorkflowState.PENDING.name, WorkflowState.SYNCED.name)
 
-        if(workflowList.isEmpty()){
-            // If local-cache doesn't have this then fetch from the network
-            LogHelper.debug(TAG, "LocalCache not-found, making network-request")
-            scope.launch {
-                requestAndSaveData {
-                    workflowList = localCache
-                        .fetchWorkflowsByMultiStatus(DATABASE_PAGE_SIZE,
-                            WorkflowState.PENDING.name, WorkflowState.SYNCED.name)
+        if(WorkflowViewModel.isNetworkFetchMandatory){
+            LogHelper.debug(TAG, "Deleting local-cache, performing full network-refresh")
+            WorkflowUtils.deleteWorkflowsCache {
+                scope.launch {
+                    requestAndSaveData {
+                        workflowList = localCache
+                            .fetchWorkflowsByMultiStatus(DATABASE_PAGE_SIZE,
+                                WorkflowState.PENDING.name, WorkflowState.SYNCED.name)
 
-                    if(workflowList.isNotEmpty()){
-                        workflowList = processSDATokenValidity(workflowList)
-                        val lastItem = workflowList.last()
-                        LogHelper.debug(TAG, "loadInitial() loadedItems: ${workflowList.size}, " +
-                                "afterID: ${lastItem.workflowID}")
-                        callback.onResult(workflowList, null, lastItem.workflowID)
-                    } else {
-                        LogHelper.debug(TAG, "loadInitial() No more items available")
-                        callback.onResult(listOf(), null, null)
+                        if(workflowList.isNotEmpty()){
+                            workflowList = processSDATokenValidity(workflowList)
+                            val lastItem = workflowList.last()
+                            LogHelper.debug(TAG, "loadInitial() loadedItems: ${workflowList.size}, " +
+                                    "afterID: ${lastItem.workflowID}")
+                            callback.onResult(workflowList, null, lastItem.workflowID)
+                        } else {
+                            LogHelper.debug(TAG, "loadInitial() No more items available")
+                            callback.onResult(listOf(), null, null)
+                        }
+
                     }
-
                 }
             }
         } else {
-            workflowList = processSDATokenValidity(workflowList)
-            val lastItem = workflowList.last()
-            LogHelper.debug(TAG, "loadInitial() loadedItems: ${workflowList.size}, " +
-                    "afterID: ${lastItem.workflowID}")
-            callback.onResult(workflowList, null, lastItem.workflowID)
+            workflowList = localCache
+                .fetchWorkflowsByMultiStatus(DATABASE_PAGE_SIZE,
+                    WorkflowState.PENDING.name, WorkflowState.SYNCED.name)
+
+            if(workflowList.isEmpty()){
+                // If local-cache doesn't have this then fetch from the network
+                LogHelper.debug(TAG, "LocalCache not-found, making network-request")
+                scope.launch {
+                    requestAndSaveData {
+                        workflowList = localCache
+                            .fetchWorkflowsByMultiStatus(DATABASE_PAGE_SIZE,
+                                WorkflowState.PENDING.name, WorkflowState.SYNCED.name)
+
+                        if(workflowList.isNotEmpty()){
+                            workflowList = processSDATokenValidity(workflowList)
+                            val lastItem = workflowList.last()
+                            LogHelper.debug(TAG, "loadInitial() loadedItems: ${workflowList.size}, " +
+                                    "afterID: ${lastItem.workflowID}")
+                            callback.onResult(workflowList, null, lastItem.workflowID)
+                        } else {
+                            LogHelper.debug(TAG, "loadInitial() No more items available")
+                            callback.onResult(listOf(), null, null)
+                        }
+
+                    }
+                }
+            } else {
+                workflowList = processSDATokenValidity(workflowList)
+                val lastItem = workflowList.last()
+                LogHelper.debug(TAG, "loadInitial() loadedItems: ${workflowList.size}, " +
+                        "afterID: ${lastItem.workflowID}")
+                callback.onResult(workflowList, null, lastItem.workflowID)
+            }
         }
-
-
     }
 
     override fun loadAfter(

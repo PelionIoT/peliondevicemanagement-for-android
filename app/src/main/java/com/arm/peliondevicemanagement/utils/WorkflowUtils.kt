@@ -78,6 +78,21 @@ object WorkflowUtils {
         }
     }
 
+    fun deleteWorkflowsCache(deleted: () -> Unit) {
+        // Delete workflow-asset files
+        val userID = SharedPrefHelper.getSelectedUserID()!!
+        val accountID = SharedPrefHelper.getSelectedAccountID()
+        WorkflowFileUtils.deleteWorkflowAssets(userID)
+
+        // Delete entries from workflow-database
+        val workflowDao = AppController.getWorkflowDB().workflowsDao()
+        val localCache = LocalCache(workflowDao, Executors.newSingleThreadExecutor())
+        localCache.deleteAllWorkflows(accountID){
+            LogHelper.debug(TAG, "deleteWorkflowsFromDB() Workflows deleted successfully")
+            deleted()
+        }
+    }
+
     fun createSDATokenRequest(popPemKey: String, scope: String, audience: List<String>): String {
         val request = CreateAccessTokenRequest()
         request.grantType = SDA_GRANT_TYPE
