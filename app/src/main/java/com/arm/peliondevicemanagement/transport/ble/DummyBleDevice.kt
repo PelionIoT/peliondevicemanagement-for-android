@@ -51,6 +51,10 @@ class DummyBleDevice(private val deviceMac: String):
                 = byteArrayOf(1, -111, 27, 27, 0, 0, 0, 0, -65, 4,
             83, 70, 105, 108, 101, 32, 87, 114, 105, 116, 101, 32,
             67, 111, 109, 112, 108, 101, 116, 101, 1, 4, 2, 0, -1, -125)
+        // Failed operation response returned by the device
+        private val DUMMY_FAILED_OPERATION_RESPONSE: ByteArray
+                = byteArrayOf(3, 33, 10, 10, 0, 0, 0, 0, -65,
+            1, 4, 2, 26, 15, -1, -1, -1, -1, 2)
 
         private const val TIME_OUT_MILLISECONDS: Long= 5000
     }

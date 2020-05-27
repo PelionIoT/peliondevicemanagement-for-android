@@ -452,4 +452,28 @@ object WorkflowUtils {
         return Gson().toJson(deviceRunLogs, type)
     }
 
+    fun verifyDeviceRunLogsStatus(deviceRunLogs: DeviceRunLogs): DeviceRunLogs {
+        LogHelper.debug(TAG, "Verify device-run logs: $deviceRunLogs")
+        if(deviceRunLogs.deviceStatus == DeviceRunState.SUCCEEDED.name){
+            // Check the task-runs for failures
+            deviceRunLogs.deviceTaskRuns.forEach { taskRun ->
+                if(taskRun.taskStatus != TaskRunState.SUCCEEDED.name){
+                    LogHelper.debug(TAG, "Found a malformed run-log, updating device-run status")
+                    deviceRunLogs.deviceStatus = DeviceRunState.HAS_FAILURES.name
+                }
+            }
+        }
+        return deviceRunLogs
+    }
+
+    /* FixME [ To be removed later ]
+    fun markSuccessFailure(deviceRunLogs: DeviceRunLogs): DeviceRunLogs {
+        if(deviceRunLogs.deviceStatus == DeviceRunState.HAS_FAILURES.name){
+            LogHelper.debug(TAG, "Malforming the run-logs")
+            deviceRunLogs.deviceStatus = DeviceRunState.SUCCEEDED.name
+        }
+        LogHelper.debug(TAG, "Malformed logs: $deviceRunLogs")
+        return deviceRunLogs
+    }*/
+
 }

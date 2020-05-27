@@ -156,24 +156,39 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
             prepareForUpload()
         }
 
-        workflowViewModel.getAssetUploadLiveData().observe(viewLifecycleOwner, Observer { statusCode ->
-            when {
-                statusCode > 0 -> {
-                    LogHelper.debug(TAG, "Upload complete")
-                    updateSyncView(true,
-                        "Syncing jobs",
-                        "Uploading $statusCode jobs",
-                        true
-                    )
+        workflowViewModel.getAssetUploadLiveData().observe(viewLifecycleOwner, Observer { responseMap ->
+            if(responseMap.containsKey("success")){
+                when {
+                    (responseMap["success"]!! > 0) -> {
+                        LogHelper.debug(TAG, "Upload complete")
+                        updateSyncView(true,
+                            "Syncing jobs",
+                            "Uploading ${responseMap["success"].toString()} jobs",
+                            true
+                        )
+                    }
+                    else -> {
+                        LogHelper.debug(TAG, "All Uploads complete")
+                        refreshContent()
+                    }
                 }
-                statusCode == 0 -> {
-                    LogHelper.debug(TAG, "All Uploads complete")
-                    refreshContent()
-                }
-                else -> {
-                    LogHelper.debug(TAG, "Upload failed")
-                    refreshContent()
-                    processErrorResponse()
+            } else {
+                when {
+                    (responseMap["failure"]!! == -1) -> {
+                        showSnackbar("Something went wrong, try again")
+                        LogHelper.debug(TAG, "Upload failed, something went wrong")
+                        refreshContent()
+                    }
+                    else -> {
+                        val statusCode = responseMap["failure"]
+                        LogHelper.debug(TAG, "NetworkAPI error: $statusCode")
+                        refreshContent()
+                        if(statusCode == 401){
+                            processErrorUnauthorizedResponse()
+                        } else {
+                            showSnackbar("Unknown error, try again")
+                        }
+                    }
                 }
             }
         })
@@ -186,7 +201,11 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
         workflowViewModel.refreshCompletedWorkflows()
     }
 
-    private fun processErrorResponse() {
+    private fun showSnackbar(message: String){
+        (requireActivity() as HomeActivity).showSnackbar(requireView(), message)
+    }
+
+    private fun processErrorUnauthorizedResponse() {
         activeActionState = ActionState.UNAUTHORIZED
         showErrorMessageDialog(NetworkErrorState.UNAUTHORIZED)
     }
