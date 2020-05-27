@@ -69,4 +69,7 @@ interface WorkflowDao {
     @Query("DELETE FROM workflows WHERE accountID=:accountID")
     fun deleteAllWorkflows(accountID: String)
 
+    @Query("DELETE FROM workflows WHERE (accountID=:accountID AND workflowStatus!=:workflowStatus)")
+    fun deleteAllWorkflowsExceptStatus(accountID: String, workflowStatus: String)
+
 }

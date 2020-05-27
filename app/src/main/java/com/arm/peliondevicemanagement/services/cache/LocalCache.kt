@@ -137,4 +137,14 @@ class LocalCache(
             deleteComplete()
         }
     }
+
+    fun deleteAllWorkflowsExceptStatus(accountID: String,
+                                       workflowStatus: String,
+                           deleteComplete: () -> Unit) {
+        ioExecutor.execute {
+            LogHelper.debug(TAG, "Deleting all workflows with status != $workflowStatus of account: $accountID")
+            workflowDao.deleteAllWorkflowsExceptStatus(accountID, workflowStatus)
+            deleteComplete()
+        }
+    }
 }

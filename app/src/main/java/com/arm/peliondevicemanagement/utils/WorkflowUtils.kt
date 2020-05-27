@@ -78,7 +78,7 @@ object WorkflowUtils {
         }
     }
 
-    fun deleteWorkflowsCache(deleted: () -> Unit) {
+    fun deleteWorkflowsCacheExceptStatus(workflowStatus: String, deleted: () -> Unit) {
         // Delete workflow-asset files
         val userID = SharedPrefHelper.getSelectedUserID()!!
         val accountID = SharedPrefHelper.getSelectedAccountID()
@@ -87,7 +87,7 @@ object WorkflowUtils {
         // Delete entries from workflow-database
         val workflowDao = AppController.getWorkflowDB().workflowsDao()
         val localCache = LocalCache(workflowDao, Executors.newSingleThreadExecutor())
-        localCache.deleteAllWorkflows(accountID){
+        localCache.deleteAllWorkflowsExceptStatus(accountID, workflowStatus){
             LogHelper.debug(TAG, "deleteWorkflowsFromDB() Workflows deleted successfully")
             deleted()
         }

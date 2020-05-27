@@ -62,7 +62,7 @@ class PendingWorkflowDataSource(
 
         if(WorkflowViewModel.isNetworkFetchMandatory){
             LogHelper.debug(TAG, "Deleting local-cache, performing full network-refresh")
-            WorkflowUtils.deleteWorkflowsCache {
+            WorkflowUtils.deleteWorkflowsCacheExceptStatus(WorkflowState.COMPLETED.name) {
                 scope.launch {
                     requestAndSaveData {
                         workflowList = localCache

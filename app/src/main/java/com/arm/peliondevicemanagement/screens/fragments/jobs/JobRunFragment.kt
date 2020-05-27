@@ -161,7 +161,7 @@ class JobRunFragment : Fragment() {
     private fun init() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, onBackPressedCallback)
         deviceRunModel = args.runObject
-        //LogHelper.debug(TAG, "deviceRunBundle: $deviceRunModel")
+        LogHelper.debug(TAG, "deviceRunBundle: $deviceRunModel")
 
         setupData()
         setupViews()
