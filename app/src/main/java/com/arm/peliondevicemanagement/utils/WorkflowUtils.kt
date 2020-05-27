@@ -322,7 +322,7 @@ object WorkflowUtils {
                         if(param.paramName == TASK_NAME_FILEPATH &&
                             param.paramType == TASK_TYPE_STRING
                         ) {
-                            val fileName = param.paramValue.substringAfterLast("/")
+                            val fileName = param.paramValue
                             val commandParams = arrayOf(ParamElement(OperationArgumentType.STR, fileName))
                             val deviceCommand = DeviceCommand(CommandConstants.READ, commandParams)
                             LogHelper.debug(TAG, "Adding device-command: $deviceCommand")
@@ -336,7 +336,7 @@ object WorkflowUtils {
                     task.inputParameters.forEach { param ->
                         if(param.paramName == TASK_NAME_FILEPATH &&
                             param.paramType == TASK_TYPE_STRING) {
-                            fileName = param.paramValue.substringAfterLast("/")
+                            fileName = param.paramValue
                         }
 
                         if(param.paramName == TASK_NAME_FILE &&
@@ -439,6 +439,8 @@ object WorkflowUtils {
         val userID = SharedPrefHelper.getSelectedUserID()
         val accountID = SharedPrefHelper.getSelectedAccountID()
         val filePath = "$userID/$accountID/$workflowID/$taskID"
+
+        LogHelper.debug(TAG, "Saving device-output to $filePath")
 
         val ioExecutor = Executors.newSingleThreadExecutor()
         ioExecutor.execute {

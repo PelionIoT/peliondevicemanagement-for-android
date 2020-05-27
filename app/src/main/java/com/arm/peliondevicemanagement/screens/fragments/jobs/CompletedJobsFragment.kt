@@ -241,13 +241,23 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
             return
         }
 
+        val workflowReadyForUpload = arrayListOf<Workflow>()
+        workflowAdapter.currentList?.forEach { workflow ->
+            if(!workflow.uploadCompleted){
+                workflowReadyForUpload.add(workflow)
+            }
+        }
+
+        val uploadCount = workflowReadyForUpload.size
+        LogHelper.debug(TAG, "Found $uploadCount workflow ready for upload")
+
         updateSyncView(true,
             "Syncing jobs",
-            "Uploading ${workflowAdapter.currentList?.size} jobs",
+            "Uploading $uploadCount jobs",
             true
         )
 
-        workflowViewModel.processWorkflowsForTaskAssetUpload(workflowAdapter.currentList!!)
+        workflowViewModel.processWorkflowsForTaskAssetUpload(workflowReadyForUpload)
     }
 
     private fun updateSyncView(visibility: Boolean, text: String? = null, desc: String? = null, inProgress: Boolean = false) {
