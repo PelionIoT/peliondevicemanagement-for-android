@@ -156,6 +156,7 @@ class JobFragment : Fragment() {
         workflowViewModel.fetchSingleWorkflow(workflowID){ workflow ->
             LogHelper.debug(TAG, "Fetched from localCache of $workflowID")
             workflowModel = workflow
+            LogHelper.debug(TAG, "$workflowModel")
             setupEverything()
         }
     }
@@ -225,16 +226,23 @@ class JobFragment : Fragment() {
             adapter = workflowDeviceAdapter
         }
 
-        // Add swipe-gesture to devices list
-        val itemTouchHelper = ItemTouchHelper(
-            SwipeDragControllerListener(
-                ContextCompat.getDrawable(requireContext(), R.drawable.ic_play_light)!!,
-                fetchAttributeColor(requireContext(), R.attr.colorAccent), swipeListener,
-                ItemTouchHelper.LEFT
+        if(workflowModel.uploadCompleted){
+            LogHelper.debug(TAG, "Workflow already uploaded, disabled run")
+            viewBinder.runJobButton.visibility = View.GONE
+            viewBinder.tvStatus.text = resources.getString(
+                R.string.status_format, resources.getString(R.string.uploaded_text))
+        } else {
+            // Add swipe-gesture to devices list
+            val itemTouchHelper = ItemTouchHelper(
+                SwipeDragControllerListener(
+                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_play_light)!!,
+                    fetchAttributeColor(requireContext(), R.attr.colorAccent), swipeListener,
+                    ItemTouchHelper.LEFT
+                )
             )
-        )
 
-        itemTouchHelper.attachToRecyclerView(viewBinder.rvDevices)
+            itemTouchHelper.attachToRecyclerView(viewBinder.rvDevices)
+        }
     }
 
     private fun setupListeners() {
@@ -326,7 +334,12 @@ class JobFragment : Fragment() {
                 if(dy>0){
                     viewBinder.runJobButton.hide()
                 } else {
-                    viewBinder.runJobButton.show()
+                    if(workflowModel.uploadCompleted){
+                        LogHelper.debug(TAG, "Workflow already uploaded, disabled run")
+                        viewBinder.runJobButton.visibility = View.GONE
+                    } else {
+                        viewBinder.runJobButton.show()
+                    }
                 }
                 super.onScrolled(recyclerView, dx, dy)
             }
@@ -377,13 +390,16 @@ class JobFragment : Fragment() {
                 resources.getString(R.string.sync_now_text)
             )
         } else {
-            viewBinder.tvStatus.text = resources.getString(
-                R.string.status_format, resources.getString(R.string.ready_text))
-            // Update run-button
-            updateRunJobButtonText(
-                ContextCompat.getDrawable(requireContext(), R.drawable.ic_play_light)!!,
-                resources.getString(R.string.run_job)
-            )
+            if(workflowModel.workflowStatus != WorkflowState.COMPLETED.name){
+                viewBinder.tvStatus.text = resources.getString(
+                    R.string.status_format, resources.getString(R.string.ready_text))
+
+                // Update run-button
+                updateRunJobButtonText(
+                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_play_light)!!,
+                    resources.getString(R.string.run_job)
+                )
+            }
         }
     }
 
