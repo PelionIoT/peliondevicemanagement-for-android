@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited and affiliates.
+ * Copyright 2020 ARM Ltd.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -68,5 +68,8 @@ interface WorkflowDao {
 
     @Query("DELETE FROM workflows WHERE accountID=:accountID")
     fun deleteAllWorkflows(accountID: String)
+
+    @Query("DELETE FROM workflows WHERE (accountID=:accountID AND workflowStatus!=:workflowStatus)")
+    fun deleteAllWorkflowsExceptStatus(accountID: String, workflowStatus: String)
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited and affiliates.
+ * Copyright 2020 ARM Ltd.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -74,7 +74,7 @@ class LoginFragment : Fragment() {
 
     private var activeLoginActionState: LoginState = LoginState.ACTION_LOGIN
 
-    private lateinit var errorBottomSheetDialog: BottomSheetDialog
+    private var errorBottomSheetDialog: BottomSheetDialog? = null
     private lateinit var retryButtonClickListener: View.OnClickListener
 
     private val onBackPressedCallback = object: OnBackPressedCallback(true){
@@ -141,7 +141,8 @@ class LoginFragment : Fragment() {
         }
 
         retryButtonClickListener = View.OnClickListener {
-            errorBottomSheetDialog.dismiss()
+            errorBottomSheetDialog!!.dismiss()
+            errorBottomSheetDialog = null
             performLogin()
         }
 
@@ -349,12 +350,18 @@ class LoginFragment : Fragment() {
     }
 
     private fun showNoInternetDialog() {
+        if(errorBottomSheetDialog != null) {
+            // If previous dialog is already visible
+            errorBottomSheetDialog!!.dismiss()
+            errorBottomSheetDialog = null
+        }
+
         errorBottomSheetDialog = buildErrorBottomSheetDialog(
             requireActivity(),
             resources.getString(R.string.no_internet_text),
             resources.getString(R.string.check_connection_text),
             retryButtonClickListener)
-        errorBottomSheetDialog.show()
+        errorBottomSheetDialog!!.show()
     }
 
     private fun processMultiAccountData(accounts: List<Account>) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited and affiliates.
+ * Copyright 2020 ARM Ltd.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -161,7 +161,7 @@ class JobRunFragment : Fragment() {
     private fun init() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, onBackPressedCallback)
         deviceRunModel = args.runObject
-        //LogHelper.debug(TAG, "deviceRunBundle: $deviceRunModel")
+        LogHelper.debug(TAG, "deviceRunBundle: $deviceRunModel")
 
         setupData()
         setupViews()

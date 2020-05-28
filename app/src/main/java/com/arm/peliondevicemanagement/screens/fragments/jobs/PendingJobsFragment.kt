@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited and affiliates.
+ * Copyright 2020 ARM Ltd.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,7 +55,7 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
 
     private lateinit var itemClickListener: RecyclerItemClickListener
 
-    private lateinit var errorBottomSheetDialog: BottomSheetDialog
+    private var errorBottomSheetDialog: BottomSheetDialog? = null
     private lateinit var retryButtonClickListener: View.OnClickListener
 
     private val queryTextListener = object : SearchView.OnQueryTextListener {
@@ -104,6 +104,8 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
                 RecyclerView.VERTICAL, false)
             itemAnimator = DefaultItemAnimator()
             adapter = workflowAdapter
+            setHasFixedSize(true)
+            setItemViewCacheSize(20)
         }
 
         @Suppress("DEPRECATION")
@@ -119,12 +121,14 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
         viewBinder.searchBar.searchTextBox.setOnQueryTextListener(queryTextListener)
 
         retryButtonClickListener = View.OnClickListener {
-            errorBottomSheetDialog.dismiss()
+            errorBottomSheetDialog!!.dismiss()
+            errorBottomSheetDialog = null
             navigateToLogin()
         }
 
         workflowViewModel.getPendingWorkflows().observe(viewLifecycleOwner, Observer {
             if(it != null && it.isNotEmpty()){
+                workflowViewModel.setNetworkFetchMandatoryStatus(false)
                 setSwipeRefreshStatus(false)
             }
             workflowAdapter.submitList(it)
@@ -136,10 +140,12 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
                     setSwipeRefreshStatus(true)
                 }
                 LoadState.LOADED -> {
+                    workflowViewModel.setNetworkFetchMandatoryStatus(false)
                     setSwipeRefreshStatus(false)
                     updateSyncView(false)
                 }
                 LoadState.DOWNLOADING -> {
+                    workflowViewModel.setNetworkFetchMandatoryStatus(false)
                     setSwipeRefreshStatus(false)
                     updateSyncView(true, "Downloading Assets")
                 }
@@ -150,6 +156,7 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
                     updateSyncView(true, "Download failed")
                 }
                 LoadState.UNAUTHORIZED -> {
+                    workflowViewModel.setNetworkFetchMandatoryStatus(false)
                     updateSyncView(false)
                     setSwipeRefreshStatus(false)
                     // Show unauthorized dialog
@@ -173,7 +180,9 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
 
         showHideSearchBar(false)
         showHide404View(false)
-        workflowViewModel.refreshPendingWorkflows()
+
+        workflowAdapter.submitList(null)
+        workflowViewModel.refreshPendingWorkflows(requireContext())
     }
 
     private fun updateSyncView(visibility: Boolean, text: String? = null) {
@@ -223,6 +232,12 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
     }
 
     private fun showUnauthorizedErrorDialog() {
+        if(errorBottomSheetDialog != null) {
+            // If previous dialog is already visible
+            errorBottomSheetDialog!!.dismiss()
+            errorBottomSheetDialog = null
+        }
+
         errorBottomSheetDialog = PlatformUtils.buildErrorBottomSheetDialog(
             requireActivity(),
             resources.getString(R.string.unauthorized_text),
@@ -230,7 +245,7 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
             retryButtonClickListener,
             resources.getString(R.string.re_login_text)
         )
-        errorBottomSheetDialog.show()
+        errorBottomSheetDialog!!.show()
     }
 
     private fun navigateToLogin() {

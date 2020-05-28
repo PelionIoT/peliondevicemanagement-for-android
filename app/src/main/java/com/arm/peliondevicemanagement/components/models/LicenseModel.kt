@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited and affiliates.
+ * Copyright 2020 ARM Ltd.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +25,7 @@ import kotlinx.android.parcel.Parcelize
 data class LicenseModel(
     @SerializedName("title") val title: String,
     @SerializedName("type") val licenseType: String,
-    @SerializedName("licence") val license: String
+    @SerializedName("license") val license: String
 ): Parcelable {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

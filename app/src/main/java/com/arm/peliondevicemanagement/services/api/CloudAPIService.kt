@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited and affiliates.
+ * Copyright 2020 ARM Ltd.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,8 +29,6 @@ import com.arm.peliondevicemanagement.constants.APIConstants.API_USER_ME
 import com.arm.peliondevicemanagement.constants.APIConstants.API_ASSIGNED_WORKFLOWS
 import com.arm.peliondevicemanagement.constants.APIConstants.API_BRANDING_COLORS
 import com.arm.peliondevicemanagement.constants.APIConstants.API_BRANDING_IMAGES
-import com.arm.peliondevicemanagement.constants.APIConstants.API_CLOUD_UI_SERVER
-import com.arm.peliondevicemanagement.constants.APIConstants.API_LICENSES
 import com.arm.peliondevicemanagement.constants.APIConstants.API_SDA_TOKEN
 import com.arm.peliondevicemanagement.constants.APIConstants.API_WORKFLOW_DEVICE_RUNS
 import com.arm.peliondevicemanagement.constants.APIConstants.API_WORKFLOW_FILES
@@ -153,8 +151,5 @@ interface CloudAPIService {
         @Path(KEY_ACCOUNT_ID) accountID: String,
         @Path(KEY_THEME) theme: String
     ): Response<ResponseBody>
-
-    @GET(API_CLOUD_UI_SERVER + API_LICENSES)
-    suspend fun getLicenses(): Response<List<LicenseModel>>
 
 }

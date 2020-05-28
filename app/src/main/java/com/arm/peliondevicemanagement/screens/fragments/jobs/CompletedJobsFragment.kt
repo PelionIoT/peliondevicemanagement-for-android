@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited and affiliates.
+ * Copyright 2020 ARM Ltd.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -58,7 +58,7 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
 
     private var totalItemsForUpload: Int = 0
 
-    private lateinit var errorBottomSheetDialog: BottomSheetDialog
+    private var errorBottomSheetDialog: BottomSheetDialog? = null
     private lateinit var retryButtonClickListener: View.OnClickListener
 
     private lateinit var activeActionState: ActionState
@@ -116,7 +116,8 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
         viewBinder.swipeRefreshLayout.setOnRefreshListener(refreshListener)
 
         retryButtonClickListener = View.OnClickListener {
-            errorBottomSheetDialog.dismiss()
+            errorBottomSheetDialog!!.dismiss()
+            errorBottomSheetDialog = null
             when(activeActionState){
                 ActionState.UNAUTHORIZED -> {
                     (requireActivity() as HomeActivity).navigateToLoginForReAuth()
@@ -155,24 +156,39 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
             prepareForUpload()
         }
 
-        workflowViewModel.getAssetUploadLiveData().observe(viewLifecycleOwner, Observer { statusCode ->
-            when {
-                statusCode > 0 -> {
-                    LogHelper.debug(TAG, "Upload complete")
-                    updateSyncView(true,
-                        "Syncing jobs",
-                        "Uploading $statusCode jobs",
-                        true
-                    )
+        workflowViewModel.getAssetUploadLiveData().observe(viewLifecycleOwner, Observer { responseMap ->
+            if(responseMap.containsKey("success")){
+                when {
+                    (responseMap["success"]!! > 0) -> {
+                        LogHelper.debug(TAG, "Upload complete")
+                        updateSyncView(true,
+                            "Syncing jobs",
+                            "Uploading ${responseMap["success"].toString()} jobs",
+                            true
+                        )
+                    }
+                    else -> {
+                        LogHelper.debug(TAG, "All Uploads complete")
+                        refreshContent()
+                    }
                 }
-                statusCode == 0 -> {
-                    LogHelper.debug(TAG, "All Uploads complete")
-                    refreshContent()
-                }
-                else -> {
-                    LogHelper.debug(TAG, "Upload failed")
-                    refreshContent()
-                    processErrorResponse()
+            } else {
+                when {
+                    (responseMap["failure"]!! == -1) -> {
+                        showSnackbar("Something went wrong, try again")
+                        LogHelper.debug(TAG, "Upload failed, something went wrong")
+                        refreshContent()
+                    }
+                    else -> {
+                        val statusCode = responseMap["failure"]
+                        LogHelper.debug(TAG, "NetworkAPI error: $statusCode")
+                        refreshContent()
+                        if(statusCode == 401){
+                            processErrorUnauthorizedResponse()
+                        } else {
+                            showSnackbar("Unknown error, try again")
+                        }
+                    }
                 }
             }
         })
@@ -185,7 +201,11 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
         workflowViewModel.refreshCompletedWorkflows()
     }
 
-    private fun processErrorResponse() {
+    private fun showSnackbar(message: String){
+        (requireActivity() as HomeActivity).showSnackbar(requireView(), message)
+    }
+
+    private fun processErrorUnauthorizedResponse() {
         activeActionState = ActionState.UNAUTHORIZED
         showErrorMessageDialog(NetworkErrorState.UNAUTHORIZED)
     }
@@ -221,13 +241,23 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
             return
         }
 
+        val workflowReadyForUpload = arrayListOf<Workflow>()
+        workflowAdapter.currentList?.forEach { workflow ->
+            if(!workflow.uploadCompleted){
+                workflowReadyForUpload.add(workflow)
+            }
+        }
+
+        val uploadCount = workflowReadyForUpload.size
+        LogHelper.debug(TAG, "Found $uploadCount workflow ready for upload")
+
         updateSyncView(true,
             "Syncing jobs",
-            "Uploading ${workflowAdapter.currentList?.size} jobs",
+            "Uploading $uploadCount jobs",
             true
         )
 
-        workflowViewModel.processWorkflowsForTaskAssetUpload(workflowAdapter.currentList!!)
+        workflowViewModel.processWorkflowsForTaskAssetUpload(workflowReadyForUpload)
     }
 
     private fun updateSyncView(visibility: Boolean, text: String? = null, desc: String? = null, inProgress: Boolean = false) {
@@ -271,6 +301,12 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
     }
 
     private fun showErrorMessageDialog(state: NetworkErrorState) {
+        if(errorBottomSheetDialog != null) {
+            // If previous dialog is already visible
+            errorBottomSheetDialog!!.dismiss()
+            errorBottomSheetDialog = null
+        }
+
         when(state){
             NetworkErrorState.NO_NETWORK -> {
                 errorBottomSheetDialog = PlatformUtils.buildErrorBottomSheetDialog(
@@ -290,7 +326,7 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
                 )
             }
         }
-        errorBottomSheetDialog.show()
+        errorBottomSheetDialog!!.show()
     }
 
     override fun onDestroyView() {

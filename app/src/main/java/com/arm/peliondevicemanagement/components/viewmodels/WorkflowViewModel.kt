@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited and affiliates.
+ * Copyright 2020 ARM Ltd.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,7 @@
 
 package com.arm.peliondevicemanagement.components.viewmodels
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -42,11 +43,11 @@ import com.arm.peliondevicemanagement.utils.PlatformUtils
 import com.arm.peliondevicemanagement.utils.WorkflowUtils
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.convertDeviceRunLogsToJson
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.downloadTaskAssets
-import com.arm.peliondevicemanagement.utils.WorkflowUtils.fetchSDAToken
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.fetchTaskOutputAsset
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.getWorkflowTaskIDs
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.isWorkflowAssetsDownloaded
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.saveWorkflowTaskOutputAsset
+import com.arm.peliondevicemanagement.utils.WorkflowUtils.verifyDeviceRunLogsStatus
 import kotlinx.coroutines.*
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -58,6 +59,7 @@ class WorkflowViewModel : ViewModel() {
 
     companion object {
         private val TAG: String = WorkflowViewModel::class.java.simpleName
+        var isNetworkFetchMandatory: Boolean = false
     }
 
     private val parentJob = Job()
@@ -77,7 +79,7 @@ class WorkflowViewModel : ViewModel() {
     private val _refreshedSDATokenLiveData = MutableLiveData<SDATokenResponse>()
     private val _assetAvailableLiveData = MutableLiveData<Boolean>()
     private val _workflowSyncStateLiveData = MutableLiveData<Boolean>()
-    private val _assetUploadResponseLiveData = MutableLiveData<Int>()
+    private val _assetUploadResponseLiveData = MutableLiveData<HashMap<String, Int>>()
     private val _errorResponseLiveData = MutableLiveData<ErrorResponse>()
 
     private val boundaryCallback = object: PagedList.BoundaryCallback<Workflow>() {
@@ -126,11 +128,23 @@ class WorkflowViewModel : ViewModel() {
     fun getRefreshState(): LiveData<LoadState> = _refreshStateLiveData
     fun getAssetAvailabilityStatus(): LiveData<Boolean> = _assetAvailableLiveData
     fun getWorkflowSyncState(): LiveData<Boolean> = _workflowSyncStateLiveData
-    fun getAssetUploadLiveData(): LiveData<Int> = _assetUploadResponseLiveData
+    fun getAssetUploadLiveData(): LiveData<HashMap<String, Int>> = _assetUploadResponseLiveData
     fun getErrorResponseLiveData(): LiveData<ErrorResponse> = _errorResponseLiveData
 
-    fun refreshPendingWorkflows() {
-        _pendingWorkflowsLiveData.value?.dataSource?.invalidate()
+    fun setNetworkFetchMandatoryStatus(isMandatory: Boolean) {
+        isNetworkFetchMandatory = isMandatory
+    }
+
+    fun refreshPendingWorkflows(context: Context) {
+        if(!PlatformUtils.isNetworkAvailable(context)){
+            setNetworkFetchMandatoryStatus(false)
+            LogHelper.debug(TAG, "Invalidate data using local-cache")
+            _pendingWorkflowsLiveData.value?.dataSource?.invalidate()
+        } else {
+            setNetworkFetchMandatoryStatus(true)
+            LogHelper.debug(TAG, "Invalidate data using network")
+            _pendingWorkflowsLiveData.value?.dataSource?.invalidate()
+        }
     }
 
     fun refreshCompletedWorkflows() {
@@ -192,14 +206,18 @@ class WorkflowViewModel : ViewModel() {
     fun getRefreshedSDAToken(): LiveData<SDATokenResponse> = _refreshedSDATokenLiveData
 
     private fun getPendingWorkflowsLiveData(): LiveData<PagedList<Workflow>> {
+        //LogHelper.debug(TAG, "Constructing pending-workflows live-data")
         val pageConfig = PagedList.Config.Builder()
             .setPageSize(5)
             .setInitialLoadSizeHint(10)
             .setEnablePlaceholders(false)
             .build()
+        //LogHelper.debug(TAG, "PageConfig constructed")
 
         // Fetch data from the local-cache and return a factory
-        val dataSourceFactory = localRepository.fetchPendingWorkflowsFactory(_refreshStateLiveData)
+        val dataSourceFactory = localRepository
+            .fetchPendingWorkflowsFactory(_refreshStateLiveData)
+        //LogHelper.debug(TAG, "DataSourceFactory constructed")
 
         // Get the paged list
         return LivePagedListBuilder(dataSourceFactory, pageConfig)
@@ -328,7 +346,8 @@ class WorkflowViewModel : ViewModel() {
                     // Now process, run-logs
                     LogHelper.debug(TAG, "->Move to device-run log upload")
                     workflow.workflowDevices?.forEach { device ->
-                        val runLog = convertDeviceRunLogsToJson(device.deviceRunLogs!!)
+                        val dRunLogs = verifyDeviceRunLogsStatus(device.deviceRunLogs!!)
+                        val runLog = convertDeviceRunLogsToJson(dRunLogs)
                         LogHelper.debug(TAG, "Device-Logs: $runLog")
                         LogHelper.debug(TAG, "Uploading logs for deviceID: ${device.deviceName}")
                         val response = cloudRepository.uploadDeviceRunLogs(runLog)
@@ -339,12 +358,22 @@ class WorkflowViewModel : ViewModel() {
                     }
                     localCache.updateWorkflowUploadStatus(workflow.workflowID, true){
                         LogHelper.debug(TAG, "Workflow assets & logs uploaded successfully")
-                        _assetUploadResponseLiveData.postValue(totalUploadCount--)
+                        val responseMap = hashMapOf<String, Int>()
+                        responseMap["success"] = totalUploadCount--
+                        _assetUploadResponseLiveData.postValue(responseMap)
                     }
                 }
             } catch (e: Exception){
                 LogHelper.debug(TAG, "${e.message}")
-                _assetUploadResponseLiveData.postValue(-1)
+                val errorResponse = PlatformUtils.parseErrorResponseFromJson(e.message!!)
+                val errorResponseMap = hashMapOf<String, Int>()
+                if(errorResponse != null){
+                    errorResponseMap["failure"] = errorResponse.errorCode
+                    _assetUploadResponseLiveData.postValue(errorResponseMap)
+                } else {
+                    errorResponseMap["failure"] = -1
+                    _assetUploadResponseLiveData.postValue(errorResponseMap)
+                }
             }
         }
     }

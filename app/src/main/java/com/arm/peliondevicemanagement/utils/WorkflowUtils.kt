@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited and affiliates.
+ * Copyright 2020 ARM Ltd.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -75,6 +75,21 @@ object WorkflowUtils {
         val localCache = LocalCache(workflowDao, Executors.newSingleThreadExecutor())
         localCache.deleteAllWorkflows(accountID){
             LogHelper.debug(TAG, "deleteWorkflowsFromDB() Workflows deleted successfully")
+        }
+    }
+
+    fun deleteWorkflowsCacheExceptStatus(workflowStatus: String, deleted: () -> Unit) {
+        // Delete workflow-asset files
+        val userID = SharedPrefHelper.getSelectedUserID()!!
+        val accountID = SharedPrefHelper.getSelectedAccountID()
+        WorkflowFileUtils.deleteWorkflowAssets(userID)
+
+        // Delete entries from workflow-database
+        val workflowDao = AppController.getWorkflowDB().workflowsDao()
+        val localCache = LocalCache(workflowDao, Executors.newSingleThreadExecutor())
+        localCache.deleteAllWorkflowsExceptStatus(accountID, workflowStatus){
+            LogHelper.debug(TAG, "deleteWorkflowsFromDB() Workflows deleted successfully")
+            deleted()
         }
     }
 
@@ -307,7 +322,7 @@ object WorkflowUtils {
                         if(param.paramName == TASK_NAME_FILEPATH &&
                             param.paramType == TASK_TYPE_STRING
                         ) {
-                            val fileName = param.paramValue.substringAfterLast("/")
+                            val fileName = param.paramValue
                             val commandParams = arrayOf(ParamElement(OperationArgumentType.STR, fileName))
                             val deviceCommand = DeviceCommand(CommandConstants.READ, commandParams)
                             LogHelper.debug(TAG, "Adding device-command: $deviceCommand")
@@ -321,7 +336,7 @@ object WorkflowUtils {
                     task.inputParameters.forEach { param ->
                         if(param.paramName == TASK_NAME_FILEPATH &&
                             param.paramType == TASK_TYPE_STRING) {
-                            fileName = param.paramValue.substringAfterLast("/")
+                            fileName = param.paramValue
                         }
 
                         if(param.paramName == TASK_NAME_FILE &&
@@ -425,6 +440,8 @@ object WorkflowUtils {
         val accountID = SharedPrefHelper.getSelectedAccountID()
         val filePath = "$userID/$accountID/$workflowID/$taskID"
 
+        LogHelper.debug(TAG, "Saving device-output to $filePath")
+
         val ioExecutor = Executors.newSingleThreadExecutor()
         ioExecutor.execute {
             val isSuccessful = writeWorkflowAssetFile(filePath, WORKFLOW_OUT_ASSETS_FILENAME, fileContent)
@@ -436,5 +453,29 @@ object WorkflowUtils {
         val type = object : TypeToken<DeviceRunLogs>() {}.type
         return Gson().toJson(deviceRunLogs, type)
     }
+
+    fun verifyDeviceRunLogsStatus(deviceRunLogs: DeviceRunLogs): DeviceRunLogs {
+        LogHelper.debug(TAG, "Verify device-run logs: $deviceRunLogs")
+        if(deviceRunLogs.deviceStatus == DeviceRunState.SUCCEEDED.name){
+            // Check the task-runs for failures
+            deviceRunLogs.deviceTaskRuns.forEach { taskRun ->
+                if(taskRun.taskStatus != TaskRunState.SUCCEEDED.name){
+                    LogHelper.debug(TAG, "Found a malformed run-log, updating device-run status")
+                    deviceRunLogs.deviceStatus = DeviceRunState.HAS_FAILURES.name
+                }
+            }
+        }
+        return deviceRunLogs
+    }
+
+    /* FixME [ To be removed later ]
+    fun markSuccessFailure(deviceRunLogs: DeviceRunLogs): DeviceRunLogs {
+        if(deviceRunLogs.deviceStatus == DeviceRunState.HAS_FAILURES.name){
+            LogHelper.debug(TAG, "Malforming the run-logs")
+            deviceRunLogs.deviceStatus = DeviceRunState.SUCCEEDED.name
+        }
+        LogHelper.debug(TAG, "Malformed logs: $deviceRunLogs")
+        return deviceRunLogs
+    }*/
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited and affiliates.
+ * Copyright 2020 ARM Ltd.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -190,6 +190,7 @@ class HomeActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         viewPagerAdapter = ViewPagerAdapter(this, fragmentList)
         // Add adapter to view-pager
         viewPager.adapter = viewPagerAdapter
+        viewPager.isUserInputEnabled = false
     }
 
     private fun setupViewPagerWithTabs() {

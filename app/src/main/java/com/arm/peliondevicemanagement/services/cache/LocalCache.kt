@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited and affiliates.
+ * Copyright 2020 ARM Ltd.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -134,6 +134,16 @@ class LocalCache(
         ioExecutor.execute {
             LogHelper.debug(TAG, "Deleting workflows of account: $accountID")
             workflowDao.deleteAllWorkflows(accountID)
+            deleteComplete()
+        }
+    }
+
+    fun deleteAllWorkflowsExceptStatus(accountID: String,
+                                       workflowStatus: String,
+                           deleteComplete: () -> Unit) {
+        ioExecutor.execute {
+            LogHelper.debug(TAG, "Deleting all workflows with status != $workflowStatus of account: $accountID")
+            workflowDao.deleteAllWorkflowsExceptStatus(accountID, workflowStatus)
             deleteComplete()
         }
     }

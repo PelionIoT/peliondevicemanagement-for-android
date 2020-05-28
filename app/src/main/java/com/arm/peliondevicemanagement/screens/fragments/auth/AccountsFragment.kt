@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited and affiliates.
+ * Copyright 2020 ARM Ltd.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -65,7 +65,7 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
     private var accountModelsList = arrayListOf<Account>()
 
     private lateinit var activeAccountModel: Account
-    private lateinit var errorBottomSheetDialog: BottomSheetDialog
+    private var errorBottomSheetDialog: BottomSheetDialog? = null
     private lateinit var retryButtonClickListener: View.OnClickListener
 
     private lateinit var networkRequestState: NetworkErrorState
@@ -126,7 +126,8 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
 
     private fun setupListeners() {
         retryButtonClickListener = View.OnClickListener {
-            errorBottomSheetDialog.dismiss()
+            errorBottomSheetDialog!!.dismiss()
+            errorBottomSheetDialog = null
             when(networkRequestState){
                 NetworkErrorState.NO_NETWORK -> {
                     processSelectedAccount(activeAccountModel)
@@ -169,9 +170,16 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
                     processErrorResponse()
                 }
             } else {
-                processErrorResponse()
+                processTimeout()
             }
         })
+    }
+
+    private fun processTimeout() {
+        SharedPrefHelper.storeSelectedAccountID(null)
+        showHideProgressbar(false)
+        showHideAccountList(true)
+        (requireActivity() as AuthActivity).showSnackbar(requireView(), "Time-out, try again.")
     }
 
     private fun processErrorResponse() {
@@ -312,6 +320,12 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
     }
 
     private fun showErrorMessageDialog(state: NetworkErrorState) {
+        if(errorBottomSheetDialog != null) {
+            // If previous dialog is already visible
+            errorBottomSheetDialog!!.dismiss()
+            errorBottomSheetDialog = null
+        }
+
         when(state){
             NetworkErrorState.NO_NETWORK -> {
                 errorBottomSheetDialog = PlatformUtils.buildErrorBottomSheetDialog(
@@ -331,7 +345,7 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
                 )
             }
         }
-        errorBottomSheetDialog.show()
+        errorBottomSheetDialog!!.show()
     }
 
     private fun resetSearchText() =
