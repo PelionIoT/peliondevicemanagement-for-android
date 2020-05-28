@@ -180,7 +180,7 @@ class ArmBleDevice(private val context: Context, private val deviceMAC: String):
         return suspendCoroutine {
             mBleManager!!.read(
                 GattAttributes.DEVICE_INFORMATION_SERVICE,
-                GattAttributes.SERIAL_NUMBER_CHARACTERISTIC,
+                GattAttributes.SERIAL_NUMBER,
                 object: BleGattReadCallback {
                     override fun onRead(hexString: String, characteristic: BluetoothGattCharacteristic) {
                         //Log.d(TAG, "->onReadEndpoint() $hexString")
