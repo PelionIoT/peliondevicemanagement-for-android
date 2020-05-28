@@ -63,6 +63,7 @@
     <string name="reassigned_text">Re-assigned</string>
     <string name="sync_now_text">Sync Now</string>
     <string name="expired_text">Expired</string>
+    <string name="uploaded_text">Uploaded</string>
 
     <string name="device_format"><xliff:g id="view">%1$s</xliff:g> Device</string>
     <string name="devices_format"><xliff:g id="view">%1$s</xliff:g> Devices</string>

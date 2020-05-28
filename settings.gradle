@@ -1,2 +1,3 @@
 rootProject.name='Pelion Device Management'
 include ':app'
+include ':transport-sdk'
