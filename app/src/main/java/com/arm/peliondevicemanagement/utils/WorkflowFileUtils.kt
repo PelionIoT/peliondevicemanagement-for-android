@@ -32,6 +32,9 @@ object WorkflowFileUtils {
 
     private val TAG: String = WorkflowFileUtils::class.java.simpleName
 
+    val File.size get() = if (!exists()) 0.0 else length().toDouble()
+    private val File.sizeInKb get() = size / 1024
+
     private fun getWorkflowAssetsDirectory(context: Context): String {
         val directoryPath = context.filesDir.absolutePath +
                 File.separator + AppConstants.WORKFLOW_ASSETS_DIRECTORY
@@ -56,6 +59,22 @@ object WorkflowFileUtils {
         val filePath = subDirPath + File.separator + fileName
         val file = File(filePath)
         return file.exists()
+    }
+
+    fun getFileSizeInKB(locationPath: String,
+                        fileName: String): Double? {
+        val context = AppController.appController!!.applicationContext
+        val subDirPath = getWorkflowAssetsDirectory(context) +
+                File.separator + locationPath
+
+        val subDir = File(subDirPath)
+        if(!subDir.exists()){
+            return null
+        }
+
+        val filePath = subDirPath + File.separator + fileName
+        val file = File(filePath)
+        return String.format("%.3f", file.sizeInKb).toDouble()
     }
 
     fun readWorkflowAssetFile(locationPath: String,

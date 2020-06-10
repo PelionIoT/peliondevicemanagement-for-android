@@ -47,6 +47,7 @@ import com.arm.peliondevicemanagement.services.cache.LocalCache
 import com.arm.peliondevicemanagement.services.data.SDATokenResponse
 import com.arm.peliondevicemanagement.transport.sda.CommandConstants
 import com.arm.peliondevicemanagement.transport.sda.DeviceCommand
+import com.arm.peliondevicemanagement.utils.WorkflowFileUtils.getFileSizeInKB
 import com.arm.peliondevicemanagement.utils.WorkflowFileUtils.isFileExists
 import com.arm.peliondevicemanagement.utils.WorkflowFileUtils.readWorkflowAssetFile
 import com.arm.peliondevicemanagement.utils.WorkflowFileUtils.writeWorkflowAssetFile
@@ -194,6 +195,40 @@ object WorkflowUtils {
             if(taskID == task.taskID && task.taskName == READ_TASK){
                 status = true
                 return status
+            }
+        }
+        return status
+    }
+
+    fun isWriteFileSizeWithinLimits(workflowID: String, tasks: List<WorkflowTask>): Boolean {
+        val userID = SharedPrefHelper.getSelectedUserID()
+        val accountID = SharedPrefHelper.getSelectedAccountID()
+        var filePath = "$userID/$accountID/$workflowID"
+
+        var status = false
+        tasks.forEach { task->
+            if(task.taskName == WRITE_TASK) {
+                task.inputParameters.forEach { inputParam ->
+                    if(inputParam.paramType == TASK_TYPE_FILE &&
+                        inputParam.paramName == TASK_NAME_FILE){
+                        filePath += "/${task.taskID}"
+                        val isAssetDownloaded = isFileExists(filePath, inputParam.paramValue)
+                        LogHelper.debug(TAG, "Found write-file task, asset-available: $isAssetDownloaded")
+
+                        if(!isAssetDownloaded){
+                            return false
+                        }
+
+                        val fileSize = getFileSizeInKB(filePath, inputParam.paramValue)
+                        return if(fileSize != null){
+                            LogHelper.debug(TAG, "Found file of size: $fileSize KB")
+                            status = fileSize < 2
+                            status
+                        } else {
+                            false
+                        }
+                    }
+                }
             }
         }
         return status
@@ -467,15 +502,5 @@ object WorkflowUtils {
         }
         return deviceRunLogs
     }
-
-    /* FixME [ To be removed later ]
-    fun markSuccessFailure(deviceRunLogs: DeviceRunLogs): DeviceRunLogs {
-        if(deviceRunLogs.deviceStatus == DeviceRunState.HAS_FAILURES.name){
-            LogHelper.debug(TAG, "Malforming the run-logs")
-            deviceRunLogs.deviceStatus = DeviceRunState.SUCCEEDED.name
-        }
-        LogHelper.debug(TAG, "Malformed logs: $deviceRunLogs")
-        return deviceRunLogs
-    }*/
 
 }
