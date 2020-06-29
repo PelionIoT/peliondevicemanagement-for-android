@@ -26,6 +26,7 @@ import com.arm.peliondevicemanagement.components.models.user.UserProfile
 import com.arm.peliondevicemanagement.constants.BrandingTheme
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.services.data.BrandingImageResponse
+import com.arm.peliondevicemanagement.services.data.CaptchaResponse
 import com.arm.peliondevicemanagement.services.repository.CloudRepository
 import com.arm.peliondevicemanagement.services.data.ErrorResponse
 import com.arm.peliondevicemanagement.services.data.LoginResponse
@@ -47,6 +48,7 @@ class LoginViewModel : ViewModel() {
     private val cloudRepository: CloudRepository = AppController.getCloudRepository()
 
     private val _userAccountLiveData = MutableLiveData<LoginResponse>()
+    private val _userCaptchaLiveData = MutableLiveData<CaptchaResponse>()
     private val _userProfileLiveData = MutableLiveData<UserProfile>()
     private val _accountProfileLiveData = MutableLiveData<AccountProfile>()
     private val _accountBrandingImagesLiveData = MutableLiveData<BrandingImageResponse>()
@@ -54,6 +56,7 @@ class LoginViewModel : ViewModel() {
 
     // LiveData APIs
     fun getLoginActionLiveData(): LiveData<LoginResponse> = _userAccountLiveData
+    fun getCaptchaLiveData(): LiveData<CaptchaResponse> = _userCaptchaLiveData
     fun getUserProfileLiveData(): LiveData<UserProfile> = _userProfileLiveData
     fun getAccountProfileLiveData(): LiveData<AccountProfile> = _accountProfileLiveData
     fun getAccountBrandingImagesLiveData(): LiveData<BrandingImageResponse> = _accountBrandingImagesLiveData
@@ -78,6 +81,46 @@ class LoginViewModel : ViewModel() {
             try {
                 val userAccountResponse = cloudRepository.doImpersonate(accountID)
                 _userAccountLiveData.postValue(userAccountResponse)
+            } catch (e: Throwable) {
+                LogHelper.debug(TAG, "Exception occurred: ${e.message}")
+                val errorResponse = parseErrorResponseFromJson(e.message!!)
+                _errorResponseLiveData.postValue(errorResponse)
+            }
+        }
+    }
+
+    fun do2AuthLogin(username: String, password: String,
+                     otpCode: String?, captchaID: String?,
+                     captchaCode: String?, accountID: String = "") {
+
+        scope.launch {
+            try {
+
+                val userAccountResponse: LoginResponse? = if(otpCode != null && captchaID == null){
+                    cloudRepository
+                        .do2AuthWithOTP(username, password, otpCode, accountID)
+                } else if(otpCode == null && captchaID != null){
+                    cloudRepository
+                        .do2AuthWithCaptcha(username, password, captchaID, captchaCode!!, accountID)
+                } else {
+                    cloudRepository
+                        .do2AuthWithOTPAndCaptcha(username, password, otpCode!!, captchaID!!, captchaCode!!, accountID)
+                }
+
+                _userAccountLiveData.postValue(userAccountResponse)
+            } catch (e: Throwable){
+                LogHelper.debug(TAG, "Exception occurred: ${e.message}")
+                val errorResponse = parseErrorResponseFromJson(e.message!!)
+                _errorResponseLiveData.postValue(errorResponse)
+            }
+        }
+    }
+
+    fun fetchCaptcha() {
+        scope.launch {
+            try {
+                val captchaResponse = cloudRepository.getCaptcha()
+                _userCaptchaLiveData.postValue(captchaResponse)
             } catch (e: Throwable) {
                 LogHelper.debug(TAG, "Exception occurred: ${e.message}")
                 val errorResponse = parseErrorResponseFromJson(e.message!!)

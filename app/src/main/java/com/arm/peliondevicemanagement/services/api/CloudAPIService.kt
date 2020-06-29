@@ -29,6 +29,7 @@ import com.arm.peliondevicemanagement.constants.APIConstants.API_USER_ME
 import com.arm.peliondevicemanagement.constants.APIConstants.API_ASSIGNED_WORKFLOWS
 import com.arm.peliondevicemanagement.constants.APIConstants.API_BRANDING_COLORS
 import com.arm.peliondevicemanagement.constants.APIConstants.API_BRANDING_IMAGES
+import com.arm.peliondevicemanagement.constants.APIConstants.API_CAPTCHA
 import com.arm.peliondevicemanagement.constants.APIConstants.API_SDA_TOKEN
 import com.arm.peliondevicemanagement.constants.APIConstants.API_WORKFLOW_DEVICE_RUNS
 import com.arm.peliondevicemanagement.constants.APIConstants.API_WORKFLOW_FILES
@@ -101,6 +102,9 @@ interface CloudAPIService {
 
     @POST(API_IMPERSONATE)
     suspend fun doImpersonate(@Body params: RequestBody): Response<LoginResponse>
+
+    @GET(API_CAPTCHA)
+    suspend fun getCaptcha(): Response<CaptchaResponse>
 
     @POST(API_SDA_TOKEN)
     suspend fun getSDAToken(@Body params: RequestBody): Response<SDATokenResponse>

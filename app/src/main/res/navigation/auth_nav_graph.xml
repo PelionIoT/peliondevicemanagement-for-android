@@ -35,8 +35,15 @@
             app:popUpToInclusive="true"
             />
         <action
-            android:id="@+id/action_loginFragment_to_twoFactorAuthFragment2"
-            app:destination="@id/twoFactorAuthFragment" />
+            android:id="@+id/action_loginFragment_to_twoFactorAuthFragment"
+            app:destination="@id/twoFactorAuthFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/right_in"
+            app:exitAnim="@anim/right_out"
+            app:popEnterAnim="@anim/left_in"
+            app:popExitAnim="@anim/left_out"
+            />
 
     </fragment>
 
@@ -55,6 +62,12 @@
             app:popUpTo="@id/accountsFragment"
             app:popUpToInclusive="true"
             />
+
+        <argument
+            android:name="authArgs"
+            app:argType="com.arm.peliondevicemanagement.components.models.user.AuthModel"
+            app:nullable="true"
+            android:defaultValue="@null" />
     </fragment>
 
     <fragment
@@ -65,6 +78,19 @@
         <action
             android:id="@+id/action_twoFactorAuthFragment_to_accountsFragment"
             app:destination="@id/accountsFragment" />
+        <action
+            android:id="@+id/action_twoFactorAuthFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:enterAnim="@anim/left_in"
+            app:exitAnim="@anim/left_out"
+            app:popEnterAnim="@anim/right_in"
+            app:popExitAnim="@anim/right_out"
+            app:popUpTo="@id/twoFactorAuthFragment"
+            app:popUpToInclusive="true"
+            />
+        <argument
+            android:name="authArgs"
+            app:argType="com.arm.peliondevicemanagement.components.models.user.AuthModel" />
     </fragment>
 
 </navigation>

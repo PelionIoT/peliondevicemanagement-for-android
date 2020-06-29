@@ -115,6 +115,10 @@ class AuthActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                     setToolbarVisibility(false)
                     setDrawerVisibility(false)
                 }
+                R.id.twoFactorAuthFragment -> {
+                    setToolbarVisibility(false)
+                    setDrawerVisibility(false)
+                }
                 R.id.accountsFragment -> {
                     setDrawerVisibility(true)
                     setToolbarVisibility(true)

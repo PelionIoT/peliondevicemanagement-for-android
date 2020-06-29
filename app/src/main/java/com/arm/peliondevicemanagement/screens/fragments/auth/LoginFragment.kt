@@ -17,6 +17,7 @@
 
 package com.arm.peliondevicemanagement.screens.fragments.auth
 
+import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.util.DisplayMetrics
@@ -25,6 +26,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import android.view.inputmethod.InputMethodManager
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
@@ -35,9 +37,12 @@ import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.models.branding.BrandingImage
 import com.arm.peliondevicemanagement.components.models.user.Account
 import com.arm.peliondevicemanagement.components.models.user.AccountProfile
+import com.arm.peliondevicemanagement.components.models.user.AuthModel
 import com.arm.peliondevicemanagement.components.models.user.UserProfile
 import com.arm.peliondevicemanagement.components.viewmodels.LoginViewModel
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_BRAND_LOGO
+import com.arm.peliondevicemanagement.constants.APIConstants.KEY_CAPTCHA
+import com.arm.peliondevicemanagement.constants.APIConstants.KEY_OTP_TOKEN
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_VALIDATION_ERROR
 import com.arm.peliondevicemanagement.constants.BrandingTheme
 import com.arm.peliondevicemanagement.constants.state.LoginState
@@ -46,7 +51,9 @@ import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.screens.activities.AuthActivity
 import com.arm.peliondevicemanagement.services.data.BrandingImageResponse
+import com.arm.peliondevicemanagement.services.data.ErrorFields
 import com.arm.peliondevicemanagement.services.data.ErrorResponse
+import com.arm.peliondevicemanagement.utils.PlatformUtils
 import com.arm.peliondevicemanagement.utils.PlatformUtils.buildErrorBottomSheetDialog
 import com.arm.peliondevicemanagement.utils.PlatformUtils.isNetworkAvailable
 import com.bumptech.glide.Glide
@@ -152,7 +159,12 @@ class LoginFragment : Fragment() {
             // Now process the login response
             if(!response.accounts.isNullOrEmpty()){
                 processMultiAccountData(response.accounts)
-                navigateToAccountsFragment()
+                val authArgs = AuthModel(userEmail, userPassword,
+                    accountID = "",
+                    isOTPRequired = false,
+                    isCaptchaRequired = false
+                )
+                navigateToAccountsFragment(authArgs)
             } else {
                 processSingleAccountData(response.accessToken)
             }
@@ -322,6 +334,9 @@ class LoginFragment : Fragment() {
         if (!validateForm())
             return
 
+        // Hide keyboard, if not hidden
+        PlatformUtils.hideKeyboard(requireActivity())
+
         if(!isNetworkAvailable(requireContext())){
             showNoInternetDialog()
             return
@@ -343,7 +358,7 @@ class LoginFragment : Fragment() {
             }
         }
 
-        SharedPrefHelper.removeCredentials(true)
+        SharedPrefHelper.removeExistingUser(true)
         setLoginActionState(LoginState.ACTION_LOGIN)
         SharedPrefHelper.storeSelectedUserName(userEmail)
         loginViewModel.doLogin(userEmail, userPassword, activeAccountID)
@@ -371,7 +386,6 @@ class LoginFragment : Fragment() {
         //LogHelper.debug(TAG, "onUserAccounts()-> $accountsJSON")
 
         //Store data
-        SharedPrefHelper.storeUserCredentials(userEmail, userPassword)
         SharedPrefHelper.storeMultiAccountStatus(true)
         SharedPrefHelper.storeUserAccounts(accountsJSON)
     }
@@ -408,10 +422,7 @@ class LoginFragment : Fragment() {
         val accountProfileJSON = Gson().toJson(accountProfile)
         LogHelper.debug(TAG, "onAccountProfile()-> $accountProfileJSON")
         SharedPrefHelper.storeUserAccountProfile(accountProfileJSON)
-        // Remove password
-        if(!SharedPrefHelper.getUserPassword().isNullOrBlank()) {
-            SharedPrefHelper.removePassword()
-        }
+
         // Store account-information
         SharedPrefHelper.storeSelectedAccountID(accountProfile.accountID)
         SharedPrefHelper.storeSelectedAccountName(accountProfile.accountName)
@@ -444,9 +455,16 @@ class LoginFragment : Fragment() {
         }
     }
 
-    private fun navigateToAccountsFragment() {
+    private fun navigateToAccountsFragment(authBundle: AuthModel) {
         Navigation.findNavController(viewBinder.root)
-            .navigate(LoginFragmentDirections.actionLoginFragmentToAccountsFragment())
+            .navigate(LoginFragmentDirections
+                .actionLoginFragmentToAccountsFragment(authBundle))
+    }
+
+    private fun navigateTo2AuthFragment(twoAuthBundle: AuthModel) {
+        Navigation.findNavController(viewBinder.root)
+            .navigate(LoginFragmentDirections
+                .actionLoginFragmentToTwoFactorAuthFragment(twoAuthBundle))
     }
 
     private fun navigateToDashboardFragment() {
@@ -454,13 +472,15 @@ class LoginFragment : Fragment() {
     }
 
     private fun processLoginError(error: ErrorResponse? = null) {
-        LogHelper.debug(TAG, "Login-Error: $error")
-
         if(error != null){
-            if(error.errorCode == 400 && error.errorType == KEY_VALIDATION_ERROR){
-                showIncorrectAttemptLimitReached()
+            if(!error.errorFields.isNullOrEmpty()){
+                processErrorFieldsAndTakeAction(error.errorFields!!)
             } else {
-                (activity as AuthActivity).showSnackbar(viewBinder.root, "Failed to authenticate")
+                if(error.errorCode == 400 && error.errorType == KEY_VALIDATION_ERROR){
+                    showIncorrectAttemptLimitReached()
+                } else {
+                    (activity as AuthActivity).showSnackbar(viewBinder.root, "Failed to authenticate")
+                }
             }
         } else {
             (activity as AuthActivity).showSnackbar(viewBinder.root, "Failed to authenticate")
@@ -468,6 +488,24 @@ class LoginFragment : Fragment() {
         clearPasswordTextBox()
         showHideProgressbar(false)
         showHideLoginView(true)
+    }
+
+    private fun processErrorFieldsAndTakeAction(errorFields: List<ErrorFields>) {
+        //LogHelper.debug(TAG, "->twoAuth() Required, constructing bundle")
+        val twoAuthBundle = AuthModel(userEmail, userPassword,
+            "", isOTPRequired = false, isCaptchaRequired = false)
+
+        errorFields.forEach { errorField ->
+            if(errorField.name == KEY_OTP_TOKEN){
+                LogHelper.debug(TAG, "Adding OTP-requirement to the bundle")
+                twoAuthBundle.isOTPRequired = true
+            } else if(errorField.name == KEY_CAPTCHA){
+                LogHelper.debug(TAG, "Adding Captcha-requirement to the bundle")
+                twoAuthBundle.isCaptchaRequired = true
+            }
+        }
+        //LogHelper.debug(TAG, "->twoAuthBundle() Constructed, proceeding for 2Auth")
+        navigateTo2AuthFragment(twoAuthBundle)
     }
 
     private fun showIncorrectAttemptLimitReached() {
@@ -483,7 +521,6 @@ class LoginFragment : Fragment() {
     }
 
     private fun processUserProfileORAccountProfileError() {
-        SharedPrefHelper.removePassword()
         SharedPrefHelper.removeAccessToken()
         (activity as AuthActivity).showSnackbar(viewBinder.root, "Failed to authenticate")
         clearPasswordTextBox()
@@ -497,8 +534,8 @@ class LoginFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _viewBinder = null
         loginViewModel.cancelAllRequests()
+        _viewBinder = null
     }
 
 }

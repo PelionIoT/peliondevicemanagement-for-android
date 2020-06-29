@@ -23,6 +23,8 @@ import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
@@ -30,7 +32,9 @@ import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import android.util.Base64
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -285,6 +289,17 @@ object PlatformUtils {
             Uri.fromParts("package", context.packageName, null))
         settingsIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(settingsIntent)
+    }
+
+    fun getBitMapFromString(imageStr: String): Bitmap {
+        val decodedString = Base64.decode(imageStr, Base64.DEFAULT)
+        return BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
+    }
+
+    fun hideKeyboard(context: Activity) {
+        val iMM = context
+            .getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        iMM.hideSoftInputFromWindow(context.currentFocus?.windowToken, 0)
     }
 
 }
