@@ -77,6 +77,7 @@ class TwoFactorAuthFragment : Fragment() {
 
     private var activeCaptchaID = ""
     private lateinit var otpCode: String
+    private lateinit var userPassword: String
 
     private val args: TwoFactorAuthFragmentArgs by navArgs()
 
@@ -115,6 +116,10 @@ class TwoFactorAuthFragment : Fragment() {
             performLogin()
         }
 
+        viewBinder.refreshCaptchaButton.setOnClickListener {
+            loginViewModel.fetchCaptcha()
+        }
+
         retryButtonClickListener = View.OnClickListener {
             errorBottomSheetDialog!!.dismiss()
             errorBottomSheetDialog = null
@@ -125,15 +130,39 @@ class TwoFactorAuthFragment : Fragment() {
             // Now process the login response
             if(!response.accounts.isNullOrEmpty()){
                 processMultiAccountData(response.accounts)
-                val authArgs = AuthModel(args.authArgs.email,
-                    args.authArgs.password,
-                    args.authArgs.accountID,
-                    isOTPRequired = true,
-                    isCaptchaRequired = false,
-                    otp = otpCode,
-                    captcha = null
-                )
-                navigateToAccountsFragment(authArgs)
+
+                val authArgs: AuthModel
+                if(args.authArgs.isCaptchaRequired && args.authArgs.isOTPRequired) {
+                    authArgs = AuthModel(args.authArgs.email,
+                        userPassword,
+                        args.authArgs.accountID,
+                        isOTPRequired = true,
+                        isCaptchaRequired = false,
+                        otp = otpCode,
+                        captcha = null
+                    )
+                    navigateToAccountsFragment(authArgs)
+                } else if(args.authArgs.isOTPRequired) {
+                    authArgs = AuthModel(args.authArgs.email,
+                        userPassword,
+                        args.authArgs.accountID,
+                        isOTPRequired = true,
+                        isCaptchaRequired = false,
+                        otp = otpCode,
+                        captcha = null
+                    )
+                    navigateToAccountsFragment(authArgs)
+                } else if(args.authArgs.isCaptchaRequired) {
+                    authArgs = AuthModel(args.authArgs.email,
+                        userPassword,
+                        args.authArgs.accountID,
+                        isOTPRequired = false,
+                        isCaptchaRequired = false,
+                        otp = null,
+                        captcha = null
+                    )
+                    navigateToAccountsFragment(authArgs)
+                }
             } else {
                 processSingleAccountData(response.accessToken)
             }
@@ -180,11 +209,26 @@ class TwoFactorAuthFragment : Fragment() {
         })
     }
 
+    private fun isValidPassword(password: String): Boolean? =
+        password.length > 6
+
     private fun isValidOTP(code: String): Boolean? =
         code.length >= 6
 
     private fun validateForm(): Boolean {
         var valid = true
+
+        viewBinder.passwordInputTxt.error = when {
+            viewBinder.passwordInputTxt.text.isBlank() -> {
+                valid = false
+                "Required"
+            }
+
+            !isValidPassword(viewBinder.passwordInputTxt.text.toString().trim())!! ->
+                "Invalid Password"
+
+            else -> null
+        }
 
         if(args.authArgs.isCaptchaRequired){
             viewBinder.captchaInputTxt.error = when {
@@ -229,13 +273,14 @@ class TwoFactorAuthFragment : Fragment() {
         }
 
         val userEmail = args.authArgs.email
-        val userPass = args.authArgs.password
+        userPassword = viewBinder.passwordInputTxt.text.toString()
         val accountID = args.authArgs.accountID
         val captchaCode = viewBinder.captchaInputTxt.text.toString()
         otpCode = viewBinder.otpInputTxt.text.toString()
 
         // Hide
         showHideOTPView(false)
+        showHidePasswordView(false)
         showHideCaptchaView(false)
         showHideVerifyButton(false)
         // Show
@@ -247,21 +292,21 @@ class TwoFactorAuthFragment : Fragment() {
 
             // Do both
             LogHelper.debug(TAG, "Attempting for login-window with 2Auth OTPCode: $otpCode, CaptchaCode: $captchaCode")
-            loginViewModel.do2AuthLogin(userEmail, userPass, otpCode = otpCode,
+            loginViewModel.do2AuthLogin(userEmail, userPassword, otpCode = otpCode,
                 captchaID = activeCaptchaID, captchaCode = captchaCode, accountID = accountID)
 
         } else if(args.authArgs.isOTPRequired) {
 
             // Do OTP Only
             LogHelper.debug(TAG, "Attempting for login-window with 2Auth-OTPCode: $otpCode")
-            loginViewModel.do2AuthLogin(userEmail, userPass, otpCode = otpCode,
+            loginViewModel.do2AuthLogin(userEmail, userPassword, otpCode = otpCode,
                 captchaID = null, captchaCode = null, accountID = accountID)
 
         } else if(args.authArgs.isCaptchaRequired) {
 
             // Do Captcha Only
             LogHelper.debug(TAG, "Attempting for login-window with 2Auth-CaptchaCode: $captchaCode")
-            loginViewModel.do2AuthLogin(userEmail, userPass,
+            loginViewModel.do2AuthLogin(userEmail, userPassword,
                 otpCode = null, captchaID = activeCaptchaID,
                 captchaCode = captchaCode, accountID = accountID)
 
@@ -349,9 +394,9 @@ class TwoFactorAuthFragment : Fragment() {
         val captchaImage = getBitMapFromString(captchaResponse.captchaBytes)
         Glide.with(requireView())
             .load(captchaImage)
-            .placeholder(R.drawable.logo_arm)
+            .placeholder(R.drawable.ic_image_dark)
             .diskCacheStrategy(DiskCacheStrategy.NONE)
-            .error(R.drawable.logo_arm)
+            .error(R.drawable.ic_image_dark)
             .into(viewBinder.imgCaptchaView)
     }
 
@@ -397,6 +442,7 @@ class TwoFactorAuthFragment : Fragment() {
 
                 viewBinder.otpInputTxt.error = "Invalid OTP-Code"
                 showHideOTPView(true)
+                showHidePasswordView(true)
                 showSnackbar("Invalid OTP-Code, try again")
                 args.authArgs.isOTPRequired = true
             } else {
@@ -409,6 +455,7 @@ class TwoFactorAuthFragment : Fragment() {
                 loginViewModel.fetchCaptcha()
                 viewBinder.captchaInputTxt.error = "Invalid Captcha"
                 showHideCaptchaView(true)
+                showHidePasswordView(true)
                 showSnackbar("Invalid Captcha, try again")
                 args.authArgs.isCaptchaRequired = true
             } else {
@@ -451,6 +498,7 @@ class TwoFactorAuthFragment : Fragment() {
     private fun clearCodeTextBoxes() {
         viewBinder.otpInputTxt.text.clear()
         viewBinder.captchaInputTxt.text.clear()
+        viewBinder.passwordInputTxt.text.clear()
     }
 
     private fun setupProgressView(){
@@ -478,6 +526,12 @@ class TwoFactorAuthFragment : Fragment() {
         viewBinder.verifyBtn.visibility = View.VISIBLE
     } else {
         viewBinder.verifyBtn.visibility = View.GONE
+    }
+
+    private fun showHidePasswordView(visibility: Boolean) = if(visibility) {
+        viewBinder.txtPasswordHeader.visibility = View.VISIBLE
+    } else {
+        viewBinder.txtPasswordHeader.visibility = View.GONE
     }
 
     private fun showHideOTPView(visibility: Boolean) = if(visibility) {

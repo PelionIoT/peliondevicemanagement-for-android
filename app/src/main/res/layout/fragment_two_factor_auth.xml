@@ -52,13 +52,13 @@
 
     </LinearLayout>
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/txtCaptchaHeader"
         android:layout_marginStart="38dp"
         android:layout_marginEnd="38dp"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="5dp"
         android:layout_above="@id/divider"
         android:alpha="0.9"
         android:visibility="gone"
@@ -69,6 +69,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:src="?attr/iconKey"
+            android:id="@+id/keyIcon"
             android:scaleType="center"/>
 
         <EditText
@@ -78,9 +79,61 @@
             android:fontFamily="@font/lato_regular"
             android:inputType="textEmailAddress"
             android:layout_marginStart="10dp"
+            android:layout_marginEnd="5dp"
+            android:layout_toStartOf="@+id/refreshCaptchaButton"
             android:id="@+id/captchaInputTxt"
             android:layout_gravity="center"
             android:singleLine="true"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@+id/keyIcon"
+            android:textColor="?attr/primaryTextColor"
+            android:textColorHint="?attr/secondaryTextColor"
+            android:background="@android:color/transparent"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:id="@+id/refreshCaptchaButton"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            app:rippleColor="?attr/colorAccent"
+            app:icon="?attr/iconRefresh"
+            app:iconTint="?attr/colorAccent"
+            app:iconPadding="0dp"
+            />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/txtPasswordHeader"
+        android:layout_marginTop="5dp"
+        android:layout_marginStart="38dp"
+        android:layout_marginEnd="38dp"
+        android:alpha="0.9"
+        android:layout_below="@+id/divider"
+        android:background="@drawable/input_border">
+
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="?attr/iconLock"
+            android:scaleType="center"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/password_header"
+            android:fontFamily="@font/lato_regular"
+            android:layout_marginStart="10dp"
+            android:inputType="textPassword"
+            android:id="@+id/passwordInputTxt"
+            android:singleLine="true"
+            android:layout_gravity="center"
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
             android:textColor="?attr/primaryTextColor"
@@ -93,10 +146,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/txtOTPHeader"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="10dp"
         android:layout_marginStart="38dp"
         android:layout_marginEnd="38dp"
-        android:layout_below="@id/divider"
+        android:layout_below="@id/txtPasswordHeader"
         android:alpha="0.9"
         android:background="@drawable/input_border">
 
