@@ -65,6 +65,7 @@ import com.arm.peliondevicemanagement.utils.WorkflowUtils
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.getAudienceListFromDevices
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.getPermissionScopeFromTasks
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.isValidSDAToken
+import com.arm.peliondevicemanagement.utils.WorkflowUtils.isWriteFileSizeWithinLimits
 import com.arm.peliondevicemanagement.utils.WorkflowUtils.isWriteTaskAvailable
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -479,10 +480,14 @@ class JobFragment : Fragment() {
         if(isSDATokenValid){
             if(_taskAssetState == AssetState.NOT_REQUIRED || _taskAssetState == AssetState.DOWNLOADED){
                 if(verifyBLEAndLocationPermissions()){
-                    if(position != null){
-                        initiateSpecificDeviceRun(position)
+                    if(validateFileSizeWithinLimits()){
+                        if(position != null){
+                            initiateSpecificDeviceRun(position)
+                        } else {
+                            initiateJobRun()
+                        }
                     } else {
-                        initiateJobRun()
+                        showFileLimitExceedDialog()
                     }
                 } else {
                     showSnackbar("Failed, try again")
@@ -492,6 +497,22 @@ class JobFragment : Fragment() {
             }
         } else {
             showSnackbar("Secure device access, not available")
+        }
+    }
+
+    private fun validateFileSizeWithinLimits(): Boolean {
+        return if(isWriteTaskAvailable(workflowModel.workflowTasks)){
+            LogHelper.debug(TAG, "->validateFileSizeWithinLimits() Found Write-Task, checking file-size")
+            return if(isWriteFileSizeWithinLimits(workflowID, workflowModel.workflowTasks)){
+                LogHelper.debug(TAG, "->validateFileSizeWithinLimits() Write file-size less than 2KB, moving ahead")
+                true
+            } else {
+                LogHelper.debug(TAG, "->validateFileSizeWithinLimits() Write file-size exceeds 2KB, skipping")
+                false
+            }
+        } else {
+            LogHelper.debug(TAG, "->validateFileSizeWithinLimits() Found only Read-Task, skipping file-size check")
+            true
         }
     }
 
@@ -786,6 +807,18 @@ class JobFragment : Fragment() {
             }
             .setNegativeButton(resources.getString(R.string.cancel_text)) { dialogInterface, _ ->
                 dialogInterface.dismiss()
+            }
+            .setCancelable(false)
+            .create()
+            .show()
+    }
+
+    private fun showFileLimitExceedDialog() {
+        MaterialAlertDialogBuilder(context)
+            .setTitle(resources.getString(R.string.could_not_run_text))
+            .setMessage(resources.getString(R.string.file_warning_desc))
+            .setPositiveButton(resources.getString(R.string.got_it_text)) { dialog, _ ->
+                dialog.dismiss()
             }
             .setCancelable(false)
             .create()
