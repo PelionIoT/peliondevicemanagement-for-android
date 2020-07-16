@@ -25,6 +25,9 @@
     <string name="password_header">Password</string>
     <string name="signin_text">Sign In</string>
     <string name="signout_text">Sign Out</string>
+    <string name="verify_text">Verify</string>
+    <string name="otp_header">OTP Code</string>
+    <string name="captcha_header">Captcha Code</string>
     <string name="signed_in_as">Signed In As</string>
     <string name="home">Home</string>
     <string name="account">Account</string>

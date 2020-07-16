@@ -1,5 +1,6 @@
 /*
  * Copyright 2020 ARM Ltd.
+ *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,20 +18,12 @@
 
 package com.arm.peliondevicemanagement.services.data
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import kotlinx.android.parcel.Parcelize
 
-data class ErrorResponse(
-    @SerializedName("code")
-    var errorCode: Int,
-    @SerializedName("type")
-    var errorType: String,
-    @SerializedName("message")
-    var errorMessage: String,
-    @SerializedName("fields")
-    var errorFields: List<ErrorFields>?
-)
-
-data class ErrorFields(
-    val name: String,
-    val message: String
-)
+@Parcelize
+data class CaptchaResponse(
+    @SerializedName("captcha_id") val captchaID: String,
+    @SerializedName("captcha_bytes") val captchaBytes: String
+): Parcelable

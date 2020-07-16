@@ -26,6 +26,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -69,6 +70,8 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
     private lateinit var retryButtonClickListener: View.OnClickListener
 
     private lateinit var networkRequestState: NetworkErrorState
+
+    private val authArgsBundle: AccountsFragmentArgs by navArgs()
 
     private val onBackPressedCallback = object: OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
@@ -243,16 +246,33 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
     }
 
     private fun handleLoginORGoImpersonate(accountID: String) {
-        if(!SharedPrefHelper.getUserPassword().isNullOrBlank()){
-            val username = SharedPrefHelper.getUserName()
-            val password = SharedPrefHelper.getUserPassword()
+        if(authArgsBundle.authArgs != null) {
+            val username = authArgsBundle.authArgs!!.email
+            val password = authArgsBundle.authArgs!!.password
 
-            /*LogHelper.debug(TAG, "onHandleLogin(): " +
+            // If twoFA enabled then use this one, else standard login
+            if(authArgsBundle.authArgs!!.isOTPRequired){
+                val otp = authArgsBundle.authArgs!!.otp
+
+                /*LogHelper.debug(TAG, "onHandleLogin(): " +
+                        "email: $username, " +
+                        "password: $password, " +
+                        "accountID: $accountID, " +
+                        "otpCode: $otp")*/
+
+                LogHelper.debug(TAG, "Attempting for login-window with 2Auth-OTPCode: $otp")
+                loginViewModel.do2AuthLogin(username, password, otpCode = otp,
+                    captchaID = null, captchaCode = null, accountID = accountID)
+
+            } else {
+                /*LogHelper.debug(TAG, "onHandleLogin(): " +
                     "email: $username, " +
                     "password: $password, " +
                     "accountID: $accountID")*/
 
-            loginViewModel.doLogin(username, password!!, accountID)
+                loginViewModel.doLogin(username, password, accountID)
+            }
+
         } else {
             LogHelper.debug(TAG, "onGoImpersonate(): accountID: $accountID")
             loginViewModel.doImpersonate(accountID)
@@ -283,10 +303,6 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
         val accountProfileJSON = Gson().toJson(accountProfile)
         LogHelper.debug(TAG, "onAccountProfile()-> $accountProfileJSON")
         SharedPrefHelper.storeUserAccountProfile(accountProfileJSON)
-        // Remove password
-        if(!SharedPrefHelper.getUserPassword().isNullOrBlank()) {
-            SharedPrefHelper.removePassword()
-        }
 
         // Now fetch account-branding-images
         val accountID = SharedPrefHelper.getSelectedAccountID()

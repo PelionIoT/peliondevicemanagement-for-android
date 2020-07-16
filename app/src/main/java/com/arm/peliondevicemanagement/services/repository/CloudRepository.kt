@@ -23,7 +23,10 @@ import com.arm.peliondevicemanagement.components.models.user.UserProfile
 import com.arm.peliondevicemanagement.constants.APIConstants.CONTENT_TYPE_JSON
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_ACCOUNT
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_ACCOUNT_ID
+import com.arm.peliondevicemanagement.constants.APIConstants.KEY_CAPTCHA
+import com.arm.peliondevicemanagement.constants.APIConstants.KEY_CAPTCHA_ID
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_GRANT_TYPE
+import com.arm.peliondevicemanagement.constants.APIConstants.KEY_OTP_TOKEN
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_PASSWORD
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_USERNAME
 import com.arm.peliondevicemanagement.constants.BrandingTheme
@@ -67,6 +70,101 @@ class CloudRepository(private val cloudAPIService: CloudAPIService): BaseReposit
                     KEY_ACCOUNT_ID to accountID
                 ))
             }
+        )
+    }
+
+    suspend fun do2AuthWithOTP(username: String, password: String,
+                               otpCode: String, accountID: String = ""): LoginResponse? {
+        val loginResponse: LoginResponse?
+
+        if(accountID.isNotEmpty()){
+            loginResponse = doSafeAPIRequest(
+                call = { cloudAPIService.doAuth(createJSONRequestBody(
+                    KEY_USERNAME to username,
+                    KEY_PASSWORD to password,
+                    KEY_GRANT_TYPE to KEY_PASSWORD,
+                    KEY_OTP_TOKEN to otpCode,
+                    KEY_ACCOUNT to accountID))
+                }
+            )
+        } else {
+            loginResponse = doSafeAPIRequest(
+                call = { cloudAPIService.doAuth(createJSONRequestBody(
+                    KEY_USERNAME to username,
+                    KEY_PASSWORD to password,
+                    KEY_OTP_TOKEN to otpCode,
+                    KEY_GRANT_TYPE to KEY_PASSWORD))
+                }
+            )
+        }
+        return loginResponse
+    }
+
+    suspend fun do2AuthWithCaptcha(username: String, password: String,
+                                   captchaID: String, captchaCode: String,
+                                   accountID: String = ""): LoginResponse? {
+        val loginResponse: LoginResponse?
+
+        if(accountID.isNotEmpty()){
+            loginResponse = doSafeAPIRequest(
+                call = { cloudAPIService.doAuth(createJSONRequestBody(
+                    KEY_USERNAME to username,
+                    KEY_PASSWORD to password,
+                    KEY_GRANT_TYPE to KEY_PASSWORD,
+                    KEY_CAPTCHA_ID to captchaID,
+                    KEY_CAPTCHA to captchaCode,
+                    KEY_ACCOUNT to accountID))
+                }
+            )
+        } else {
+            loginResponse = doSafeAPIRequest(
+                call = { cloudAPIService.doAuth(createJSONRequestBody(
+                    KEY_USERNAME to username,
+                    KEY_PASSWORD to password,
+                    KEY_CAPTCHA_ID to captchaID,
+                    KEY_CAPTCHA to captchaCode,
+                    KEY_GRANT_TYPE to KEY_PASSWORD))
+                }
+            )
+        }
+        return loginResponse
+    }
+
+    suspend fun do2AuthWithOTPAndCaptcha(username: String, password: String,
+                                         otpCode: String, captchaID: String,
+                                         captchaCode: String, accountID: String = ""): LoginResponse? {
+        val loginResponse: LoginResponse?
+
+        if(accountID.isNotEmpty()){
+            loginResponse = doSafeAPIRequest(
+                call = { cloudAPIService.doAuth(createJSONRequestBody(
+                    KEY_USERNAME to username,
+                    KEY_PASSWORD to password,
+                    KEY_GRANT_TYPE to KEY_PASSWORD,
+                    KEY_OTP_TOKEN to otpCode,
+                    KEY_CAPTCHA_ID to captchaID,
+                    KEY_CAPTCHA to captchaCode,
+                    KEY_ACCOUNT to accountID))
+                }
+            )
+        } else {
+            loginResponse = doSafeAPIRequest(
+                call = { cloudAPIService.doAuth(createJSONRequestBody(
+                    KEY_USERNAME to username,
+                    KEY_PASSWORD to password,
+                    KEY_OTP_TOKEN to otpCode,
+                    KEY_CAPTCHA_ID to captchaID,
+                    KEY_CAPTCHA to captchaCode,
+                    KEY_GRANT_TYPE to KEY_PASSWORD))
+                }
+            )
+        }
+        return loginResponse
+    }
+
+    suspend fun getCaptcha(): CaptchaResponse? {
+        return doSafeAPIRequest(
+            call = { cloudAPIService.getCaptcha()}
         )
     }
 

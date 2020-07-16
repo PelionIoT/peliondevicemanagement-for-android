@@ -33,10 +33,6 @@ object SharedPrefHelper {
         SharedPrefManager.with(context = AppController.appController!!)!!
             .getString(SharedPrefConstants.STORE_USER_NAME, "")!!
 
-    internal fun getUserPassword(): String? =
-        SharedPrefManager.with(context = AppController.appController!!)!!
-            .getString(SharedPrefConstants.STORE_USER_PASSWORD, "")!!
-
     internal fun getUserAccessToken(): String? =
         SharedPrefManager.with(context = AppController.appController!!)!!
             .getString(SharedPrefConstants.STORE_USER_ACCESS_TOKEN, "")!!
@@ -93,13 +89,6 @@ object SharedPrefHelper {
     internal fun storeUserAccessToken(accessToken: String) =
         SharedPrefManager.with(context = AppController.appController!!)!!.edit()
             .putString(SharedPrefConstants.STORE_USER_ACCESS_TOKEN, accessToken)
-            .apply()
-
-    internal fun storeUserCredentials(userName: String,
-                                      userPassword: String) =
-        SharedPrefManager.with(context = AppController.appController!!)!!.edit()
-            .putString(SharedPrefConstants.STORE_USER_NAME, userName)
-            .putString(SharedPrefConstants.STORE_USER_PASSWORD, userPassword)
             .apply()
 
     internal fun storeSelectedUserName(userName: String) =
@@ -164,20 +153,13 @@ object SharedPrefHelper {
             .apply()
 
     // DELETE APIs
-    internal fun removeCredentials(accessTokenAlso: Boolean = false){
+    internal fun removeExistingUser(accessTokenAlso: Boolean = false){
         val editor = SharedPrefManager.with(context = AppController.appController!!)!!.edit()
         editor.remove(SharedPrefConstants.STORE_USER_NAME)
-        editor.remove(SharedPrefConstants.STORE_USER_PASSWORD)
 
         if(accessTokenAlso){
             editor.remove(SharedPrefConstants.STORE_USER_ACCESS_TOKEN)
         }
-        editor.apply()
-    }
-
-    internal fun removePassword(){
-        val editor = SharedPrefManager.with(context = AppController.appController!!)!!.edit()
-        editor.remove(SharedPrefConstants.STORE_USER_PASSWORD)
         editor.apply()
     }
 
@@ -202,7 +184,6 @@ object SharedPrefHelper {
         val editor = SharedPrefManager.with(context = AppController.appController!!)!!.edit()
         // Login credentials
         editor.remove(SharedPrefConstants.STORE_USER_NAME)
-        editor.remove(SharedPrefConstants.STORE_USER_PASSWORD)
         editor.remove(SharedPrefConstants.STORE_USER_ACCESS_TOKEN)
         // User information
         editor.remove(SharedPrefConstants.STORE_USER_PROFILE)

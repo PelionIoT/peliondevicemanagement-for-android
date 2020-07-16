@@ -74,6 +74,8 @@
         <attr name="iconPendingJobs" format="reference" />
         <attr name="iconCompletedJobs" format="reference" />
         <attr name="iconBleScan" format="reference"/>
+        <attr name="iconKey" format="reference" />
+        <attr name="iconImage" format="reference" />
 
     </declare-styleable>
 </resources>
