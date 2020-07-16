@@ -29,15 +29,14 @@ import androidx.navigation.Navigation
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import com.arm.peliondevicemanagement.R
+import com.arm.peliondevicemanagement.constants.AppConstants.IS_FROM_FEATURE_GRAPH
 import com.arm.peliondevicemanagement.constants.AppConstants.VIEW_HOST_LAUNCH_GRAPH
 import com.arm.peliondevicemanagement.constants.AppConstants.WORKFLOW_ID_ARG
 import com.arm.peliondevicemanagement.constants.AppConstants.viewHostLaunchActionList
 import com.arm.peliondevicemanagement.databinding.ActivityViewHostActivityBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
-import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.utils.PlatformUtils
 import com.arm.peliondevicemanagement.utils.PlatformUtils.requestLocationPermission
-import com.arm.peliondevicemanagement.utils.WorkflowUtils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class ViewHostActivity : BaseActivity() {
@@ -49,6 +48,7 @@ class ViewHostActivity : BaseActivity() {
 
     private lateinit var launchAction: String
     private var isJobRunGraph: Boolean = false
+    private var isFromFeatureGraph: Boolean = false
 
     companion object {
         private val TAG: String = ViewHostActivity::class.java.simpleName
@@ -64,6 +64,7 @@ class ViewHostActivity : BaseActivity() {
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
         launchAction = intent.getStringExtra(VIEW_HOST_LAUNCH_GRAPH)!!
+        isFromFeatureGraph = intent.getBooleanExtra(IS_FROM_FEATURE_GRAPH, false)
         init()
     }
 
@@ -149,14 +150,20 @@ class ViewHostActivity : BaseActivity() {
             true
         } else {
             if(!NavigationUI.navigateUp(navigationController, appBarConfiguration)){
-                navigateBackToHomeActivity()
+                navigateBackToRelevantActivity()
             }
             return true
         }
     }
 
-    private fun navigateBackToHomeActivity() {
-        fireIntentWithFinish(Intent(this, HomeActivity::class.java), false)
+    private fun navigateBackToRelevantActivity() {
+        if(isFromFeatureGraph){
+            LogHelper.debug(TAG, "-> navigateBackToChooseFeatureActivity()")
+            fireIntentWithFinish(Intent(this, ChooseFeatureActivity::class.java), false)
+        } else {
+            LogHelper.debug(TAG, "-> navigateBackToHomeActivity()")
+            fireIntentWithFinish(Intent(this, HomeActivity::class.java), false)
+        }
     }
 
     fun navigateToLogin() {

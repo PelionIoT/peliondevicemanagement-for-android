@@ -415,7 +415,7 @@ class TwoFactorAuthFragment : Fragment() {
     }
 
     private fun navigateToDashboardFragment() {
-        (requireActivity() as AuthActivity).launchHomeActivity()
+        (requireActivity() as AuthActivity).launchChooseFeatureActivity()
     }
 
     private fun processLoginError(error: ErrorResponse? = null) {

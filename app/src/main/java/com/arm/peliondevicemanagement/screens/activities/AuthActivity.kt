@@ -170,8 +170,8 @@ class AuthActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         }
     }
 
-    fun launchHomeActivity() {
-        fireIntentWithFinish(Intent(this, HomeActivity::class.java), true)
+    fun launchChooseFeatureActivity() {
+        fireIntentWithFinish(Intent(this, ChooseFeatureActivity::class.java), true)
     }
 
     override fun onSupportNavigateUp(): Boolean {

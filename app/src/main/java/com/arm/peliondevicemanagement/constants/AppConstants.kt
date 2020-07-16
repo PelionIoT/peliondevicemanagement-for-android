@@ -26,8 +26,13 @@ object AppConstants {
     // Navigation-action constants
     const val IS_ACCOUNT_GRAPH = "isAccountGraph"
     const val VIEW_HOST_LAUNCH_GRAPH = "viewHostLaunchGraph"
+    const val IS_FROM_FEATURE_GRAPH = "isFeatureGraph"
     const val WORKFLOW_ID_ARG = "workflow_id"
     val viewHostLaunchActionList = listOf("Job", "Settings")
+
+    // Feature constants
+    const val JOB_MANAGEMENT = "Job Management"
+    const val DEVICE_MANAGEMENT = "Device Management"
 
     // Local-Cache constants
     const val WORKFLOW_DATABASE_NAME = "Workflow.db"

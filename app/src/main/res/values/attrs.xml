@@ -76,6 +76,7 @@
         <attr name="iconBleScan" format="reference"/>
         <attr name="iconKey" format="reference" />
         <attr name="iconImage" format="reference" />
+        <attr name="iconFeature" format="reference"/>
 
     </declare-styleable>
 </resources>

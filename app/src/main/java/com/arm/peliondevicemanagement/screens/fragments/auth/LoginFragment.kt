@@ -17,7 +17,6 @@
 
 package com.arm.peliondevicemanagement.screens.fragments.auth
 
-import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.util.DisplayMetrics
@@ -26,7 +25,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
-import android.view.inputmethod.InputMethodManager
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
@@ -468,7 +466,7 @@ class LoginFragment : Fragment() {
     }
 
     private fun navigateToDashboardFragment() {
-        (requireActivity() as AuthActivity).launchHomeActivity()
+        (requireActivity() as AuthActivity).launchChooseFeatureActivity()
     }
 
     private fun processLoginError(error: ErrorResponse? = null) {

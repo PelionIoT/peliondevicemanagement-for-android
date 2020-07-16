@@ -83,6 +83,7 @@
         <item name="iconBleScan">@drawable/ic_ble_dark</item>
         <item name="iconKey">@drawable/ic_key_dark</item>
         <item name="iconImage">@drawable/ic_image_dark</item>
+        <item name="iconFeature">@drawable/ic_widget_dark</item>
     </style>
 
     <!-- Launch Theme -->
@@ -159,6 +160,7 @@
         <item name="iconBleScan">@drawable/ic_ble_light</item>
         <item name="iconKey">@drawable/ic_key_light</item>
         <item name="iconImage">@drawable/ic_image_light</item>
+        <item name="iconFeature">@drawable/ic_widget_light</item>
     </style>
 
     <style name="AppTheme.Toolbar">

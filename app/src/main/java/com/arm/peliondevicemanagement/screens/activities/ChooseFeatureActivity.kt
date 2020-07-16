@@ -1,5 +1,6 @@
 /*
  * Copyright 2020 ARM Ltd.
+ *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,53 +28,44 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.fragment.app.Fragment
-import androidx.viewpager2.widget.ViewPager2
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.R
-import com.arm.peliondevicemanagement.components.adapters.ViewPagerAdapter
+import com.arm.peliondevicemanagement.components.adapters.FeatureAdapter
 import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
 import com.arm.peliondevicemanagement.constants.AppConstants
-import com.arm.peliondevicemanagement.constants.AppConstants.IS_ACCOUNT_GRAPH
-import com.arm.peliondevicemanagement.constants.AppConstants.VIEW_HOST_LAUNCH_GRAPH
-import com.arm.peliondevicemanagement.constants.AppConstants.viewHostLaunchActionList
-import com.arm.peliondevicemanagement.databinding.ActivityHomeBinding
+import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_MANAGEMENT
+import com.arm.peliondevicemanagement.constants.AppConstants.JOB_MANAGEMENT
+import com.arm.peliondevicemanagement.databinding.ActivityChooseFeatureBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
-import com.arm.peliondevicemanagement.screens.fragments.jobs.CompletedJobsFragment
-import com.arm.peliondevicemanagement.screens.fragments.jobs.PendingJobsFragment
 import com.arm.peliondevicemanagement.utils.PlatformUtils
 import com.arm.peliondevicemanagement.utils.WorkflowUtils
 import com.google.android.material.navigation.NavigationView
-import com.google.android.material.tabs.TabLayout
-import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.android.synthetic.main.layout_drawer_header.view.*
 
-
-class HomeActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener, RecyclerItemClickListener {
+class ChooseFeatureActivity : BaseActivity(),
+    NavigationView.OnNavigationItemSelectedListener,
+    RecyclerItemClickListener {
 
     private lateinit var toolbar: Toolbar
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var drawerHeaderView: View
     private lateinit var navigationView: NavigationView
-    private lateinit var viewPager: ViewPager2
-    private lateinit var tabLayout: TabLayout
 
-    private lateinit var viewBinder: ActivityHomeBinding
+    private lateinit var viewBinder: ActivityChooseFeatureBinding
 
-    private var pendingJobsFragment: PendingJobsFragment? = null
-    private var completedJobsFragment: CompletedJobsFragment? = null
-
-    private lateinit var viewPagerAdapter: ViewPagerAdapter
-    private lateinit var fragmentList: List<Fragment>
-    private lateinit var fragmentNamesList: List<String>
+    private val featureList = arrayOf(JOB_MANAGEMENT, DEVICE_MANAGEMENT)
+    private lateinit var featureAdapter: FeatureAdapter
 
     companion object {
-        private val TAG: String = HomeActivity::class.java.simpleName
+        private val TAG: String = ChooseFeatureActivity::class.java.simpleName
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewBinder = ActivityHomeBinding.inflate(layoutInflater)
+        viewBinder = ActivityChooseFeatureBinding.inflate(layoutInflater)
         initTheme(false)
         setContentView(viewBinder.root)
     }
@@ -96,10 +88,7 @@ class HomeActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             navigationView.inflateMenu(R.menu.menu_single_account)
         }
 
-        viewPager = viewBinder.contentView.viewPager
-        tabLayout = viewBinder.contentView.tabLayout
-
-        setupToolbar(toolbar, "Jobs")
+        setupToolbar(toolbar, "Dashboard")
         updateDrawerViews()
 
         val drawerToggle = ActionBarDrawerToggle(this,
@@ -110,10 +99,17 @@ class HomeActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         navigationView.setNavigationItemSelectedListener(this)
 
         setupItemNavViewColors()
-        setupTabLayoutColors()
 
-        initFragmentViews()
-        setupViewPagerWithTabs()
+        drawerLayout.background = PlatformUtils
+            .fetchAttributeColor(this, R.attr.colorBackground)
+
+        featureAdapter = FeatureAdapter(featureList = featureList, itemClickListener = this)
+        viewBinder.rvFeatures.apply {
+            layoutManager = LinearLayoutManager(context,
+                RecyclerView.VERTICAL, false)
+            itemAnimator = DefaultItemAnimator()
+            adapter = featureAdapter
+        }
     }
 
     private fun setupItemNavViewColors() {
@@ -125,38 +121,6 @@ class HomeActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         navigationView.itemTextColor = colorList
         navigationView.itemIconTintList = colorList
         navigationView.background = PlatformUtils.fetchAttributeColor(this, R.attr.cardColor)
-    }
-
-    private fun setupTabLayoutColors() {
-        tabLayout.background = PlatformUtils.fetchAttributeDrawable(this, R.attr.cardColor)
-        val normalColor: Int
-        val selectedColor: Int
-        val rippleColor: ColorStateList
-        if(SharedPrefHelper.isDarkThemeEnabled()){
-            normalColor = ContextCompat.getColor(this, android.R.color.white)
-            selectedColor = ContextCompat.getColor(this, R.color.colorAccentForDark)
-            rippleColor = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorAccentForDark))
-            toolbar.elevation = 0f
-        } else {
-            normalColor = ContextCompat.getColor(this, android.R.color.black)
-            selectedColor = ContextCompat.getColor(this, R.color.colorAccentForLight)
-            rippleColor = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorAccentForLight))
-        }
-
-        tabLayout.setTabTextColors(normalColor, selectedColor)
-        tabLayout.setSelectedTabIndicatorColor(selectedColor)
-        tabLayout.tabRippleColor = rippleColor
-
-        // Define ColorStateList
-        val states = arrayOf(
-            intArrayOf(android.R.attr.state_selected),
-            intArrayOf(-android.R.attr.state_selected)
-        )
-        val colors = intArrayOf(
-            selectedColor,
-            normalColor
-        )
-        tabLayout.tabIconTint = ColorStateList(states, colors)
     }
 
     private fun updateDrawerViews() {
@@ -177,35 +141,6 @@ class HomeActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         }
     }
 
-    private fun initFragmentViews() {
-        fragmentNamesList = listOf("Pending", "Completed")
-        // Initialize fragments
-        pendingJobsFragment =
-            PendingJobsFragment()
-        completedJobsFragment =
-            CompletedJobsFragment()
-        // Add them to the list
-        fragmentList = listOf<Fragment>(pendingJobsFragment!!, completedJobsFragment!!)
-        // Initialize adapter
-        viewPagerAdapter = ViewPagerAdapter(this, fragmentList)
-        // Add adapter to view-pager
-        viewPager.adapter = viewPagerAdapter
-        viewPager.isUserInputEnabled = false
-    }
-
-    private fun setupViewPagerWithTabs() {
-        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
-            if(fragmentNamesList[position] == "Pending"){
-                tab.icon = PlatformUtils
-                    .fetchAttributeDrawable(this, R.attr.iconPendingJobs)
-            } else {
-                tab.icon = PlatformUtils
-                    .fetchAttributeDrawable(this, R.attr.iconCompletedJobs)
-            }
-            tab.text = fragmentNamesList[position]
-        }.attach()
-    }
-
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         item.isChecked = true
         drawerLayout.closeDrawers()
@@ -214,10 +149,6 @@ class HomeActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             R.id.switch_account -> {
                 LogHelper.debug(TAG, "->switchAccount()")
                 navigateToAccounts()
-            }
-            R.id.change_feature -> {
-                LogHelper.debug(TAG, "->changeFeature()")
-                navigateToChooseFeature()
             }
             R.id.settings -> {
                 LogHelper.debug(TAG, "->settings()")
@@ -241,12 +172,8 @@ class HomeActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
     private fun navigateToAccounts() {
         val accountIntent = Intent(this, AuthActivity::class.java)
-        accountIntent.putExtra(IS_ACCOUNT_GRAPH, true)
+        accountIntent.putExtra(AppConstants.IS_ACCOUNT_GRAPH, true)
         fireIntentWithFinish(accountIntent, false)
-    }
-
-    private fun navigateToChooseFeature() {
-        fireIntentWithFinish(Intent(this, ChooseFeatureActivity::class.java), false)
     }
 
     private fun navigateToLogin() {
@@ -257,37 +184,22 @@ class HomeActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         fireIntentWithFinish(Intent(this, AuthActivity::class.java), false)
     }
 
-    fun initiateTemporarySignOut() {
-        LogHelper.debug(TAG, "Temporary sign-out complete")
-        fireIntentWithFinish(Intent(this, AuthActivity::class.java), false)
-    }
-
-    fun navigateToLoginForReAuth() {
-        LogHelper.debug(TAG, "Temporary sign-out complete")
-        fireIntentWithFinish(Intent(this, AuthActivity::class.java), false)
-    }
-
     private fun navigateToSettings() {
         val settingsIntent = Intent(this, ViewHostActivity::class.java)
-        settingsIntent.putExtra(VIEW_HOST_LAUNCH_GRAPH, viewHostLaunchActionList[1])
+        settingsIntent.putExtra(AppConstants.IS_FROM_FEATURE_GRAPH, true)
+        settingsIntent.putExtra(AppConstants.VIEW_HOST_LAUNCH_GRAPH, AppConstants.viewHostLaunchActionList[1])
         fireIntentWithFinish(settingsIntent, true)
     }
 
-    private fun navigateToJob(workflowID: String) {
-        val jobIntent = Intent(this, ViewHostActivity::class.java)
-        jobIntent.putExtra(VIEW_HOST_LAUNCH_GRAPH, viewHostLaunchActionList[0])
-        jobIntent.putExtra(AppConstants.WORKFLOW_ID_ARG, workflowID)
-        fireIntentWithFinish(jobIntent, true)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        pendingJobsFragment = null
-        completedJobsFragment = null
+    private fun navigateToHomeActivity() {
+        fireIntentWithFinish(Intent(this, HomeActivity::class.java), true)
     }
 
     override fun onItemClick(data: Any) {
-        val workflowID = data as String
-        navigateToJob(workflowID)
+        val featureName = data as String
+        LogHelper.debug(TAG, "onItemClick()-> featureName: $featureName")
+        if(featureName == JOB_MANAGEMENT){
+            navigateToHomeActivity()
+        }
     }
 }
