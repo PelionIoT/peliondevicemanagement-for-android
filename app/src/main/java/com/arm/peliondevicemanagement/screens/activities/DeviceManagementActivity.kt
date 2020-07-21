@@ -28,47 +28,49 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.recyclerview.widget.DefaultItemAnimator
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.fragment.app.Fragment
+import androidx.viewpager2.widget.ViewPager2
 import com.arm.peliondevicemanagement.R
-import com.arm.peliondevicemanagement.components.adapters.FeatureAdapter
-import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
-import com.arm.peliondevicemanagement.components.models.FeatureModel
+import com.arm.peliondevicemanagement.components.adapters.ViewPagerAdapter
 import com.arm.peliondevicemanagement.constants.AppConstants
-import com.arm.peliondevicemanagement.constants.AppConstants.DEVICE_MANAGEMENT
-import com.arm.peliondevicemanagement.constants.AppConstants.JOB_MANAGEMENT
 import com.arm.peliondevicemanagement.constants.state.NavigationBackState
-import com.arm.peliondevicemanagement.databinding.ActivityChooseFeatureBinding
+import com.arm.peliondevicemanagement.databinding.ActivityDeviceManagementBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
+import com.arm.peliondevicemanagement.screens.fragments.devices.DevicesFragment
+import com.arm.peliondevicemanagement.screens.fragments.devices.EnrollingDevicesFragment
 import com.arm.peliondevicemanagement.utils.PlatformUtils
-import com.arm.peliondevicemanagement.utils.PlatformUtils.fetchAttributeDrawable
 import com.arm.peliondevicemanagement.utils.WorkflowUtils
 import com.google.android.material.navigation.NavigationView
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.android.synthetic.main.layout_drawer_header.view.*
 
-class ChooseFeatureActivity : BaseActivity(),
-    NavigationView.OnNavigationItemSelectedListener,
-    RecyclerItemClickListener {
+class DeviceManagementActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var toolbar: Toolbar
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var drawerHeaderView: View
     private lateinit var navigationView: NavigationView
+    private lateinit var viewPager: ViewPager2
+    private lateinit var tabLayout: TabLayout
 
-    private lateinit var viewBinder: ActivityChooseFeatureBinding
+    private lateinit var viewBinder: ActivityDeviceManagementBinding
 
-    private val featureList= arrayListOf<FeatureModel>()
-    private lateinit var featureAdapter: FeatureAdapter
+    private var devicesFragment: DevicesFragment? = null
+    private var enrollingDevicesFragment: EnrollingDevicesFragment? = null
+
+    private lateinit var viewPagerAdapter: ViewPagerAdapter
+    private lateinit var fragmentList: List<Fragment>
+    private lateinit var fragmentNamesList: List<String>
 
     companion object {
-        private val TAG: String = ChooseFeatureActivity::class.java.simpleName
+        private val TAG: String = DeviceManagementActivity::class.java.simpleName
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewBinder = ActivityChooseFeatureBinding.inflate(layoutInflater)
+        viewBinder = ActivityDeviceManagementBinding.inflate(layoutInflater)
         initTheme(false)
         setContentView(viewBinder.root)
     }
@@ -88,10 +90,13 @@ class ChooseFeatureActivity : BaseActivity(),
         // In-case of single-account, update drawer-menu
         if(!SharedPrefHelper.isMultiAccountSupported()){
             navigationView.menu.clear()
-            navigationView.inflateMenu(R.menu.menu_single_account)
+            navigationView.inflateMenu(R.menu.menu_single_feature)
         }
 
-        setupToolbar(toolbar, getString(R.string.choose_features_text))
+        viewPager = viewBinder.contentView.viewPager
+        tabLayout = viewBinder.contentView.tabLayout
+
+        setupToolbar(toolbar, getString(R.string.devices_text))
         updateDrawerViews()
 
         val drawerToggle = ActionBarDrawerToggle(this,
@@ -102,37 +107,10 @@ class ChooseFeatureActivity : BaseActivity(),
         navigationView.setNavigationItemSelectedListener(this)
 
         setupItemNavViewColors()
+        setupTabLayoutColors()
 
-        drawerLayout.background = PlatformUtils
-            .fetchAttributeColor(this, R.attr.colorBackground)
-
-        addFeatures()
-        featureAdapter = FeatureAdapter(featureList = featureList, itemClickListener = this)
-        viewBinder.rvFeatures.apply {
-            layoutManager = LinearLayoutManager(context,
-                RecyclerView.VERTICAL, false)
-            itemAnimator = DefaultItemAnimator()
-            adapter = featureAdapter
-        }
-    }
-
-    private fun addFeatures() {
-        featureList.clear()
-        // Add features here
-        featureList.add(
-            FeatureModel(
-                fetchAttributeDrawable(this, R.attr.iconWorkflowManagement),
-                getString(R.string.feature_job_management_text),
-                getString(R.string.feature_job_management_desc)
-            )
-        )
-        featureList.add(
-            FeatureModel(
-                fetchAttributeDrawable(this, R.attr.iconDeviceManagement),
-                getString(R.string.feature_device_management_text),
-                getString(R.string.feature_device_management_desc)
-            )
-        )
+        initFragmentViews()
+        setupViewPagerWithTabs()
     }
 
     private fun setupItemNavViewColors() {
@@ -144,6 +122,38 @@ class ChooseFeatureActivity : BaseActivity(),
         navigationView.itemTextColor = colorList
         navigationView.itemIconTintList = colorList
         navigationView.background = PlatformUtils.fetchAttributeColor(this, R.attr.cardColor)
+    }
+
+    private fun setupTabLayoutColors() {
+        tabLayout.background = PlatformUtils.fetchAttributeDrawable(this, R.attr.cardColor)
+        val normalColor: Int
+        val selectedColor: Int
+        val rippleColor: ColorStateList
+        if(SharedPrefHelper.isDarkThemeEnabled()){
+            normalColor = ContextCompat.getColor(this, android.R.color.white)
+            selectedColor = ContextCompat.getColor(this, R.color.colorAccentForDark)
+            rippleColor = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorAccentForDark))
+            toolbar.elevation = 0f
+        } else {
+            normalColor = ContextCompat.getColor(this, android.R.color.black)
+            selectedColor = ContextCompat.getColor(this, R.color.colorAccentForLight)
+            rippleColor = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorAccentForLight))
+        }
+
+        tabLayout.setTabTextColors(normalColor, selectedColor)
+        tabLayout.setSelectedTabIndicatorColor(selectedColor)
+        tabLayout.tabRippleColor = rippleColor
+
+        // Define ColorStateList
+        val states = arrayOf(
+            intArrayOf(android.R.attr.state_selected),
+            intArrayOf(-android.R.attr.state_selected)
+        )
+        val colors = intArrayOf(
+            selectedColor,
+            normalColor
+        )
+        tabLayout.tabIconTint = ColorStateList(states, colors)
     }
 
     private fun updateDrawerViews() {
@@ -164,6 +174,38 @@ class ChooseFeatureActivity : BaseActivity(),
         }
     }
 
+    private fun initFragmentViews() {
+        fragmentNamesList = listOf(
+            getString(R.string.devices_text),
+            getString(R.string.enrolling_devices_text)
+        )
+        // Initialize fragments
+        devicesFragment =
+            DevicesFragment()
+        enrollingDevicesFragment =
+            EnrollingDevicesFragment()
+        // Add them to the list
+        fragmentList = listOf(devicesFragment!!, enrollingDevicesFragment!!)
+        // Initialize adapter
+        viewPagerAdapter = ViewPagerAdapter(this, fragmentList)
+        // Add adapter to view-pager
+        viewPager.adapter = viewPagerAdapter
+        viewPager.isUserInputEnabled = false
+    }
+
+    private fun setupViewPagerWithTabs() {
+        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+            if(fragmentNamesList[position] == "Devices"){
+                tab.icon = PlatformUtils
+                    .fetchAttributeDrawable(this, R.attr.iconPendingJobs)
+            } else {
+                tab.icon = PlatformUtils
+                    .fetchAttributeDrawable(this, R.attr.iconCompletedJobs)
+            }
+            tab.text = fragmentNamesList[position]
+        }.attach()
+    }
+
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         item.isChecked = true
         drawerLayout.closeDrawers()
@@ -172,6 +214,10 @@ class ChooseFeatureActivity : BaseActivity(),
             R.id.switch_account -> {
                 LogHelper.debug(TAG, "->switchAccount()")
                 navigateToAccounts()
+            }
+            R.id.change_feature -> {
+                LogHelper.debug(TAG, "->changeFeature()")
+                navigateToChooseFeature()
             }
             R.id.settings -> {
                 LogHelper.debug(TAG, "->settings()")
@@ -199,6 +245,10 @@ class ChooseFeatureActivity : BaseActivity(),
         fireIntentWithFinish(accountIntent, false)
     }
 
+    private fun navigateToChooseFeature() {
+        fireIntentWithFinish(Intent(this, ChooseFeatureActivity::class.java), false)
+    }
+
     private fun navigateToLogin() {
         WorkflowUtils.deleteWorkflowsCache()
         SharedPrefHelper.storeMultiAccountStatus(false)
@@ -207,28 +257,20 @@ class ChooseFeatureActivity : BaseActivity(),
         fireIntentWithFinish(Intent(this, AuthActivity::class.java), false)
     }
 
+    fun initiateTemporarySignOut() {
+        LogHelper.debug(TAG, "Temporary sign-out complete")
+        fireIntentWithFinish(Intent(this, AuthActivity::class.java), false)
+    }
+
+    fun navigateToLoginForReAuth() {
+        LogHelper.debug(TAG, "Temporary sign-out complete")
+        fireIntentWithFinish(Intent(this, AuthActivity::class.java), false)
+    }
+
     private fun navigateToSettings() {
         val settingsIntent = Intent(this, ViewHostActivity::class.java)
-        settingsIntent.putExtra(AppConstants.NAVIGATION_BACK_STATE_GRAPH, NavigationBackState.CHOOSE_FEATURES.name)
+        settingsIntent.putExtra(AppConstants.NAVIGATION_BACK_STATE_GRAPH, NavigationBackState.DEVICE_MANAGEMENT.name)
         settingsIntent.putExtra(AppConstants.VIEW_HOST_LAUNCH_GRAPH, AppConstants.viewHostLaunchActionList[1])
         fireIntentWithFinish(settingsIntent, true)
-    }
-
-    private fun navigateToJobManagementActivity() {
-        fireIntentWithFinish(Intent(this, JobManagementActivity::class.java), true)
-    }
-
-    private fun navigateToDeviceManagementActivity() {
-        fireIntentWithFinish(Intent(this, DeviceManagementActivity::class.java), true)
-    }
-
-    override fun onItemClick(data: Any) {
-        val featureName = data as String
-        LogHelper.debug(TAG, "onItemClick()-> featureName: $featureName")
-        if(featureName == JOB_MANAGEMENT) {
-            navigateToJobManagementActivity()
-        } else if(featureName == DEVICE_MANAGEMENT){
-            navigateToDeviceManagementActivity()
-        }
     }
 }

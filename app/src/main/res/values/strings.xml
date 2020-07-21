@@ -46,8 +46,10 @@
     <string name="activity_info">Activity Info</string>
     <string name="help_and_support">Help &amp; Support</string>
     <string name="no_login_history">No login history found</string>
+    <string name="choose_features_text">Choose Features</string>
+    <string name="devices_text">Devices</string>
+    <string name="enrolling_devices_text">Enrolling Devices</string>
     <string name="tasks">Tasks</string>
-    <string name="devices">Devices</string>
     <string name="pending_text">Pending</string>
     <string name="running_text">Running</string>
     <string name="stopped_text">Stopped</string>
@@ -126,6 +128,14 @@
     <string name="unauthorized_limit_reached_desc">You\'ve made more than 5 incorrect attempts while logging-in, please re-configure your account using portal on a desktop and then try again.</string>
     <string name="got_it_text">Got, it</string>
 
+    <string name="job_text">Job</string>
+    <string name="jobs_text">Jobs</string>
+    <string name="job_run_text">Job Run</string>
+    <string name="login_history_text">Login History</string>
+    <string name="lib_we_use_text">Libraries we use</string>
+    <string name="license_text">License</string>
+    <string name="in_app_browse_text">In-App Browsing</string>
+
     <!-- Workflow asset strings-->
     <string name="asset_downloading_text">Downloading assets</string>
     <string name="asset_downloaded_text">Assets available</string>
@@ -137,13 +147,12 @@
     <string name="scan_service_uuid_text">Service-UUID</string>
     <string name="scan_service_characteristic_uuid_text">Service-Characteristic-UUID</string>
 
-    <!-- Developer Options strings -->
+    <!-- Developer-Options [START] -->
     <string name="build_info_text">Build Info</string>
     <string name="developer_mode_format">You are now <xliff:g id="view">%1$s</xliff:g> step away from being a developer</string>
     <string name="developer_mode_enabled_text">Developer mode enabled</string>
     <string name="developer_mode_already_enabled_text">Developer mode already enabled</string>
     <string name="developer_options_text">Developer Options</string>
-
     <string name="feature_flags_text">Feature Flags</string>
     <string name="feature_flags_desc_text">Warning these flags are for development-use only, app may crash also, try at your own risk</string>
     <string name="auth_flags_text">Authentication</string>
@@ -155,6 +164,13 @@
     <string name="job_disable_workflow_sync_text">Disable Job auto-sync</string>
     <string name="job_disable_asset_download_text">Disable asset-download</string>
     <string name="job_sda_token_download_text">Disable SDA-Token download</string>
+    <!-- Developer-Options [END] -->
 
+    <!-- Add choose-features [START] -->
+    <string name="feature_job_management_text">Job Management</string>
+    <string name="feature_job_management_desc">Consistent connectivity experience</string>
+    <string name="feature_device_management_text">Device Management</string>
+    <string name="feature_device_management_desc">Deploying &amp; managing IoT devices</string>
+    <!-- Add choose-features [END] -->
 
 </resources>

@@ -20,6 +20,7 @@ package com.arm.peliondevicemanagement.components.viewholders
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
+import com.arm.peliondevicemanagement.components.models.FeatureModel
 import kotlinx.android.synthetic.main.layout_item_feature.view.*
 
 class FeatureViewHolder(itemView: View,
@@ -34,10 +35,12 @@ class FeatureViewHolder(itemView: View,
         }
     }
 
-    internal fun bind(featureName: String) {
-        this.featureName = featureName
+    internal fun bind(feature: FeatureModel) {
+        this.featureName = feature.featureName
         itemView.apply {
+            iconView.setImageDrawable(feature.featureIcon)
             tvName.text = featureName
+            tvDescription.text = feature.featureDescription
         }
     }
 

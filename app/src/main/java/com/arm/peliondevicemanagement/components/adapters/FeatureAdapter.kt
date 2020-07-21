@@ -22,10 +22,11 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
+import com.arm.peliondevicemanagement.components.models.FeatureModel
 import com.arm.peliondevicemanagement.components.viewholders.FeatureViewHolder
 import java.util.*
 
-class FeatureAdapter(private val featureList: Array<String>,
+class FeatureAdapter(private val featureList: ArrayList<FeatureModel>,
                      private val itemClickListener: RecyclerItemClickListener):
     RecyclerView.Adapter<FeatureViewHolder>(),
     RecyclerItemClickListener {
@@ -44,7 +45,7 @@ class FeatureAdapter(private val featureList: Array<String>,
     }
 
     override fun onBindViewHolder(holder: FeatureViewHolder, position: Int) =
-        holder.bind(featureName = featureList[position])
+        holder.bind(feature = featureList[position])
 
     override fun getItemCount(): Int = featureList.size
 

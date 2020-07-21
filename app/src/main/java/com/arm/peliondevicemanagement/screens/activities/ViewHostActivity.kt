@@ -29,10 +29,11 @@ import androidx.navigation.Navigation
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import com.arm.peliondevicemanagement.R
-import com.arm.peliondevicemanagement.constants.AppConstants.IS_FROM_FEATURE_GRAPH
+import com.arm.peliondevicemanagement.constants.AppConstants.NAVIGATION_BACK_STATE_GRAPH
 import com.arm.peliondevicemanagement.constants.AppConstants.VIEW_HOST_LAUNCH_GRAPH
 import com.arm.peliondevicemanagement.constants.AppConstants.WORKFLOW_ID_ARG
 import com.arm.peliondevicemanagement.constants.AppConstants.viewHostLaunchActionList
+import com.arm.peliondevicemanagement.constants.state.NavigationBackState
 import com.arm.peliondevicemanagement.databinding.ActivityViewHostActivityBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.utils.PlatformUtils
@@ -48,7 +49,7 @@ class ViewHostActivity : BaseActivity() {
 
     private lateinit var launchAction: String
     private var isJobRunGraph: Boolean = false
-    private var isFromFeatureGraph: Boolean = false
+    private lateinit var navigationBackState: NavigationBackState
 
     companion object {
         private val TAG: String = ViewHostActivity::class.java.simpleName
@@ -63,8 +64,12 @@ class ViewHostActivity : BaseActivity() {
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
+        // Arguments
         launchAction = intent.getStringExtra(VIEW_HOST_LAUNCH_GRAPH)!!
-        isFromFeatureGraph = intent.getBooleanExtra(IS_FROM_FEATURE_GRAPH, false)
+        navigationBackState = NavigationBackState
+            .valueOf(intent.getStringExtra(NAVIGATION_BACK_STATE_GRAPH)!!)
+
+        // Initialize
         init()
     }
 
@@ -98,33 +103,33 @@ class ViewHostActivity : BaseActivity() {
         navigationController.addOnDestinationChangedListener { _, destination, _ ->
             when(destination.id){
                 R.id.jobFragment -> {
-                    updateToolbarText("Job")
+                    updateToolbarText(getString(R.string.job_text))
                     isJobRunGraph = false
                 }
                 R.id.jobRunFragment -> {
-                    updateToolbarText("Job Run")
+                    updateToolbarText(getString(R.string.job_run_text))
                     isJobRunGraph = true
                 }
                 R.id.settingsFragment -> {
-                    updateToolbarText("Settings")
+                    updateToolbarText(getString(R.string.settings))
                 }
                 R.id.activityInfoFragment -> {
-                    updateToolbarText("Login History")
+                    updateToolbarText(getString(R.string.login_history_text))
                 }
                 R.id.helpAndSupportFragment -> {
-                    updateToolbarText("Help & Support")
+                    updateToolbarText(getString(R.string.help_and_support))
                 }
                 R.id.licensesFragment -> {
-                    updateToolbarText("Libraries we use")
+                    updateToolbarText(getString(R.string.lib_we_use_text))
                 }
                 R.id.licenseViewFragment -> {
-                    updateToolbarText("License")
+                    updateToolbarText(getString(R.string.license_text))
                 }
                 R.id.webViewFragment -> {
-                    updateToolbarText("In-App Browsing")
+                    updateToolbarText(getString(R.string.in_app_browse_text))
                 }
                 R.id.developerOptionsFragment -> {
-                    updateToolbarText("Developer Options")
+                    updateToolbarText(getString(R.string.developer_options_text))
                 }
             }
         }
@@ -157,12 +162,25 @@ class ViewHostActivity : BaseActivity() {
     }
 
     private fun navigateBackToRelevantActivity() {
-        if(isFromFeatureGraph){
-            LogHelper.debug(TAG, "-> navigateBackToChooseFeatureActivity()")
-            fireIntentWithFinish(Intent(this, ChooseFeatureActivity::class.java), false)
-        } else {
-            LogHelper.debug(TAG, "-> navigateBackToHomeActivity()")
-            fireIntentWithFinish(Intent(this, HomeActivity::class.java), false)
+        when(navigationBackState){
+            NavigationBackState.CHOOSE_FEATURES -> {
+                LogHelper.debug(TAG, "-> navigateBackToChooseFeatureActivity()")
+                fireIntentWithFinish(
+                    Intent(this, ChooseFeatureActivity::class.java),
+                    false)
+            }
+            NavigationBackState.JOB_MANAGEMENT -> {
+                LogHelper.debug(TAG, "-> navigateBackToJobManagementActivity()")
+                fireIntentWithFinish(
+                    Intent(this, JobManagementActivity::class.java),
+                    false)
+            }
+            NavigationBackState.DEVICE_MANAGEMENT -> {
+                LogHelper.debug(TAG, "-> navigateBackToDevicesManagementActivity()")
+                fireIntentWithFinish(
+                    Intent(this, DeviceManagementActivity::class.java),
+                    false)
+            }
         }
     }
 
