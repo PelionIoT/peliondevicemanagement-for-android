@@ -87,6 +87,9 @@
         <item name="iconWorkflowManagement">@drawable/ic_workflow_management_dark</item>
         <item name="iconDeviceManagement">@drawable/ic_device_management_dark</item>
         <item name="iconGateway">@drawable/ic_gateway_dark</item>
+        <item name="iconIoTDevice">@drawable/ic_end_device_dark</item>
+        <item name="iconCamera">@drawable/ic_camera_dark</item>
+        <item name="iconEnrollDevices">@drawable/ic_enroll_device_dark</item>
     </style>
 
     <!-- Launch Theme -->
@@ -167,6 +170,9 @@
         <item name="iconWorkflowManagement">@drawable/ic_workflow_management_light</item>
         <item name="iconDeviceManagement">@drawable/ic_device_management_light</item>
         <item name="iconGateway">@drawable/ic_gateway_light</item>
+        <item name="iconIoTDevice">@drawable/ic_end_device_light</item>
+        <item name="iconCamera">@drawable/ic_camera_light</item>
+        <item name="iconEnrollDevices">@drawable/ic_enroll_device_light</item>
     </style>
 
     <style name="AppTheme.Toolbar">

@@ -18,7 +18,6 @@
 package com.arm.peliondevicemanagement.services.api
 
 import com.arm.peliondevicemanagement.components.models.user.AccountProfile
-import com.arm.peliondevicemanagement.components.models.LicenseModel
 import com.arm.peliondevicemanagement.components.models.user.UserProfile
 import com.arm.peliondevicemanagement.constants.APIConstants.API_ACCOUNTS
 import com.arm.peliondevicemanagement.constants.APIConstants.API_ACCOUNTS_ME
@@ -30,6 +29,8 @@ import com.arm.peliondevicemanagement.constants.APIConstants.API_ASSIGNED_WORKFL
 import com.arm.peliondevicemanagement.constants.APIConstants.API_BRANDING_COLORS
 import com.arm.peliondevicemanagement.constants.APIConstants.API_BRANDING_IMAGES
 import com.arm.peliondevicemanagement.constants.APIConstants.API_CAPTCHA
+import com.arm.peliondevicemanagement.constants.APIConstants.API_DEVICES
+import com.arm.peliondevicemanagement.constants.APIConstants.API_DEVICE_ENROLLMENTS
 import com.arm.peliondevicemanagement.constants.APIConstants.API_SDA_TOKEN
 import com.arm.peliondevicemanagement.constants.APIConstants.API_WORKFLOW_DEVICE_RUNS
 import com.arm.peliondevicemanagement.constants.APIConstants.API_WORKFLOW_FILES
@@ -44,7 +45,9 @@ import com.arm.peliondevicemanagement.constants.APIConstants.KEY_BEARER
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_CONTENT_TYPE
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_CONTENT_TYPE_JSON
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_FILE_ID
+import com.arm.peliondevicemanagement.constants.APIConstants.KEY_FILTER
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_LIMIT
+import com.arm.peliondevicemanagement.constants.APIConstants.KEY_ORDER
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_THEME
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_WORKFLOW_ID
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
@@ -155,5 +158,21 @@ interface CloudAPIService {
         @Path(KEY_ACCOUNT_ID) accountID: String,
         @Path(KEY_THEME) theme: String
     ): Response<ResponseBody>
+
+    @GET(API_DEVICES)
+    suspend fun getDevices(
+        @Query(KEY_LIMIT) itemsPerPage: Int,
+        @Query(KEY_FILTER) filter: String,
+        @Query(KEY_ORDER) order: String,
+        @Query(KEY_AFTER_ID) after: String? = null
+    ): Response<IoTDevicesResponse>
+
+    @GET(API_DEVICE_ENROLLMENTS)
+    suspend fun getEnrollingDevices(
+        @Query(KEY_LIMIT) itemsPerPage: Int,
+        @Query(KEY_FILTER) filter: String,
+        @Query(KEY_ORDER) order: String,
+        @Query(KEY_AFTER_ID) after: String? = null
+    ): Response<EnrollingIoTDevicesResponse>
 
 }

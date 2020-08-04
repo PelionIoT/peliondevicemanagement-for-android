@@ -80,6 +80,9 @@
         <attr name="iconWorkflowManagement" format="reference" />
         <attr name="iconDeviceManagement" format="reference" />
         <attr name="iconGateway" format="reference" />
+        <attr name="iconIoTDevice" format="reference" />
+        <attr name="iconCamera" format="reference" />
+        <attr name="iconEnrollDevices" format="reference" />
 
     </declare-styleable>
 </resources>

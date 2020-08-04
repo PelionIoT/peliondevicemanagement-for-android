@@ -18,7 +18,6 @@
 package com.arm.peliondevicemanagement.services.repository
 
 import com.arm.peliondevicemanagement.components.models.user.AccountProfile
-import com.arm.peliondevicemanagement.components.models.LicenseModel
 import com.arm.peliondevicemanagement.components.models.user.UserProfile
 import com.arm.peliondevicemanagement.constants.APIConstants.CONTENT_TYPE_JSON
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_ACCOUNT
@@ -236,5 +235,35 @@ class CloudRepository(private val cloudAPIService: CloudAPIService): BaseReposit
             call = { cloudAPIService.getAccountBrandingImages(accountID,
                 theme.name.toLowerCase(Locale.ENGLISH)) }
         )
+    }
+
+    suspend fun getDevices(itemsPerPage: Int,
+                           accountID: String,
+                           order: String,
+                           after: String? = null): IoTDevicesResponse? {
+        return if(after != null){
+            doSafeAPIRequest(
+                call = { cloudAPIService.getDevices(itemsPerPage, accountID, order, after)}
+            )
+        } else {
+            doSafeAPIRequest(
+                call = { cloudAPIService.getDevices(itemsPerPage, accountID, order)}
+            )
+        }
+    }
+
+    suspend fun getEnrollingDevices(itemsPerPage: Int,
+                           accountID: String,
+                           order: String,
+                           after: String? = null): EnrollingIoTDevicesResponse? {
+        return if(after != null){
+            doSafeAPIRequest(
+                call = { cloudAPIService.getEnrollingDevices(itemsPerPage, accountID, order, after)}
+            )
+        } else {
+            doSafeAPIRequest(
+                call = { cloudAPIService.getEnrollingDevices(itemsPerPage, accountID, order)}
+            )
+        }
     }
 }

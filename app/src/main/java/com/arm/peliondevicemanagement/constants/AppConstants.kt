@@ -72,4 +72,7 @@ object AppConstants {
     const val DEVICE_STATE_COMPLETED = "Completed"
     const val DEVICE_STATE_FAILED = "Failed"
 
+    // Device Management constants
+    const val DEVICE_REGISTERED = "registered"
+
 }

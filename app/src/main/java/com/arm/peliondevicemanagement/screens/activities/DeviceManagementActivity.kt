@@ -32,6 +32,7 @@ import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.adapters.ViewPagerAdapter
+import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
 import com.arm.peliondevicemanagement.constants.AppConstants
 import com.arm.peliondevicemanagement.constants.state.NavigationBackState
 import com.arm.peliondevicemanagement.databinding.ActivityDeviceManagementBinding
@@ -46,7 +47,8 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.android.synthetic.main.layout_drawer_header.view.*
 
-class DeviceManagementActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener {
+class DeviceManagementActivity : BaseActivity(),
+    NavigationView.OnNavigationItemSelectedListener, RecyclerItemClickListener {
 
     private lateinit var toolbar: Toolbar
     private lateinit var drawerLayout: DrawerLayout
@@ -197,10 +199,10 @@ class DeviceManagementActivity : BaseActivity(), NavigationView.OnNavigationItem
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             if(fragmentNamesList[position] == "Devices"){
                 tab.icon = PlatformUtils
-                    .fetchAttributeDrawable(this, R.attr.iconPendingJobs)
+                    .fetchAttributeDrawable(this, R.attr.iconIoTDevice)
             } else {
                 tab.icon = PlatformUtils
-                    .fetchAttributeDrawable(this, R.attr.iconCompletedJobs)
+                    .fetchAttributeDrawable(this, R.attr.iconEnrollDevices)
             }
             tab.text = fragmentNamesList[position]
         }.attach()
@@ -262,15 +264,21 @@ class DeviceManagementActivity : BaseActivity(), NavigationView.OnNavigationItem
         fireIntentWithFinish(Intent(this, AuthActivity::class.java), false)
     }
 
-    fun navigateToLoginForReAuth() {
-        LogHelper.debug(TAG, "Temporary sign-out complete")
-        fireIntentWithFinish(Intent(this, AuthActivity::class.java), false)
-    }
-
     private fun navigateToSettings() {
         val settingsIntent = Intent(this, ViewHostActivity::class.java)
         settingsIntent.putExtra(AppConstants.NAVIGATION_BACK_STATE_GRAPH, NavigationBackState.DEVICE_MANAGEMENT.name)
         settingsIntent.putExtra(AppConstants.VIEW_HOST_LAUNCH_GRAPH, AppConstants.viewHostLaunchActionList[1])
         fireIntentWithFinish(settingsIntent, true)
+    }
+
+    override fun onItemClick(data: Any) {
+        // ToDO
+        LogHelper.debug(TAG, "->navigateToDashboard() [ TODO ]")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        devicesFragment = null
+        enrollingDevicesFragment = null
     }
 }

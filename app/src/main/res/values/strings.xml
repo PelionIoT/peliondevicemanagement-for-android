@@ -173,4 +173,7 @@
     <string name="feature_device_management_desc">Deploying &amp; managing IoT devices</string>
     <!-- Add choose-features [END] -->
 
+    <string name="enroll_device_text">Enroll Device</string>
+    <string name="no_iot_devices_text">It\'s lonely here!\nTry enrolling some devices</string>
+
 </resources>
