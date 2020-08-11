@@ -37,7 +37,7 @@ import com.arm.peliondevicemanagement.constants.state.NavigationBackState
 import com.arm.peliondevicemanagement.databinding.ActivityViewHostActivityBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.utils.PlatformUtils
-import com.arm.peliondevicemanagement.utils.PlatformUtils.requestLocationPermission
+import com.arm.peliondevicemanagement.utils.PlatformUtils.requestPermission
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class ViewHostActivity : BaseActivity() {
@@ -200,7 +200,7 @@ class ViewHostActivity : BaseActivity() {
                             .setTitle(resources.getString(R.string.attention_text))
                             .setMessage(resources.getString(R.string.location_perm_desc))
                             .setPositiveButton(resources.getString(R.string.grant_text)) { _, _ ->
-                                requestLocationPermission(this)
+                                requestPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                             }
                             .setNegativeButton(resources.getString(R.string.deny_text)) { dialogInterface, _ ->
                                 dialogInterface.dismiss()

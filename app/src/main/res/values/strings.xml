@@ -108,6 +108,8 @@
     <string name="grant_text">Grant</string>
     <string name="deny_text">Deny</string>
     <string name="open_settings_text">Open Settings</string>
+    <string name="camera_perm_desc">This app needs access to camera for scanning QR-codes</string>
+    <string name="camera_perm_denied_desc">You\'ve denied camera permission, we need that for scanning QR-codes\n\nAllow at [Settings] > [Permissions]</string>
 
     <string name="job_completed_text">Job Completed</string>
     <string name="job_completed_desc">This job is already completed\nYou\'re good to go!</string>
@@ -175,5 +177,7 @@
 
     <string name="enroll_device_text">Enroll Device</string>
     <string name="no_iot_devices_text">It\'s lonely here!\nTry enrolling some devices</string>
+    <string name="scan_qr_text">Scan QR Code</string>
+    <string name="scan_qr_desc">Align QR within the frame to scan the enrollment-code which is required to securely on-board your device</string>
 
 </resources>

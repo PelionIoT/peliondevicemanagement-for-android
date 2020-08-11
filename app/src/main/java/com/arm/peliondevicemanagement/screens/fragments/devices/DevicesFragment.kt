@@ -105,6 +105,10 @@ class DevicesFragment : Fragment(), RecyclerItemClickListener {
     private fun setupListeners() {
         viewBinder.swipeRefreshLayout.setOnRefreshListener(refreshListener)
 
+        viewBinder.notFoundView.scanQRButton.setOnClickListener {
+            (activity as DeviceManagementActivity).navigateToEnrollQRScan()
+        }
+
         retryButtonClickListener = View.OnClickListener {
             errorBottomSheetDialog!!.dismiss()
             errorBottomSheetDialog = null

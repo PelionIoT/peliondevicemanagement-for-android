@@ -251,6 +251,10 @@ class DeviceManagementActivity : BaseActivity(),
         fireIntentWithFinish(Intent(this, ChooseFeatureActivity::class.java), false)
     }
 
+    fun navigateToEnrollQRScan() {
+        fireIntent(Intent(this, EnrollQRScanActivity::class.java), true)
+    }
+
     private fun navigateToLogin() {
         WorkflowUtils.deleteWorkflowsCache()
         SharedPrefHelper.storeMultiAccountStatus(false)

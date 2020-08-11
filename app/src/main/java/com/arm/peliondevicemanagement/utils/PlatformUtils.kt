@@ -256,21 +256,21 @@ object PlatformUtils {
         return Build.VERSION.SDK_INT >= version
     }
 
-    private fun hasLocationPermission(context: Context): Boolean {
-        return (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+    private fun hasPermission(context: Context, permission: String): Boolean {
+        return (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED)
     }
 
-    fun requestLocationPermission(context: Activity){
-        ActivityCompat.requestPermissions(context, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_PERMISSION)
+    fun requestPermission(context: Activity, permission: String){
+        ActivityCompat.requestPermissions(context, arrayOf(permission), REQUEST_PERMISSION)
     }
 
-    fun checkForLocationPermission(context: Activity): Boolean {
+    fun checkForRuntimePermission(context: Activity, permission: String): Boolean {
         // Check for the platform, if M or higher
         return if(isSDKEqualORHigher(Build.VERSION_CODES.M)){
             // Check if we already have it or not
-            if(!hasLocationPermission(context)){
+            if(!hasPermission(context, permission)){
                 // No? then make a new request
-                requestLocationPermission(context)
+                requestPermission(context, permission)
                 false
             } else {
                 true

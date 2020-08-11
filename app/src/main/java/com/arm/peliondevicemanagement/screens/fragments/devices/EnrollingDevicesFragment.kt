@@ -109,7 +109,11 @@ class EnrollingDevicesFragment : Fragment() {
         })
 
         viewBinder.scanButton.setOnClickListener {
-            (activity as DeviceManagementActivity).showSnackbar(requireView(), "Under construction")
+            (activity as DeviceManagementActivity).navigateToEnrollQRScan()
+        }
+
+        viewBinder.notFoundView.scanQRButton.setOnClickListener {
+            (activity as DeviceManagementActivity).navigateToEnrollQRScan()
         }
 
         retryButtonClickListener = View.OnClickListener {

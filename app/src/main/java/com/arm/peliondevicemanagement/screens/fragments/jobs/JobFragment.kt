@@ -17,6 +17,7 @@
 
 package com.arm.peliondevicemanagement.screens.fragments.jobs
 
+import android.Manifest
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Bundle
@@ -52,7 +53,7 @@ import com.arm.peliondevicemanagement.databinding.FragmentJobBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.screens.activities.ViewHostActivity
 import com.arm.peliondevicemanagement.utils.PlatformUtils
-import com.arm.peliondevicemanagement.utils.PlatformUtils.checkForLocationPermission
+import com.arm.peliondevicemanagement.utils.PlatformUtils.checkForRuntimePermission
 import com.arm.peliondevicemanagement.utils.PlatformUtils.enableBluetooth
 import com.arm.peliondevicemanagement.utils.PlatformUtils.fetchAttributeColor
 import com.arm.peliondevicemanagement.utils.PlatformUtils.fetchAttributeDrawable
@@ -685,7 +686,7 @@ class JobFragment : Fragment() {
             }
         }
         // Check for permissions
-        return if(checkForLocationPermission(requireActivity())){
+        return if(checkForRuntimePermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION)){
             if(isLocationServiceEnabled(requireContext())){
                 true
             } else {
