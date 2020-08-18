@@ -93,7 +93,7 @@
 
     <string name="hello_blank_fragment">Hello</string>
     <string name="run_job">Run Job</string>
-    <string name="fab_description">Run Job Button</string>
+    <string name="fab_description">FabButton</string>
     <string name="cancel_text">Cancel</string>
     <string name="finish_text">Finish</string>
     <string name="stop_text">Stop</string>
@@ -179,5 +179,15 @@
     <string name="no_iot_devices_text">It\'s lonely here!\nTry enrolling some devices</string>
     <string name="scan_qr_text">Scan QR Code</string>
     <string name="scan_qr_desc">Align QR within the frame to scan the enrollment-code which is required to securely on-board your device</string>
+    <string name="scanned_qr_upload_text">Enrolling Device</string>
+    <string name="scanned_qr_upload_desc">Hang tight,\nDevice enrollment is in progress!</string>
+    <string name="scanned_qr_uploaded_text">Enrollment Successful</string>
+    <string name="scanned_qr_uploaded_desc">Let\'s party!\nYour device is successfully enrolled</string>
+    <string name="scanned_qr_upload_already_exists_text">Enrollment Exists</string>
+    <string name="scanned_qr_upload_already_exists_desc">Oh wait!\nThis device is already claimed</string>
+    <string name="retake_qr_text">Re-Take Shot</string>
+    <string name="close_text">Close</string>
+    <string name="re_upload_scanned_qr_text">Enrollment Failed</string>
+    <string name="re_upload_scanned_qr_desc">We\'ve encountered some error while enrolling your device, you can re-upload the enrollment-code or try scanning again</string>
 
 </resources>

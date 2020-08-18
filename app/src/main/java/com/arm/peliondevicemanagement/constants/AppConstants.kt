@@ -74,5 +74,8 @@ object AppConstants {
 
     // Device Management constants
     const val DEVICE_REGISTERED = "registered"
+    const val SCANNED_QR_CODE_EID = "eid"
+    const val SCAN_QR_REQUEST_CODE: Int = 2020
+    const val ACTIVITY_RESULT = "result"
 
 }

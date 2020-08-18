@@ -90,6 +90,7 @@
         <item name="iconIoTDevice">@drawable/ic_end_device_dark</item>
         <item name="iconCamera">@drawable/ic_camera_dark</item>
         <item name="iconEnrollDevices">@drawable/ic_enroll_device_dark</item>
+        <item name="iconBack">@drawable/ic_back_dark</item>
     </style>
 
     <!-- Launch Theme -->
@@ -173,6 +174,7 @@
         <item name="iconIoTDevice">@drawable/ic_end_device_light</item>
         <item name="iconCamera">@drawable/ic_camera_light</item>
         <item name="iconEnrollDevices">@drawable/ic_enroll_device_light</item>
+        <item name="iconBack">@drawable/ic_back_light</item>
     </style>
 
     <style name="AppTheme.Toolbar">
@@ -226,9 +228,19 @@
 
     <!-- Alert Dialog Dark Theme -->
     <style name="MaterialDialogDark" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="materialAlertDialogTitleTextStyle">@style/Alert.Title.Text</item>
+        <item name="materialAlertDialogBodyTextStyle">@style/Alert.Body.Text</item>
         <item name="colorSurface">@color/colorBackgroundForDark</item>
         <item name="buttonBarPositiveButtonStyle">@style/Alert.Button.Positive.Dark</item>
         <item name="buttonBarNegativeButtonStyle">@style/Alert.Button.Negative.Dark</item>
+    </style>
+
+    <style name="Alert.Title.Text" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
+        <item name="android:textColor">@color/colorPrimaryForLight</item>
+    </style>
+
+    <style name="Alert.Body.Text" parent="MaterialAlertDialog.MaterialComponents.Body.Text">
+        <item name="android:textColor">@color/colorPrimaryForLight</item>
     </style>
 
     <style name="Alert.Button.Positive.Dark" parent="Widget.MaterialComponents.Button.TextButton">

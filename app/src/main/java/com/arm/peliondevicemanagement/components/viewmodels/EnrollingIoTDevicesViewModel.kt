@@ -27,8 +27,10 @@ import com.arm.peliondevicemanagement.AppController
 import com.arm.peliondevicemanagement.components.models.devices.EnrollingIoTDevice
 import com.arm.peliondevicemanagement.constants.state.LoadState
 import com.arm.peliondevicemanagement.helpers.LogHelper
+import com.arm.peliondevicemanagement.services.data.ErrorResponse
 import com.arm.peliondevicemanagement.services.repository.CloudRepository
 import com.arm.peliondevicemanagement.services.store.EnrollingIoTDevicesDataSource
+import com.arm.peliondevicemanagement.utils.PlatformUtils
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
@@ -47,7 +49,9 @@ class EnrollingIoTDevicesViewModel : ViewModel() {
     private val cloudRepository: CloudRepository = AppController.getCloudRepository()
 
     private lateinit var _devicesLiveData: LiveData<PagedList<EnrollingIoTDevice>>
+    private var _enrollingDeviceLiveData = MutableLiveData<EnrollingIoTDevice>()
     private val _refreshStateLiveData = MutableLiveData<LoadState>()
+    private val _errorResponseLiveData = MutableLiveData<ErrorResponse>()
 
     private val boundaryCallback = object: PagedList.BoundaryCallback<EnrollingIoTDevice>() {
         override fun onZeroItemsLoaded() {
@@ -77,7 +81,23 @@ class EnrollingIoTDevicesViewModel : ViewModel() {
     }
 
     fun getEnrollingIoTDevices(): LiveData<PagedList<EnrollingIoTDevice>> = _devicesLiveData
+
+    fun enrollDevice(identity: String) {
+        scope.launch {
+            try {
+                val enrollingDeviceResponse = cloudRepository.enrollDevice(identity)
+                _enrollingDeviceLiveData.postValue(enrollingDeviceResponse)
+            } catch (e: Throwable) {
+                LogHelper.debug(TAG, "Exception occurred: ${e.message}")
+                val errorResponse = PlatformUtils.parseErrorResponseFromJson(e.message!!)
+                _errorResponseLiveData.postValue(errorResponse)
+            }
+        }
+    }
+
     fun getRefreshState(): LiveData<LoadState> = _refreshStateLiveData
+    fun getEnrollmentStatusLiveData(): LiveData<EnrollingIoTDevice> = _enrollingDeviceLiveData
+    fun getErrorResponseLiveData(): LiveData<ErrorResponse> = _errorResponseLiveData
 
     fun refreshEnrollingDevices() {
         LogHelper.debug(TAG, "Invalidate data using network")

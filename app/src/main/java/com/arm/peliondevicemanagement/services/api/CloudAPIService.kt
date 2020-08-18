@@ -17,6 +17,7 @@
 
 package com.arm.peliondevicemanagement.services.api
 
+import com.arm.peliondevicemanagement.components.models.devices.EnrollingIoTDevice
 import com.arm.peliondevicemanagement.components.models.user.AccountProfile
 import com.arm.peliondevicemanagement.components.models.user.UserProfile
 import com.arm.peliondevicemanagement.constants.APIConstants.API_ACCOUNTS
@@ -174,5 +175,10 @@ interface CloudAPIService {
         @Query(KEY_ORDER) order: String,
         @Query(KEY_AFTER_ID) after: String? = null
     ): Response<EnrollingIoTDevicesResponse>
+
+    @POST(API_DEVICE_ENROLLMENTS)
+    suspend fun enrollDevice(
+        @Body params: RequestBody
+    ): Response<EnrollingIoTDevice>
 
 }

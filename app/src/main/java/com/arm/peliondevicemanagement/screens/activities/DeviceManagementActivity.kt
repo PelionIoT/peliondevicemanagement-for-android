@@ -18,6 +18,7 @@
 
 package com.arm.peliondevicemanagement.screens.activities
 
+import android.app.Activity
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
@@ -34,6 +35,8 @@ import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.adapters.ViewPagerAdapter
 import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
 import com.arm.peliondevicemanagement.constants.AppConstants
+import com.arm.peliondevicemanagement.constants.AppConstants.ACTIVITY_RESULT
+import com.arm.peliondevicemanagement.constants.AppConstants.SCAN_QR_REQUEST_CODE
 import com.arm.peliondevicemanagement.constants.state.NavigationBackState
 import com.arm.peliondevicemanagement.databinding.ActivityDeviceManagementBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
@@ -252,7 +255,10 @@ class DeviceManagementActivity : BaseActivity(),
     }
 
     fun navigateToEnrollQRScan() {
-        fireIntent(Intent(this, EnrollQRScanActivity::class.java), true)
+        startActivityForResult(
+            Intent(this, EnrollQRScanActivity::class.java),
+            SCAN_QR_REQUEST_CODE
+        )
     }
 
     private fun navigateToLogin() {
@@ -278,6 +284,19 @@ class DeviceManagementActivity : BaseActivity(),
     override fun onItemClick(data: Any) {
         // ToDO
         LogHelper.debug(TAG, "->navigateToDashboard() [ TODO ]")
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode,resultCode,data)
+        if (requestCode == SCAN_QR_REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                val result = data!!.getBooleanExtra(ACTIVITY_RESULT,false)
+                if(result){
+                    LogHelper.debug(TAG, "Requesting refresh for enrolling-devices list")
+                    enrollingDevicesFragment!!.refreshContent()
+                }
+            }
+        }
     }
 
     override fun onDestroy() {

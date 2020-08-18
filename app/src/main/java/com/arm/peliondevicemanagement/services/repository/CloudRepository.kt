@@ -17,6 +17,7 @@
 
 package com.arm.peliondevicemanagement.services.repository
 
+import com.arm.peliondevicemanagement.components.models.devices.EnrollingIoTDevice
 import com.arm.peliondevicemanagement.components.models.user.AccountProfile
 import com.arm.peliondevicemanagement.components.models.user.UserProfile
 import com.arm.peliondevicemanagement.constants.APIConstants.CONTENT_TYPE_JSON
@@ -24,6 +25,7 @@ import com.arm.peliondevicemanagement.constants.APIConstants.KEY_ACCOUNT
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_ACCOUNT_ID
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_CAPTCHA
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_CAPTCHA_ID
+import com.arm.peliondevicemanagement.constants.APIConstants.KEY_ENROLLMENT_IDENTITY
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_GRANT_TYPE
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_OTP_TOKEN
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_PASSWORD
@@ -265,5 +267,15 @@ class CloudRepository(private val cloudAPIService: CloudAPIService): BaseReposit
                 call = { cloudAPIService.getEnrollingDevices(itemsPerPage, accountID, order)}
             )
         }
+    }
+
+    suspend fun enrollDevice(identity: String): EnrollingIoTDevice? {
+        return doSafeAPIRequest (
+            call = {
+                cloudAPIService.enrollDevice(createJSONRequestBody(
+                    KEY_ENROLLMENT_IDENTITY to identity
+                ))
+            }
+        )
     }
 }

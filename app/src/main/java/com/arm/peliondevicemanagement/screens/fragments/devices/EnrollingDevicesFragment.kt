@@ -172,7 +172,7 @@ class EnrollingDevicesFragment : Fragment() {
         })
     }
 
-    private fun refreshContent() {
+    fun refreshContent() {
         LogHelper.debug(TAG, "refreshContent()")
 
         showHideEnrollButton(false)

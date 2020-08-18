@@ -17,7 +17,6 @@
 
 package com.arm.peliondevicemanagement.utils
 
-import android.Manifest
 import android.app.Activity
 import android.bluetooth.le.ScanSettings
 import android.content.Context

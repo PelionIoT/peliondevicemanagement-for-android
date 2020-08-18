@@ -83,5 +83,6 @@ object APIConstants {
     const val KEY_THEME = "theme"
     const val KEY_BRAND_LOGO = "brand_logo_landscape"
     const val KEY_VALIDATION_ERROR = "validation_error"
+    const val KEY_ENROLLMENT_IDENTITY = "enrollment_identity"
 
 }

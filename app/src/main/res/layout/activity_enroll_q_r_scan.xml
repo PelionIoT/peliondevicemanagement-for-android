@@ -58,6 +58,18 @@
             android:layout_marginBottom="10dp"
             >
 
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:paddingStart="10dp"
+                android:paddingEnd="0dp"
+                android:id="@+id/backButton"
+                app:icon="?attr/iconBack"
+                app:iconTint="?attr/colorAccent"
+                app:rippleColor="?attr/colorAccent"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -94,6 +106,20 @@
                 android:gravity="center"
                 />
 
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:indeterminate="true"
+                android:layout_below="@id/tvMessage"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="10dp"
+                android:layout_centerHorizontal="true"
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:visibility="visible"/>
+
             <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -105,15 +131,34 @@
                 app:layout_anchorGravity="bottom"
                 app:elevation="10dp"
                 android:textAllCaps="false"
-                android:id="@+id/retryButton"
+                android:id="@+id/primaryButton"
                 android:textSize="16sp"
                 android:textColor="?attr/primaryInverseTextColor"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="25dp"
                 android:layout_marginBottom="10dp"
                 android:layout_centerHorizontal="true"
                 android:layout_below="@id/tvMessage"
                 android:visibility="gone"
                 tools:visibility="visible"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:text="@string/retake_qr_text"
+                android:id="@+id/secondaryButton"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="10dp"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@id/primaryButton"
+                android:textAllCaps="false"
+                app:icon="?attr/iconRefresh"
+                app:iconTint="?attr/colorAccent"
+                android:textColor="?attr/colorAccent"
+                app:iconPadding="10dp"
+                android:visibility="gone"
+                tools:visibility="visible"
+                />
 
         </RelativeLayout>
 
