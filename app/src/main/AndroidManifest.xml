@@ -85,6 +85,13 @@
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="stateHidden"
             tools:ignore="LockedOrientationActivity" />
+        <activity android:name=".screens.activities.SearchDevicesEnrollingActivity"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="stateHidden"
+            tools:ignore="LockedOrientationActivity"
+            />
         <activity
             android:name=".screens.activities.ViewHostActivity"
             android:launchMode="singleTop"

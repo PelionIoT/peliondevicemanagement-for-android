@@ -27,6 +27,7 @@ object AppConstants {
     const val IS_ACCOUNT_GRAPH = "isAccountGraph"
     const val VIEW_HOST_LAUNCH_GRAPH = "viewHostLaunchGraph"
     const val NAVIGATION_BACK_STATE_GRAPH = "isNavBackStateGraph"
+    const val DEVICES_AND_ENROLLING_SEARCH = "isDevicesOREnrollingSearch"
     const val WORKFLOW_ID_ARG = "workflow_id"
     val viewHostLaunchActionList = listOf("Job", "Settings")
 

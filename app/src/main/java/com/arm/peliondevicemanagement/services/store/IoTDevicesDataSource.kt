@@ -35,7 +35,8 @@ import kotlinx.coroutines.launch
 class IoTDevicesDataSource(
     private val scope: CoroutineScope,
     private val cloudRepository: CloudRepository,
-    private val stateLiveData: MutableLiveData<LoadState>
+    private val stateLiveData: MutableLiveData<LoadState>,
+    private val searchIndexData: ArrayList<IoTDevice>
 ): PageKeyedDataSource<String, IoTDevice>()  {
 
     companion object {
@@ -53,6 +54,8 @@ class IoTDevicesDataSource(
                     val lastItem = deviceList.last()
                     LogHelper.debug(TAG, "loadInitial() loadedItems: ${deviceList.size}, " +
                             "afterID: ${lastItem.deviceID}")
+                    searchIndexData.clear()
+                    searchIndexData.addAll(deviceList)
                     callback.onResult(deviceList, null, lastItem.deviceID)
                 } else {
                     LogHelper.debug(TAG, "loadInitial() No more items available")
@@ -74,6 +77,7 @@ class IoTDevicesDataSource(
                     val lastItem = deviceList.last()
                     LogHelper.debug(TAG, "loadAfter() loadedItems: ${deviceList.size}, " +
                             "afterID: ${lastItem.deviceID}")
+                    searchIndexData.addAll(deviceList)
                     callback.onResult(deviceList, lastItem.deviceID)
                 } else {
                     LogHelper.debug(TAG, "loadAfter() No more items available")

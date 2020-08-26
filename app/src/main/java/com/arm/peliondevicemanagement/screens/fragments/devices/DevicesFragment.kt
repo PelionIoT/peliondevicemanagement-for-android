@@ -40,7 +40,6 @@ import com.arm.peliondevicemanagement.constants.state.NetworkErrorState
 import com.arm.peliondevicemanagement.databinding.FragmentDevicesBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.screens.activities.DeviceManagementActivity
-import com.arm.peliondevicemanagement.screens.fragments.jobs.CompletedJobsFragment
 import com.arm.peliondevicemanagement.utils.PlatformUtils
 import com.google.android.material.bottomsheet.BottomSheetDialog
 

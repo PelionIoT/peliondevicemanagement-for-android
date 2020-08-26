@@ -49,6 +49,7 @@
     <string name="choose_features_text">Choose Features</string>
     <string name="devices_text">Devices</string>
     <string name="enrolling_devices_text">Enrolling Devices</string>
+    <string name="search_text">Search</string>
     <string name="tasks">Tasks</string>
     <string name="pending_text">Pending</string>
     <string name="running_text">Running</string>
@@ -189,5 +190,12 @@
     <string name="close_text">Close</string>
     <string name="re_upload_scanned_qr_text">Enrollment Failed</string>
     <string name="re_upload_scanned_qr_desc">We\'ve encountered some error while enrolling your device, you can re-upload the enrollment-code or try scanning again</string>
+
+    <string name="filters_text">Filters</string>
+    <string-array name="devices_filters">
+        <item>Device ID</item>
+        <item>Device Name</item>
+        <item>Endpoint Name</item>
+    </string-array>
 
 </resources>
