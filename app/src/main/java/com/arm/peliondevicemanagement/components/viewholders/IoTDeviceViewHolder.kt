@@ -46,8 +46,19 @@ class IoTDeviceViewHolder(itemView: View,
     internal fun bind(model: IoTDevice) {
         this.ioTDeviceModel = model
         itemView.apply {
-            tvName.text = model.endpointName
 
+            // Set device name
+            when {
+                model.deviceName.isNotEmpty() -> {
+                    tvName.text = model.deviceName
+                }
+                model.endpointName.isNotEmpty() -> {
+                    tvName.text = model.endpointName
+                }
+                else -> {
+                    tvName.text = model.deviceID
+                }
+            }
             // Set device icon
             if(model.hostGateway.isEmpty()){
                 iconView.setImageDrawable(fetchAttributeDrawable(context, R.attr.iconGateway))
