@@ -20,7 +20,6 @@ package com.arm.peliondevicemanagement.components.viewmodels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.paging.DataSource
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
@@ -31,16 +30,8 @@ import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.services.repository.CloudRepository
 import com.arm.peliondevicemanagement.services.store.IoTDevicesDataSource
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import java.util.*
 import kotlin.coroutines.CoroutineContext
 
-@FlowPreview
-@ExperimentalCoroutinesApi
 class IoTDevicesViewModel : ViewModel() {
 
     companion object {
@@ -59,9 +50,7 @@ class IoTDevicesViewModel : ViewModel() {
     private lateinit var _devicesLiveData: LiveData<PagedList<IoTDevice>>
     private val _refreshStateLiveData = MutableLiveData<LoadState>()
 
-    private val _devicesListSearchIndex = arrayListOf<IoTDevice>()
-
-    val queryChannel = ConflatedBroadcastChannel<String>()
+    val devicesListSearchIndex = arrayListOf<IoTDevice>()
 
     private val boundaryCallback = object: PagedList.BoundaryCallback<IoTDevice>() {
         override fun onZeroItemsLoaded() {
@@ -86,15 +75,6 @@ class IoTDevicesViewModel : ViewModel() {
         }
     }
 
-    init {
-        queryChannel.asFlow()
-            .debounce(QUERY_DEBOUNCE)
-            .onEach {
-                searchDevicesList(queryChannel.valueOrNull.orEmpty())
-            }
-            .launchIn(viewModelScope)
-    }
-
     fun initIoTDevicesLiveData() {
         _devicesLiveData = getIoTDevicesLiveData()
     }
@@ -105,21 +85,6 @@ class IoTDevicesViewModel : ViewModel() {
     fun refreshDevices() {
         LogHelper.debug(TAG, "Invalidate data using network")
         _devicesLiveData.value?.dataSource?.invalidate()
-    }
-
-    private fun searchDevicesList(searchQuery: String) {
-        if(_devicesListSearchIndex.isEmpty()){
-            LogHelper.debug(TAG, "Nothing to search!")
-        } else if(searchQuery.isNotBlank() || searchQuery.isNotEmpty()) {
-            val filteredList = arrayListOf<IoTDevice>()
-            _devicesListSearchIndex.filterTo(filteredList) {
-                it.endpointName.toLowerCase(Locale.getDefault()).contains(searchQuery)
-            }
-            LogHelper.debug(TAG, "Filtered-Results() size: ${filteredList.size}, " +
-                    "data: $filteredList")
-        } else {
-            LogHelper.debug(TAG, "Empty search-query!")
-        }
     }
 
     private fun getIoTDevicesLiveData(): LiveData<PagedList<IoTDevice>> {
@@ -139,7 +104,7 @@ class IoTDevicesViewModel : ViewModel() {
     private fun buildDevicesFactory(): DataSource.Factory<String, IoTDevice> {
         return object : DataSource.Factory<String, IoTDevice>() {
             override fun create(): DataSource<String, IoTDevice> {
-                return IoTDevicesDataSource(scope, cloudRepository, _refreshStateLiveData, _devicesListSearchIndex)
+                return IoTDevicesDataSource(scope, cloudRepository, _refreshStateLiveData, devicesListSearchIndex)
             }
         }
     }

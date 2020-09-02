@@ -54,13 +54,11 @@ class DevicesFragment : Fragment(), RecyclerItemClickListener {
 
     private lateinit var devicesViewModel: IoTDevicesViewModel
     private var devicesAdapter = IoTDeviceAdapter(this)
-
     private lateinit var itemClickListener: RecyclerItemClickListener
-
     private var errorBottomSheetDialog: BottomSheetDialog? = null
     private lateinit var retryButtonClickListener: View.OnClickListener
-
     private lateinit var activeActionState: NetworkErrorState
+    private lateinit var parentContext: DeviceManagementActivity
 
     private val refreshListener: SwipeRefreshLayout.OnRefreshListener = SwipeRefreshLayout.OnRefreshListener {
         refreshContent()
@@ -76,7 +74,7 @@ class DevicesFragment : Fragment(), RecyclerItemClickListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        parentContext = (requireActivity() as DeviceManagementActivity)
         init()
         setupListeners()
     }
@@ -87,6 +85,7 @@ class DevicesFragment : Fragment(), RecyclerItemClickListener {
     }
 
     private fun init() {
+        showHideRecViewAndSearchBar(false)
         setSwipeRefreshStatus(true)
         devicesViewModel = ViewModelProvider(this).get(IoTDevicesViewModel::class.java)
         devicesViewModel.initIoTDevicesLiveData()
@@ -105,7 +104,11 @@ class DevicesFragment : Fragment(), RecyclerItemClickListener {
         viewBinder.swipeRefreshLayout.setOnRefreshListener(refreshListener)
 
         viewBinder.notFoundView.scanQRButton.setOnClickListener {
-            (activity as DeviceManagementActivity).navigateToEnrollQRScan()
+            parentContext.navigateToEnrollQRScan()
+        }
+
+        viewBinder.searchBar.setOnClickListener {
+            parentContext.startDevicesSearch(devicesViewModel.devicesListSearchIndex)
         }
 
         retryButtonClickListener = View.OnClickListener {
@@ -138,6 +141,7 @@ class DevicesFragment : Fragment(), RecyclerItemClickListener {
                 }
                 LoadState.DOWNLOADED -> {
                     setSwipeRefreshStatus(false)
+                    showHideRecViewAndSearchBar(true)
                 }
                 LoadState.FAILED -> {
                     setSwipeRefreshStatus(false)
@@ -155,6 +159,7 @@ class DevicesFragment : Fragment(), RecyclerItemClickListener {
                     showErrorDialog(NetworkErrorState.NO_NETWORK)
                 }
                 else -> {
+                    showHideRecViewAndSearchBar(false)
                     setSwipeRefreshStatus(false)
                     showHide404View(true)
                 }
@@ -165,6 +170,7 @@ class DevicesFragment : Fragment(), RecyclerItemClickListener {
     private fun refreshContent() {
         LogHelper.debug(TAG, "refreshContent()")
 
+        showHideRecViewAndSearchBar(false)
         showHide404View(false)
         setSwipeRefreshStatus(true)
 
@@ -181,6 +187,16 @@ class DevicesFragment : Fragment(), RecyclerItemClickListener {
             viewBinder.notFoundView.root.visibility = View.VISIBLE
         } else {
             viewBinder.notFoundView.root.visibility = View.GONE
+        }
+    }
+
+    private fun showHideRecViewAndSearchBar(visibility: Boolean) {
+        if(visibility) {
+            viewBinder.rvDevices.visibility = View.VISIBLE
+            viewBinder.searchBar.visibility = View.VISIBLE
+        } else {
+            viewBinder.rvDevices.visibility = View.GONE
+            viewBinder.searchBar.visibility = View.GONE
         }
     }
 
@@ -224,7 +240,7 @@ class DevicesFragment : Fragment(), RecyclerItemClickListener {
     }
 
     private fun navigateToLogin() {
-        (requireActivity() as DeviceManagementActivity).initiateTemporarySignOut()
+        parentContext.initiateTemporarySignOut()
     }
 
     override fun onDestroyView() {

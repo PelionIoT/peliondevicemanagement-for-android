@@ -25,7 +25,6 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
@@ -35,10 +34,13 @@ import androidx.viewpager2.widget.ViewPager2
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.adapters.ViewPagerAdapter
 import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
+import com.arm.peliondevicemanagement.components.models.devices.EnrollingIoTDevice
+import com.arm.peliondevicemanagement.components.models.devices.IoTDevice
 import com.arm.peliondevicemanagement.constants.AppConstants
 import com.arm.peliondevicemanagement.constants.AppConstants.ACTIVITY_RESULT
 import com.arm.peliondevicemanagement.constants.AppConstants.DEVICES_AND_ENROLLING_SEARCH
 import com.arm.peliondevicemanagement.constants.AppConstants.SCAN_QR_REQUEST_CODE
+import com.arm.peliondevicemanagement.constants.AppConstants.SEARCH_BUNDLE
 import com.arm.peliondevicemanagement.constants.state.NavigationBackState
 import com.arm.peliondevicemanagement.constants.state.devices.DevicesSearchState
 import com.arm.peliondevicemanagement.databinding.ActivityDeviceManagementBinding
@@ -71,8 +73,6 @@ class DeviceManagementActivity : BaseActivity(),
     private lateinit var viewPagerAdapter: ViewPagerAdapter
     private lateinit var fragmentList: List<Fragment>
     private lateinit var fragmentNamesList: List<String>
-
-    private var activeSearchState: DevicesSearchState = DevicesSearchState.DEVICES
 
     companion object {
         private val TAG: String = DeviceManagementActivity::class.java.simpleName
@@ -115,10 +115,6 @@ class DeviceManagementActivity : BaseActivity(),
         drawerLayout.addDrawerListener(drawerToggle)
         drawerToggle.syncState()
         navigationView.setNavigationItemSelectedListener(this)
-
-        viewBinder.searchBar.setOnClickListener {
-            startSearchActivity(activeSearchState)
-        }
 
         setupItemNavViewColors()
         setupTabLayoutColors()
@@ -188,19 +184,6 @@ class DeviceManagementActivity : BaseActivity(),
         }
     }
 
-    fun startSearchActivity(state: DevicesSearchState) {
-        val searchIntent = Intent(this, SearchDevicesEnrollingActivity::class.java)
-        when(state) {
-            DevicesSearchState.DEVICES -> {
-                searchIntent.putExtra(DEVICES_AND_ENROLLING_SEARCH, DevicesSearchState.DEVICES.name)
-            }
-            DevicesSearchState.ENROLLING_DEVICES -> {
-                searchIntent.putExtra(DEVICES_AND_ENROLLING_SEARCH, DevicesSearchState.ENROLLING_DEVICES.name)
-            }
-        }
-        fireIntentWithFinish(searchIntent, true)
-    }
-
     private fun initFragmentViews() {
         fragmentNamesList = listOf(
             getString(R.string.devices_text),
@@ -231,24 +214,6 @@ class DeviceManagementActivity : BaseActivity(),
             }
             tab.text = fragmentNamesList[position]
         }.attach()
-
-        tabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener {
-            override fun onTabReselected(tab: TabLayout.Tab?) {
-                // Do nothing
-            }
-
-            override fun onTabUnselected(tab: TabLayout.Tab?) {
-                // Do nothing
-            }
-
-            override fun onTabSelected(tab: TabLayout.Tab) {
-                activeSearchState = if(tab.position == 0) {
-                    DevicesSearchState.DEVICES
-                } else {
-                    DevicesSearchState.ENROLLING_DEVICES
-                }
-            }
-        })
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -337,6 +302,24 @@ class DeviceManagementActivity : BaseActivity(),
                 }
             }
         }
+    }
+
+    fun startDevicesSearch(searchList: ArrayList<IoTDevice>) {
+        val searchIntent = Intent(this, SearchDevicesEnrollingActivity::class.java)
+        val searchBundle = Bundle()
+        searchIntent.putExtra(DEVICES_AND_ENROLLING_SEARCH, DevicesSearchState.DEVICES.name)
+        searchBundle.putParcelableArrayList(SEARCH_BUNDLE, searchList)
+        searchIntent.putExtras(searchBundle)
+        fireIntentWithFinish(searchIntent, true)
+    }
+
+    fun startEnrollingDevicesSearch(searchList: ArrayList<EnrollingIoTDevice>) {
+        val searchIntent = Intent(this, SearchDevicesEnrollingActivity::class.java)
+        val searchBundle = Bundle()
+        searchIntent.putExtra(DEVICES_AND_ENROLLING_SEARCH, DevicesSearchState.ENROLLING_DEVICES.name)
+        searchBundle.putParcelableArrayList(SEARCH_BUNDLE, searchList)
+        searchIntent.putExtras(searchBundle)
+        fireIntentWithFinish(searchIntent, true)
     }
 
     override fun onDestroy() {

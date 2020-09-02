@@ -29,6 +29,41 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="?attr/cardColor"
+            app:cardElevation="2dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginTop="10dp"
+            app:rippleColor="?attr/colorAccent"
+            android:focusable="true"
+            android:clickable="true"
+            android:id="@+id/searchBar"
+            app:strokeColor="@drawable/stroke_color"
+            app:strokeWidth="1dp"
+            >
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/search_text"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="3dp"
+                android:layout_marginBottom="3dp"
+                android:padding="10dp"
+                android:textSize="18sp"
+                android:textColor="?attr/primaryTextColor"
+                android:drawableStart="?attr/iconSearch"
+                android:drawablePadding="15dp"
+                android:singleLine="true"
+                android:fontFamily="@font/lato_regular"
+                />
+
+        </com.google.android.material.card.MaterialCardView>
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvDevices"
             android:layout_width="match_parent"
@@ -38,6 +73,7 @@
             android:clipToPadding="false"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
+            android:layout_below="@id/searchBar"
             />
 
         <include

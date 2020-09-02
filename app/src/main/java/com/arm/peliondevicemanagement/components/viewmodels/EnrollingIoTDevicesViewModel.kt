@@ -53,6 +53,8 @@ class EnrollingIoTDevicesViewModel : ViewModel() {
     private val _refreshStateLiveData = MutableLiveData<LoadState>()
     private val _errorResponseLiveData = MutableLiveData<ErrorResponse>()
 
+    val enrollingListSearchIndex = arrayListOf<EnrollingIoTDevice>()
+
     private val boundaryCallback = object: PagedList.BoundaryCallback<EnrollingIoTDevice>() {
         override fun onZeroItemsLoaded() {
             super.onZeroItemsLoaded()
@@ -121,7 +123,9 @@ class EnrollingIoTDevicesViewModel : ViewModel() {
     private fun buildEnrollingDevicesFactory(): DataSource.Factory<String, EnrollingIoTDevice> {
         return object : DataSource.Factory<String, EnrollingIoTDevice>() {
             override fun create(): DataSource<String, EnrollingIoTDevice> {
-                return EnrollingIoTDevicesDataSource(scope, cloudRepository, _refreshStateLiveData)
+                return EnrollingIoTDevicesDataSource(
+                    scope, cloudRepository, _refreshStateLiveData, enrollingListSearchIndex
+                )
             }
         }
     }

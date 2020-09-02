@@ -25,6 +25,7 @@ import kotlinx.android.parcel.Parcelize
 @Parcelize
 data class IoTDevice(
     @SerializedName("id") val deviceID: String,
+    @SerializedName("name") val deviceName: String,
     @SerializedName("vendor_id") val vendorID: String,
     @SerializedName("endpoint_name") val endpointName: String,
     @SerializedName("state") val currentState: String,

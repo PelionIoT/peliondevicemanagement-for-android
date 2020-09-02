@@ -21,15 +21,27 @@ package com.arm.peliondevicemanagement.screens.activities
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.R
+import com.arm.peliondevicemanagement.components.adapters.DevicesSearchAdapter
+import com.arm.peliondevicemanagement.components.adapters.EnrollingDevicesSearchAdapter
+import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
+import com.arm.peliondevicemanagement.components.models.devices.EnrollingIoTDevice
+import com.arm.peliondevicemanagement.components.models.devices.IoTDevice
 import com.arm.peliondevicemanagement.constants.AppConstants
+import com.arm.peliondevicemanagement.constants.AppConstants.SEARCH_BUNDLE
+import com.arm.peliondevicemanagement.constants.state.devices.DevicesFilters
 import com.arm.peliondevicemanagement.constants.state.devices.DevicesSearchState
 import com.arm.peliondevicemanagement.databinding.ActivitySearchDevicesEnrollingBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 
-class SearchDevicesEnrollingActivity : BaseActivity() {
+class SearchDevicesEnrollingActivity : BaseActivity(), RecyclerItemClickListener {
 
     companion object {
         private val TAG: String = SearchDevicesEnrollingActivity::class.java.simpleName
@@ -38,7 +50,31 @@ class SearchDevicesEnrollingActivity : BaseActivity() {
     private lateinit var viewBinder: ActivitySearchDevicesEnrollingBinding
     private lateinit var toolbar: Toolbar
     private lateinit var searchState: DevicesSearchState
-    private val deviceFiltersArray = resources.getStringArray(R.array.devices_filters)
+    private lateinit var deviceFiltersArray: Array<String>
+
+    private lateinit var searchBundle: Bundle
+
+    private lateinit var devicesList: ArrayList<IoTDevice>
+    private lateinit var enrollingList: ArrayList<EnrollingIoTDevice>
+
+    private lateinit var devicesSearchAdapter: DevicesSearchAdapter
+    private lateinit var enrollingDevicesSearchAdapter: EnrollingDevicesSearchAdapter
+
+    private val queryTextListener = object : SearchView.OnQueryTextListener {
+        override fun onQueryTextSubmit(query: String?): Boolean = false
+
+        override fun onQueryTextChange(newText: String?): Boolean {
+            when(searchState) {
+                DevicesSearchState.DEVICES -> {
+                    devicesSearchAdapter.filter.filter(newText)
+                }
+                DevicesSearchState.ENROLLING_DEVICES -> {
+                    enrollingDevicesSearchAdapter.filter.filter(newText)
+                }
+            }
+            return false
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         initTheme(false)
@@ -54,6 +90,8 @@ class SearchDevicesEnrollingActivity : BaseActivity() {
         searchState = DevicesSearchState.valueOf(
             intent.getStringExtra(AppConstants.DEVICES_AND_ENROLLING_SEARCH)!!
         )
+        searchBundle = intent.extras!!
+
         // Initialize
         init()
     }
@@ -62,19 +100,42 @@ class SearchDevicesEnrollingActivity : BaseActivity() {
         LogHelper.debug(TAG, "->ActiveSearchState: ${searchState.name}")
 
         toolbar = viewBinder.toolbar
+        viewBinder.rvDevicesSearch.apply {
+            layoutManager = LinearLayoutManager(context,
+                RecyclerView.VERTICAL, false)
+            itemAnimator = DefaultItemAnimator()
+            setHasFixedSize(true)
+            setItemViewCacheSize(20)
+        }
+
         when(searchState) {
             DevicesSearchState.DEVICES -> {
                 setupToolbar(toolbar, getString(R.string.devices_text))
                 // Add filters to the view
                 setupDeviceFilters()
+                devicesList = searchBundle
+                    .getParcelableArrayList<IoTDevice>(SEARCH_BUNDLE) as ArrayList<IoTDevice>
+                LogHelper.debug(TAG, "->devicesList() size: ${devicesList.size}")
+                devicesSearchAdapter = DevicesSearchAdapter(devicesList, this)
+                viewBinder.rvDevicesSearch.adapter = devicesSearchAdapter
             }
             DevicesSearchState.ENROLLING_DEVICES -> {
                 setupToolbar(toolbar, getString(R.string.enrolling_devices_text))
+                enrollingList = searchBundle
+                    .getParcelableArrayList<EnrollingIoTDevice>(SEARCH_BUNDLE) as ArrayList<EnrollingIoTDevice>
+                LogHelper.debug(TAG, "->enrollingDevicesList() size: ${enrollingList.size}")
+                enrollingDevicesSearchAdapter = EnrollingDevicesSearchAdapter(enrollingList)
+                viewBinder.rvDevicesSearch.adapter = enrollingDevicesSearchAdapter
             }
         }
+        // Set query listener
+        viewBinder.searchBar.searchTextBox.setOnQueryTextListener(queryTextListener)
+        // Activate search-bar
+        viewBinder.searchBar.searchTextBox.isIconified = false
     }
 
     private fun setupDeviceFilters() {
+        deviceFiltersArray = resources.getStringArray(R.array.devices_filters)
         val filtersAdapter = ArrayAdapter(
             this,
             R.layout.dropdown_menu_item,
@@ -83,6 +144,22 @@ class SearchDevicesEnrollingActivity : BaseActivity() {
         viewBinder.filtersMenu.setText(deviceFiltersArray[2], false)
         viewBinder.filtersMenu.setAdapter(filtersAdapter)
         viewBinder.dropdownFiltersMenu.visibility = View.VISIBLE
+
+        viewBinder.filtersMenu.onItemClickListener =
+            AdapterView.OnItemClickListener { _, _, position, _ ->
+                LogHelper.debug(TAG, "SelectedItem: ${deviceFiltersArray[position]}")
+                when (position) {
+                    0 -> {
+                        devicesSearchAdapter.setFilterType(DevicesFilters.DEVICE_ID)
+                    }
+                    1 -> {
+                        devicesSearchAdapter.setFilterType(DevicesFilters.DEVICE_NAME)
+                    }
+                    else -> {
+                        devicesSearchAdapter.setFilterType(DevicesFilters.ENDPOINT_NAME)
+                    }
+                }
+            }
     }
 
     private fun navigateBackToDeviceManagementActivity() {
@@ -97,5 +174,10 @@ class SearchDevicesEnrollingActivity : BaseActivity() {
     override fun onBackPressed() {
         super.onBackPressed()
         navigateBackToDeviceManagementActivity()
+    }
+
+    override fun onItemClick(data: Any) {
+        val deviceItem = data as IoTDevice
+        LogHelper.debug(TAG, "SelectedItem: $deviceItem")
     }
 }

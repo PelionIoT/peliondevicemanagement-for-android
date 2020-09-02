@@ -57,6 +57,7 @@ class EnrollingDevicesFragment : Fragment() {
     private lateinit var retryButtonClickListener: View.OnClickListener
 
     private lateinit var activeActionState: NetworkErrorState
+    private lateinit var parentContext: DeviceManagementActivity
 
     private val refreshListener: SwipeRefreshLayout.OnRefreshListener = SwipeRefreshLayout.OnRefreshListener {
         refreshContent()
@@ -72,12 +73,13 @@ class EnrollingDevicesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        parentContext = (activity as DeviceManagementActivity)
         init()
         setupListeners()
     }
 
     private fun init() {
+        showHideRecViewAndSearchBar(false)
         setSwipeRefreshStatus(true)
         enrollingDevicesViewModel = ViewModelProvider(this).get(EnrollingIoTDevicesViewModel::class.java)
         enrollingDevicesViewModel.initEnrollingIoTDevicesLiveData()
@@ -109,11 +111,17 @@ class EnrollingDevicesFragment : Fragment() {
         })
 
         viewBinder.scanButton.setOnClickListener {
-            (activity as DeviceManagementActivity).navigateToEnrollQRScan()
+            parentContext.navigateToEnrollQRScan()
         }
 
         viewBinder.notFoundView.scanQRButton.setOnClickListener {
-            (activity as DeviceManagementActivity).navigateToEnrollQRScan()
+            parentContext.navigateToEnrollQRScan()
+        }
+
+        viewBinder.searchBar.setOnClickListener {
+            parentContext.startEnrollingDevicesSearch(
+                enrollingDevicesViewModel.enrollingListSearchIndex
+            )
         }
 
         retryButtonClickListener = View.OnClickListener {
@@ -147,6 +155,7 @@ class EnrollingDevicesFragment : Fragment() {
                 LoadState.DOWNLOADED -> {
                     setSwipeRefreshStatus(false)
                     showHideEnrollButton(true)
+                    showHideRecViewAndSearchBar(true)
                 }
                 LoadState.FAILED -> {
                     setSwipeRefreshStatus(false)
@@ -164,6 +173,7 @@ class EnrollingDevicesFragment : Fragment() {
                     showErrorDialog(NetworkErrorState.NO_NETWORK)
                 }
                 else -> {
+                    showHideRecViewAndSearchBar(false)
                     setSwipeRefreshStatus(false)
                     showHideEnrollButton(false)
                     showHide404View(true)
@@ -175,6 +185,7 @@ class EnrollingDevicesFragment : Fragment() {
     fun refreshContent() {
         LogHelper.debug(TAG, "refreshContent()")
 
+        showHideRecViewAndSearchBar(false)
         showHideEnrollButton(false)
         showHide404View(false)
         setSwipeRefreshStatus(true)
@@ -197,6 +208,16 @@ class EnrollingDevicesFragment : Fragment() {
         viewBinder.scanButton.visibility = View.VISIBLE
     } else {
         viewBinder.scanButton.visibility = View.GONE
+    }
+
+    private fun showHideRecViewAndSearchBar(visibility: Boolean) {
+        if(visibility) {
+            viewBinder.rvEnrollingDevices.visibility = View.VISIBLE
+            viewBinder.searchBar.visibility = View.VISIBLE
+        } else {
+            viewBinder.rvEnrollingDevices.visibility = View.GONE
+            viewBinder.searchBar.visibility = View.GONE
+        }
     }
 
     private fun showErrorDialog(state: NetworkErrorState) {
@@ -230,7 +251,7 @@ class EnrollingDevicesFragment : Fragment() {
     }
 
     private fun navigateToLogin() {
-        (requireActivity() as DeviceManagementActivity).initiateTemporarySignOut()
+        parentContext.initiateTemporarySignOut()
     }
 
     override fun onDestroyView() {
