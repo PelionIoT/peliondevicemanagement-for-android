@@ -32,6 +32,7 @@ import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.adapters.DevicesSearchAdapter
 import com.arm.peliondevicemanagement.components.adapters.EnrollingDevicesSearchAdapter
 import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
+import com.arm.peliondevicemanagement.components.listeners.SearchResultsListener
 import com.arm.peliondevicemanagement.components.models.devices.EnrollingIoTDevice
 import com.arm.peliondevicemanagement.components.models.devices.IoTDevice
 import com.arm.peliondevicemanagement.constants.AppConstants
@@ -64,6 +65,7 @@ class SearchDevicesEnrollingActivity : BaseActivity(), RecyclerItemClickListener
         override fun onQueryTextSubmit(query: String?): Boolean = false
 
         override fun onQueryTextChange(newText: String?): Boolean {
+            showHideNoResultsView(false)
             when(searchState) {
                 DevicesSearchState.DEVICES -> {
                     devicesSearchAdapter.filter.filter(newText)
@@ -73,6 +75,13 @@ class SearchDevicesEnrollingActivity : BaseActivity(), RecyclerItemClickListener
                 }
             }
             return false
+        }
+    }
+
+    private val searchResultsListener = object : SearchResultsListener {
+        override fun onNoResultsFound() {
+            LogHelper.debug(TAG, "Search returned no results!")
+            showHideNoResultsView(true)
         }
     }
 
@@ -116,7 +125,7 @@ class SearchDevicesEnrollingActivity : BaseActivity(), RecyclerItemClickListener
                 devicesList = searchBundle
                     .getParcelableArrayList<IoTDevice>(SEARCH_BUNDLE) as ArrayList<IoTDevice>
                 LogHelper.debug(TAG, "->devicesList() size: ${devicesList.size}")
-                devicesSearchAdapter = DevicesSearchAdapter(devicesList, this)
+                devicesSearchAdapter = DevicesSearchAdapter(devicesList, this, searchResultsListener)
                 viewBinder.rvDevicesSearch.adapter = devicesSearchAdapter
             }
             DevicesSearchState.ENROLLING_DEVICES -> {
@@ -124,7 +133,7 @@ class SearchDevicesEnrollingActivity : BaseActivity(), RecyclerItemClickListener
                 enrollingList = searchBundle
                     .getParcelableArrayList<EnrollingIoTDevice>(SEARCH_BUNDLE) as ArrayList<EnrollingIoTDevice>
                 LogHelper.debug(TAG, "->enrollingDevicesList() size: ${enrollingList.size}")
-                enrollingDevicesSearchAdapter = EnrollingDevicesSearchAdapter(enrollingList)
+                enrollingDevicesSearchAdapter = EnrollingDevicesSearchAdapter(enrollingList, searchResultsListener)
                 viewBinder.rvDevicesSearch.adapter = enrollingDevicesSearchAdapter
             }
         }
@@ -162,6 +171,21 @@ class SearchDevicesEnrollingActivity : BaseActivity(), RecyclerItemClickListener
             }
     }
 
+    private fun showHideNoResultsView(visibility: Boolean) {
+        if(visibility){
+            viewBinder.rvDevicesSearch.visibility = View.GONE
+            viewBinder.noSearchResultsView.root.visibility = View.VISIBLE
+        } else {
+            viewBinder.noSearchResultsView.root.visibility = View.GONE
+            viewBinder.rvDevicesSearch.visibility = View.VISIBLE
+        }
+    }
+
+    override fun onItemClick(data: Any) {
+        val deviceItem = data as IoTDevice
+        LogHelper.debug(TAG, "SelectedItem: $deviceItem")
+    }
+
     private fun navigateBackToDeviceManagementActivity() {
         fireIntentWithFinish(Intent(this, DeviceManagementActivity::class.java), false)
     }
@@ -174,10 +198,5 @@ class SearchDevicesEnrollingActivity : BaseActivity(), RecyclerItemClickListener
     override fun onBackPressed() {
         super.onBackPressed()
         navigateBackToDeviceManagementActivity()
-    }
-
-    override fun onItemClick(data: Any) {
-        val deviceItem = data as IoTDevice
-        LogHelper.debug(TAG, "SelectedItem: $deviceItem")
     }
 }

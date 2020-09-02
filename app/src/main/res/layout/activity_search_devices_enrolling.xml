@@ -87,6 +87,18 @@
         android:clipToPadding="false"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
+        android:visibility="visible"
+        tools:visibility="gone"
+        />
+
+    <include
+        layout="@layout/layout_no_search_results"
+        android:id="@+id/noSearchResultsView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="50dp"
+        android:visibility="gone"
+        tools:visibility="visible"
         />
 
 </LinearLayout>

@@ -23,11 +23,13 @@ import android.widget.Filter
 import android.widget.Filterable
 import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.R
+import com.arm.peliondevicemanagement.components.listeners.SearchResultsListener
 import com.arm.peliondevicemanagement.components.models.devices.EnrollingIoTDevice
 import com.arm.peliondevicemanagement.components.viewholders.EnrollingIoTDeviceViewHolder
 import java.util.*
 
-class EnrollingDevicesSearchAdapter(private val enrollingDevicesList: ArrayList<EnrollingIoTDevice>):
+class EnrollingDevicesSearchAdapter(private val enrollingDevicesList: ArrayList<EnrollingIoTDevice>,
+                                    private val searchResultsListener: SearchResultsListener):
     RecyclerView.Adapter<EnrollingIoTDeviceViewHolder>(),
     Filterable {
 
@@ -70,6 +72,9 @@ class EnrollingDevicesSearchAdapter(private val enrollingDevicesList: ArrayList<
         override fun publishResults(charSequence: CharSequence, filterResults: FilterResults) {
             @Suppress("UNCHECKED_CAST")
             enrollingDevicesListFiltered = filterResults.values as ArrayList<EnrollingIoTDevice>
+            if(enrollingDevicesListFiltered.isEmpty()){
+                searchResultsListener.onNoResultsFound()
+            }
             notifyDataSetChanged()
         }
     }

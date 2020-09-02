@@ -24,13 +24,15 @@ import android.widget.Filterable
 import androidx.recyclerview.widget.RecyclerView
 import com.arm.peliondevicemanagement.R
 import com.arm.peliondevicemanagement.components.listeners.RecyclerItemClickListener
+import com.arm.peliondevicemanagement.components.listeners.SearchResultsListener
 import com.arm.peliondevicemanagement.components.models.devices.IoTDevice
 import com.arm.peliondevicemanagement.components.viewholders.IoTDeviceViewHolder
 import com.arm.peliondevicemanagement.constants.state.devices.DevicesFilters
 import java.util.*
 
 class DevicesSearchAdapter(private val devicesList: ArrayList<IoTDevice>,
-                           private val itemClickListener: RecyclerItemClickListener):
+                           private val itemClickListener: RecyclerItemClickListener,
+                           private val searchResultsListener: SearchResultsListener):
     RecyclerView.Adapter<IoTDeviceViewHolder>(),
     RecyclerItemClickListener,
     Filterable {
@@ -86,6 +88,9 @@ class DevicesSearchAdapter(private val devicesList: ArrayList<IoTDevice>,
         override fun publishResults(charSequence: CharSequence, filterResults: FilterResults) {
             @Suppress("UNCHECKED_CAST")
             devicesListFiltered = filterResults.values as ArrayList<IoTDevice>
+            if(devicesListFiltered.isEmpty()){
+                searchResultsListener.onNoResultsFound()
+            }
             notifyDataSetChanged()
         }
     }

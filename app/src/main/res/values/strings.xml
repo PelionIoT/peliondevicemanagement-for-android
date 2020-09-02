@@ -198,4 +198,6 @@
         <item>Endpoint Name</item>
     </string-array>
 
+    <string name="no_search_results">No results found</string>
+
 </resources>
