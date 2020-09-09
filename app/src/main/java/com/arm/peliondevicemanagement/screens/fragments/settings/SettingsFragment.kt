@@ -150,6 +150,7 @@ class SettingsFragment : Fragment() {
     }
 
     private fun enableDeveloperMode() {
+        developerModeStepCounter = 5
         showToast(resources.getString(R.string.developer_mode_enabled_text))
         LogHelper.debug(TAG, "->Developer-Mode: Enabled")
         SharedPrefHelper.getDeveloperOptions().setDeveloperModeStatus(true)

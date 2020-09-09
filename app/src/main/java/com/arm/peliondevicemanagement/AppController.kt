@@ -39,6 +39,10 @@ class AppController : Application() {
 
         internal fun getCloudRepository(): CloudRepository = cloudRepository!!
         internal fun getWorkflowDB(): WorkflowDB = workflowDB!!
+        internal fun initCloudAPI() {
+            cloudAPIService = CloudAPIService()
+            cloudRepository = CloudRepository(cloudAPIService!!)
+        }
     }
 
     /**
@@ -50,11 +54,7 @@ class AppController : Application() {
 
         appController = this
         // Setup Cloud-Services
-        cloudAPIService = CloudAPIService()
-        cloudRepository =
-            CloudRepository(
-                cloudAPIService!!
-            )
+        initCloudAPI()
         // Setup Local-DB
         workflowDB = WorkflowDB.getInstance(this)
         // Setup Android-Keystore

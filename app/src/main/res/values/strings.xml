@@ -21,6 +21,10 @@
     <string name="version_format">Version: <xliff:g id="view">%1$s</xliff:g></string>
     <string name="logo_description">App Logo</string>
 
+    <string name="cloud_url_prod_text">https://api.us-east-1.mbedcloud.com</string>
+    <string name="cloud_url_staging_text">https://api-os2.mbedcloudstaging.net</string>
+    <string name="cloud_url_integration_text">https://lab-api.mbedcloudintegration.net</string>
+
     <string name="email_header">Email/Username</string>
     <string name="password_header">Password</string>
     <string name="signin_text">Sign In</string>
@@ -159,6 +163,8 @@
     <string name="feature_flags_text">Feature Flags</string>
     <string name="feature_flags_desc_text">Warning these flags are for development-use only, app may crash also, try at your own risk</string>
     <string name="auth_flags_text">Authentication</string>
+    <string name="cloud_flags_text">Cloud</string>
+    <string name="cloud_flags_desc">This action will sign you out from your current account\n\nAre you sure?</string>
     <string name="sda_flags_text">Secure Device Access</string>
     <string name="job_flags_text">Job</string>
     <string name="auth_disable_reauth_text">Disable Re-Auth</string>
@@ -167,6 +173,8 @@
     <string name="job_disable_workflow_sync_text">Disable Job auto-sync</string>
     <string name="job_disable_asset_download_text">Disable asset-download</string>
     <string name="job_sda_token_download_text">Disable SDA-Token download</string>
+    <string name="reset_developer_mode_text">Reset Developer-Mode</string>
+    <string name="reset_developer_mode_desc">This will disable the developer mode and all the associated developer-flags\n\nAre you sure?</string>
     <!-- Developer-Options [END] -->
 
     <!-- Add choose-features [START] -->

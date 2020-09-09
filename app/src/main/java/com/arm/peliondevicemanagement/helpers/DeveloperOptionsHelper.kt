@@ -18,6 +18,7 @@
 package com.arm.peliondevicemanagement.helpers
 
 import com.arm.peliondevicemanagement.AppController
+import com.arm.peliondevicemanagement.constants.APIConstants
 import com.arm.peliondevicemanagement.constants.SharedPrefConstants
 import com.arm.peliondevicemanagement.utils.SharedPrefManager
 
@@ -28,6 +29,10 @@ object DeveloperOptionsHelper {
     internal fun isDeveloperModeEnabled(): Boolean =
         SharedPrefManager.with(context = AppController.appController!!)!!
             .getBoolean(SharedPrefConstants.STORE_DEVELOPER_MODE_STATUS, false)
+
+    internal fun getDefaultCloud(): String =
+        SharedPrefManager.with(context = AppController.appController!!)!!
+            .getString(SharedPrefConstants.STORE_DEFAULT_CLOUD, APIConstants.DEFAULT_BASE_URL)!!
 
     internal fun isReAuthDisabled(): Boolean =
         SharedPrefManager.with(context = AppController.appController!!)!!
@@ -57,6 +62,11 @@ object DeveloperOptionsHelper {
     internal fun setDeveloperModeStatus(enabled: Boolean) =
         SharedPrefManager.with(context = AppController.appController!!)!!.edit()
             .putBoolean(SharedPrefConstants.STORE_DEVELOPER_MODE_STATUS, enabled)
+            .apply()
+
+    internal fun storeDefaultCloud(cloudURL: String) =
+        SharedPrefManager.with(context = AppController.appController!!)!!.edit()
+            .putString(SharedPrefConstants.STORE_DEFAULT_CLOUD, cloudURL)
             .apply()
 
     internal fun setReAuthDisabledStatus(disabled: Boolean) =
@@ -93,6 +103,7 @@ object DeveloperOptionsHelper {
     // Clear developer-options
     internal fun resetOptions() {
         val editor = SharedPrefManager.with(context = AppController.appController!!)!!.edit()
+        editor.remove(SharedPrefConstants.STORE_DEFAULT_CLOUD)
         editor.remove(SharedPrefConstants.STORE_DEVELOPER_MODE_STATUS)
         editor.remove(SharedPrefConstants.STORE_DISABLE_REAUTH_STATUS)
         editor.remove(SharedPrefConstants.STORE_SDA_EXECUTION_MODE)

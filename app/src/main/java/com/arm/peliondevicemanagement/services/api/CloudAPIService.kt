@@ -51,6 +51,7 @@ import com.arm.peliondevicemanagement.constants.APIConstants.KEY_LIMIT
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_ORDER
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_THEME
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_WORKFLOW_ID
+import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
 import com.arm.peliondevicemanagement.services.data.*
 import okhttp3.*
@@ -65,6 +66,8 @@ import java.util.concurrent.TimeUnit
 interface CloudAPIService {
 
     companion object {
+        private val TAG = CloudAPIService::class.java.simpleName
+
         operator fun invoke(): CloudAPIService {
 
             val requestInterceptor = Interceptor { chain->
@@ -89,9 +92,17 @@ interface CloudAPIService {
                 .cache(null)
                 .build()
 
+            val cloudURl = if(SharedPrefHelper.getDeveloperOptions().isDeveloperModeEnabled()) {
+                SharedPrefHelper.getDeveloperOptions().getDefaultCloud()
+            } else {
+                DEFAULT_BASE_URL
+            }
+
+            LogHelper.debug(TAG, "Using cloud: $cloudURl")
+
             return Retrofit.Builder()
                 .client(okHttpClient)
-                .baseUrl(DEFAULT_BASE_URL)
+                .baseUrl(cloudURl)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
                 .create(CloudAPIService::class.java)

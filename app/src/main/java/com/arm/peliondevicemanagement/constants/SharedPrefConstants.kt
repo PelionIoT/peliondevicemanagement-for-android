@@ -22,6 +22,9 @@ object SharedPrefConstants {
     // Preferences File
     const val SHARED_PREF_FILENAME = "pdmSharedPrefs"
 
+    // Cloud
+    const val STORE_DEFAULT_CLOUD = "defaultCloud"
+
     // Credentials
     const val STORE_USER_NAME = "userName"
     const val STORE_USER_ACCESS_TOKEN = "userAccessToken"
