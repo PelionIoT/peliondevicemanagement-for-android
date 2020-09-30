@@ -277,6 +277,7 @@ class JobManagementActivity : BaseActivity(), NavigationView.OnNavigationItemSel
 
     private fun navigateToJob(workflowID: String) {
         val jobIntent = Intent(this, ViewHostActivity::class.java)
+        jobIntent.putExtra(AppConstants.NAVIGATION_BACK_STATE_GRAPH, NavigationBackState.JOB_MANAGEMENT.name)
         jobIntent.putExtra(VIEW_HOST_LAUNCH_GRAPH, viewHostLaunchActionList[0])
         jobIntent.putExtra(AppConstants.WORKFLOW_ID_ARG, workflowID)
         fireIntentWithFinish(jobIntent, true)
