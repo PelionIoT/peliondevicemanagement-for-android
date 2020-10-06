@@ -180,29 +180,33 @@ object PlatformUtils {
 
     fun parseJSONTimeString(inputString: String, format: String = "MMM dd, yyyy"): String {
         // default should be: dd-MM-yyyy, but the use-case is different
-        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH)
-        val outputFormat = SimpleDateFormat(format, Locale.ENGLISH)
-        val date = inputFormat.parse(inputString)
+        val outputFormat = SimpleDateFormat(format, Locale.getDefault())
+        val date = timeFormatter().parse(inputString)
         return outputFormat.format(date!!)
     }
 
     fun convertJSONDateTimeStringToDate(inputString: String): Date {
         // default should be: dd-MM-yyyy, but the use-case is different
-        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH)
-        return inputFormat.parse(inputString)!!
+        return timeFormatter().parse(inputString)!!
     }
 
     fun parseJSONTimeIntoTimeAgo(inputString: String): String {
-        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH)
-        val date = inputFormat.parse(inputString)
+        val date = timeFormatter().parse(inputString)
         return TimeAgo.getTimeAgo(date!!.time)
     }
 
     fun getCurrentTimeInZFormat(): String {
-        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH)
-        val dateTime = inputFormat.format(Date())
+        val dateTime = timeFormatter().format(Date())
         //LogHelper.debug(TAG, "ZFormattedTime: $dateTime")
         return dateTime.toString()
+    }
+
+    private fun timeFormatter(): SimpleDateFormat {
+        val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+        formatter.timeZone = TimeZone.getTimeZone("UTC")
+        LogHelper.debug(TAG, "Server-timezone is: ${formatter.timeZone.displayName}")
+        LogHelper.debug(TAG, "Device-timezone is: ${TimeZone.getDefault().displayName}")
+        return formatter
     }
 
     fun getSDAServiceUUID(): String {
