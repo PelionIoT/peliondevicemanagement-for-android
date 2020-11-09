@@ -332,7 +332,7 @@ class AccountsFragment : Fragment(), RecyclerItemClickListener {
     }
 
     private fun navigateToDashboardFragment() {
-        (requireActivity() as AuthActivity).launchHomeActivity()
+        (requireActivity() as AuthActivity).launchChooseFeatureActivity()
     }
 
     private fun showErrorMessageDialog(state: NetworkErrorState) {

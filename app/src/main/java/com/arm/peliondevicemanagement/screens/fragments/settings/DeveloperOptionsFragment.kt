@@ -22,11 +22,16 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.Navigation
+import com.arm.peliondevicemanagement.AppController
+import com.arm.peliondevicemanagement.R
 
 import com.arm.peliondevicemanagement.constants.ExecutionMode
 import com.arm.peliondevicemanagement.databinding.FragmentDeveloperOptionsBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
+import com.arm.peliondevicemanagement.screens.activities.ViewHostActivity
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class DeveloperOptionsFragment : Fragment() {
 
@@ -58,6 +63,21 @@ class DeveloperOptionsFragment : Fragment() {
     }
 
     private fun setupView() {
+        // Set default-cloud to the view
+        when {
+            SharedPrefHelper.getDeveloperOptions().getDefaultCloud() ==
+                    getString(R.string.cloud_url_prod_text) -> {
+                viewBinder.cloudProdCard.isChecked = true
+            }
+            SharedPrefHelper.getDeveloperOptions().getDefaultCloud() ==
+                    getString(R.string.cloud_url_staging_text) -> {
+                viewBinder.cloudStagingCard.isChecked = true
+            }
+            else -> {
+                viewBinder.cloudIntegrationCard.isChecked = true
+            }
+        }
+
         if(SharedPrefHelper.getDeveloperOptions().isReAuthDisabled()){
             viewBinder.disableReAuthSwitch.isChecked = true
         }
@@ -82,6 +102,18 @@ class DeveloperOptionsFragment : Fragment() {
     }
 
     private fun setupListeners() {
+        viewBinder.cloudProdCard.setOnClickListener {
+            signOutToChangeCloud(getString(R.string.cloud_url_prod_text))
+        }
+
+        viewBinder.cloudStagingCard.setOnClickListener {
+            signOutToChangeCloud(getString(R.string.cloud_url_staging_text))
+        }
+
+        viewBinder.cloudIntegrationCard.setOnClickListener {
+            signOutToChangeCloud(getString(R.string.cloud_url_integration_text))
+        }
+
         viewBinder.disableReAuthSwitch.setOnCheckedChangeListener { _, isChecked ->
             LogHelper.debug(TAG, "ReAuth Disabled: $isChecked")
             SharedPrefHelper.getDeveloperOptions().setReAuthDisabledStatus(isChecked)
@@ -115,6 +147,46 @@ class DeveloperOptionsFragment : Fragment() {
             LogHelper.debug(TAG, "SDA-Token Download Disabled: $isChecked")
             SharedPrefHelper.getDeveloperOptions().setSDATokenDownloadDisabledStatus(isChecked)
         }
+
+        viewBinder.resetFeaturesCard.setOnClickListener {
+            MaterialAlertDialogBuilder(context)
+                .setTitle(resources.getString(R.string.reset_developer_mode_text))
+                .setMessage(resources.getString(R.string.reset_developer_mode_desc))
+                .setPositiveButton(resources.getString(R.string.got_it_text)) { _, _ ->
+                    LogHelper.debug(TAG, "Resetting developer-mode!")
+                    SharedPrefHelper.getDeveloperOptions().resetOptions()
+                    Navigation.findNavController(viewBinder.root).navigateUp()
+                }
+                .setNegativeButton(resources.getString(R.string.cancel_text)) { dialogInterface, _ ->
+                    dialogInterface.dismiss()
+                }
+                .setCancelable(false)
+                .create()
+                .show()
+        }
+    }
+
+    private fun signOutToChangeCloud(cloudURL: String) {
+        MaterialAlertDialogBuilder(context)
+            .setTitle(resources.getString(R.string.attention_text))
+            .setMessage(resources.getString(R.string.cloud_flags_desc))
+            .setPositiveButton(resources.getString(R.string.got_it_text)) { _, _ ->
+                LogHelper.debug(TAG, "->signOutToChangeCloud()")
+                LogHelper.debug(TAG, "Setting default-cloud to $cloudURL")
+                // Save default-cloud to cache
+                SharedPrefHelper.getDeveloperOptions().storeDefaultCloud(cloudURL)
+                // Re-initialize cloudAPIService
+                AppController.initCloudAPI()
+                // Start sign-out
+                SharedPrefHelper.clearEverything()
+                (requireActivity() as ViewHostActivity).navigateToLogin()
+            }
+            .setNegativeButton(resources.getString(R.string.cancel_text)) { dialogInterface, _ ->
+                dialogInterface.dismiss()
+            }
+            .setCancelable(false)
+            .create()
+            .show()
     }
 
 }

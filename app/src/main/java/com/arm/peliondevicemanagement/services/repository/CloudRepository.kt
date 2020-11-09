@@ -17,14 +17,15 @@
 
 package com.arm.peliondevicemanagement.services.repository
 
+import com.arm.peliondevicemanagement.components.models.devices.EnrollingIoTDevice
 import com.arm.peliondevicemanagement.components.models.user.AccountProfile
-import com.arm.peliondevicemanagement.components.models.LicenseModel
 import com.arm.peliondevicemanagement.components.models.user.UserProfile
 import com.arm.peliondevicemanagement.constants.APIConstants.CONTENT_TYPE_JSON
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_ACCOUNT
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_ACCOUNT_ID
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_CAPTCHA
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_CAPTCHA_ID
+import com.arm.peliondevicemanagement.constants.APIConstants.KEY_ENROLLMENT_IDENTITY
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_GRANT_TYPE
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_OTP_TOKEN
 import com.arm.peliondevicemanagement.constants.APIConstants.KEY_PASSWORD
@@ -235,6 +236,46 @@ class CloudRepository(private val cloudAPIService: CloudAPIService): BaseReposit
         return doSafeAPIRequest(
             call = { cloudAPIService.getAccountBrandingImages(accountID,
                 theme.name.toLowerCase(Locale.ENGLISH)) }
+        )
+    }
+
+    suspend fun getDevices(itemsPerPage: Int,
+                           accountID: String,
+                           order: String,
+                           after: String? = null): IoTDevicesResponse? {
+        return if(after != null){
+            doSafeAPIRequest(
+                call = { cloudAPIService.getDevices(itemsPerPage, accountID, order, after)}
+            )
+        } else {
+            doSafeAPIRequest(
+                call = { cloudAPIService.getDevices(itemsPerPage, accountID, order)}
+            )
+        }
+    }
+
+    suspend fun getEnrollingDevices(itemsPerPage: Int,
+                           accountID: String,
+                           order: String,
+                           after: String? = null): EnrollingIoTDevicesResponse? {
+        return if(after != null){
+            doSafeAPIRequest(
+                call = { cloudAPIService.getEnrollingDevices(itemsPerPage, accountID, order, after)}
+            )
+        } else {
+            doSafeAPIRequest(
+                call = { cloudAPIService.getEnrollingDevices(itemsPerPage, accountID, order)}
+            )
+        }
+    }
+
+    suspend fun enrollDevice(identity: String): EnrollingIoTDevice? {
+        return doSafeAPIRequest (
+            call = {
+                cloudAPIService.enrollDevice(createJSONRequestBody(
+                    KEY_ENROLLMENT_IDENTITY to identity
+                ))
+            }
         )
     }
 }

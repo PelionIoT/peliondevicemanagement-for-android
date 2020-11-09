@@ -36,6 +36,7 @@ import com.arm.peliondevicemanagement.constants.AppConstants
 import com.arm.peliondevicemanagement.constants.AppConstants.IS_ACCOUNT_GRAPH
 import com.arm.peliondevicemanagement.constants.AppConstants.VIEW_HOST_LAUNCH_GRAPH
 import com.arm.peliondevicemanagement.constants.AppConstants.viewHostLaunchActionList
+import com.arm.peliondevicemanagement.constants.state.NavigationBackState
 import com.arm.peliondevicemanagement.databinding.ActivityHomeBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
 import com.arm.peliondevicemanagement.helpers.SharedPrefHelper
@@ -49,7 +50,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.android.synthetic.main.layout_drawer_header.view.*
 
 
-class HomeActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener, RecyclerItemClickListener {
+class JobManagementActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener, RecyclerItemClickListener {
 
     private lateinit var toolbar: Toolbar
     private lateinit var drawerLayout: DrawerLayout
@@ -68,7 +69,7 @@ class HomeActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     private lateinit var fragmentNamesList: List<String>
 
     companion object {
-        private val TAG: String = HomeActivity::class.java.simpleName
+        private val TAG: String = JobManagementActivity::class.java.simpleName
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -93,7 +94,7 @@ class HomeActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         // In-case of single-account, update drawer-menu
         if(!SharedPrefHelper.isMultiAccountSupported()){
             navigationView.menu.clear()
-            navigationView.inflateMenu(R.menu.menu_single_account)
+            navigationView.inflateMenu(R.menu.menu_single_feature)
         }
 
         viewPager = viewBinder.contentView.viewPager
@@ -215,6 +216,10 @@ class HomeActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 LogHelper.debug(TAG, "->switchAccount()")
                 navigateToAccounts()
             }
+            R.id.change_feature -> {
+                LogHelper.debug(TAG, "->changeFeature()")
+                navigateToChooseFeature()
+            }
             R.id.settings -> {
                 LogHelper.debug(TAG, "->settings()")
                 navigateToSettings()
@@ -241,6 +246,10 @@ class HomeActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         fireIntentWithFinish(accountIntent, false)
     }
 
+    private fun navigateToChooseFeature() {
+        fireIntentWithFinish(Intent(this, ChooseFeatureActivity::class.java), false)
+    }
+
     private fun navigateToLogin() {
         WorkflowUtils.deleteWorkflowsCache()
         SharedPrefHelper.storeMultiAccountStatus(false)
@@ -261,12 +270,14 @@ class HomeActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
     private fun navigateToSettings() {
         val settingsIntent = Intent(this, ViewHostActivity::class.java)
+        settingsIntent.putExtra(AppConstants.NAVIGATION_BACK_STATE_GRAPH, NavigationBackState.JOB_MANAGEMENT.name)
         settingsIntent.putExtra(VIEW_HOST_LAUNCH_GRAPH, viewHostLaunchActionList[1])
         fireIntentWithFinish(settingsIntent, true)
     }
 
     private fun navigateToJob(workflowID: String) {
         val jobIntent = Intent(this, ViewHostActivity::class.java)
+        jobIntent.putExtra(AppConstants.NAVIGATION_BACK_STATE_GRAPH, NavigationBackState.JOB_MANAGEMENT.name)
         jobIntent.putExtra(VIEW_HOST_LAUNCH_GRAPH, viewHostLaunchActionList[0])
         jobIntent.putExtra(AppConstants.WORKFLOW_ID_ARG, workflowID)
         fireIntentWithFinish(jobIntent, true)

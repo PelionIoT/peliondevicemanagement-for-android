@@ -26,8 +26,15 @@ object AppConstants {
     // Navigation-action constants
     const val IS_ACCOUNT_GRAPH = "isAccountGraph"
     const val VIEW_HOST_LAUNCH_GRAPH = "viewHostLaunchGraph"
+    const val NAVIGATION_BACK_STATE_GRAPH = "isNavBackStateGraph"
+    const val DEVICES_AND_ENROLLING_SEARCH = "isDevicesOREnrollingSearch"
+    const val SEARCH_BUNDLE = "searchBundle"
     const val WORKFLOW_ID_ARG = "workflow_id"
     val viewHostLaunchActionList = listOf("Job", "Settings")
+
+    // Feature constants
+    const val JOB_MANAGEMENT = "Job Management"
+    const val DEVICE_MANAGEMENT = "Device Management"
 
     // Local-Cache constants
     const val WORKFLOW_DATABASE_NAME = "Workflow.db"
@@ -66,5 +73,11 @@ object AppConstants {
     const val DEVICE_STATE_PENDING = "Pending"
     const val DEVICE_STATE_COMPLETED = "Completed"
     const val DEVICE_STATE_FAILED = "Failed"
+
+    // Device Management constants
+    const val DEVICE_REGISTERED = "registered"
+    const val SCANNED_QR_CODE_EID = "eid"
+    const val SCAN_QR_REQUEST_CODE: Int = 2020
+    const val ACTIVITY_RESULT = "result"
 
 }

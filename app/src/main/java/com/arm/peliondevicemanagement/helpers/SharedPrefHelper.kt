@@ -18,6 +18,7 @@
 package com.arm.peliondevicemanagement.helpers
 
 import com.arm.peliondevicemanagement.AppController
+import com.arm.peliondevicemanagement.constants.APIConstants
 import com.arm.peliondevicemanagement.constants.SharedPrefConstants
 import com.arm.peliondevicemanagement.utils.SharedPrefManager
 
@@ -178,8 +179,6 @@ object SharedPrefHelper {
     }
 
     internal fun clearEverything() {
-        // Reset developer-options
-        developerOptions.resetOptions()
         // Reset everything else
         val editor = SharedPrefManager.with(context = AppController.appController!!)!!.edit()
         // Login credentials

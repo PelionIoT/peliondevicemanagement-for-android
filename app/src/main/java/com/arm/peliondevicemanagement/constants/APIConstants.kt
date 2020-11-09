@@ -54,6 +54,10 @@ object APIConstants {
     const val API_BRANDING_COLORS = "/branding-colors"
     const val API_BRANDING_IMAGES = "/branding-images"
 
+    // Device Management Service Endpoints
+    const val API_DEVICES = "/v3/devices"
+    const val API_DEVICE_ENROLLMENTS = "/v3/device-enrollments"
+
     // Endpoint Keys
     const val KEY_AUTHORIZATION = "Authorization"
     const val KEY_CONTENT_TYPE = "Content-Type"
@@ -70,11 +74,15 @@ object APIConstants {
     const val KEY_ERROR_CODE = "error_code"
     const val KEY_AFTER_ID = "after"
     const val KEY_LIMIT = "limit"
+    const val KEY_FILTER = "filter"
+    const val KEY_ORDER = "order"
+    const val KEY_DESCENDING = "DESC"
     const val KEY_FILE_ID = "file_id"
     const val KEY_WORKFLOW_ID = "workflow_id"
     const val KEY_ASSIGNEE_ID = "assignee__eq"
     const val KEY_THEME = "theme"
     const val KEY_BRAND_LOGO = "brand_logo_landscape"
     const val KEY_VALIDATION_ERROR = "validation_error"
+    const val KEY_ENROLLMENT_IDENTITY = "enrollment_identity"
 
 }

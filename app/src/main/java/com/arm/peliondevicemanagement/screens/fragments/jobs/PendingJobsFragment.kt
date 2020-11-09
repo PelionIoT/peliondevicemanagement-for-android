@@ -37,7 +37,7 @@ import com.arm.peliondevicemanagement.components.viewmodels.WorkflowViewModel
 import com.arm.peliondevicemanagement.constants.state.LoadState
 import com.arm.peliondevicemanagement.databinding.FragmentPendingJobsBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
-import com.arm.peliondevicemanagement.screens.activities.HomeActivity
+import com.arm.peliondevicemanagement.screens.activities.JobManagementActivity
 import com.arm.peliondevicemanagement.utils.PlatformUtils
 import com.google.android.material.bottomsheet.BottomSheetDialog
 
@@ -249,7 +249,7 @@ class PendingJobsFragment : Fragment(), RecyclerItemClickListener {
     }
 
     private fun navigateToLogin() {
-        (requireActivity() as HomeActivity).initiateTemporarySignOut()
+        (requireActivity() as JobManagementActivity).initiateTemporarySignOut()
     }
 
     override fun onDestroyView() {
