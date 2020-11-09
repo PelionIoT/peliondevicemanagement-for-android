@@ -95,11 +95,11 @@
 
     <!-- Launch Theme -->
     <style name="AppTheme.Launcher">
-        <item name="android:windowBackground">@drawable/launch_screen</item>
+        <item name="android:windowBackground">@color/colorSplashForLight</item>
     </style>
 
     <style name="AppThemeDark.Launcher">
-        <item name="android:windowBackground">@drawable/launch_screen</item>
+        <item name="android:windowBackground">@color/colorSplashForDark</item>
     </style>
 
     <!-- Dark Theme. -->
