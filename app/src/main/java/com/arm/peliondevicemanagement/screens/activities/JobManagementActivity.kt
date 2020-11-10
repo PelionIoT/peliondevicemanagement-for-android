@@ -118,14 +118,10 @@ class JobManagementActivity : BaseActivity(), NavigationView.OnNavigationItemSel
     }
 
     private fun setupItemNavViewColors() {
-        val colorList: ColorStateList = if(SharedPrefHelper.isDarkThemeEnabled()){
-            ColorStateList.valueOf(ContextCompat.getColor(this, android.R.color.white))
-        } else {
-            ColorStateList.valueOf(ContextCompat.getColor(this, android.R.color.black))
-        }
+        val colorList: ColorStateList = ColorStateList
+            .valueOf(ContextCompat.getColor(this, android.R.color.white))
         navigationView.itemTextColor = colorList
         navigationView.itemIconTintList = colorList
-        navigationView.background = PlatformUtils.fetchAttributeColor(this, R.attr.cardColor)
     }
 
     private fun setupTabLayoutColors() {

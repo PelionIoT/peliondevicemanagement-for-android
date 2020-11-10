@@ -39,7 +39,7 @@
             android:elevation="5dp"
             android:visibility="gone"
             tools:visibility="visible"
-            android:background="@color/arm_yellow">
+            android:background="@color/pelion_orange">
 
             <TextView
                 android:layout_width="match_parent"

@@ -17,54 +17,6 @@
   -->
 
 <resources>
-    <color name="colorPrimary">@color/arm_black</color>
-    <color name="colorPrimaryDark">@color/arm_black</color>
-    <color name="colorAccent">@color/arm_blue</color>
-
-    // Light Colors
-    <color name="colorPrimaryForLight">@color/arm_light_medium</color>
-    <color name="colorPrimaryDarkForLight">@color/arm_light_low</color>
-    <color name="colorAccentForLight">@color/arm_blue</color>
-    <color name="colorBackgroundForLight">@color/arm_quartz_white</color>
-
-    // Dark Colors
-    <color name="colorPrimaryForDark">@color/arm_dark_medium</color>
-    <color name="colorPrimaryDarkForDark">@color/arm_dark_high</color>
-    <color name="colorAccentForDark">@color/arm_yellow</color>
-    <color name="colorBackgroundForDark">@color/arm_jet_black</color>
-
-    // ARM's Color Derived Palette
-
-    // Dark
-    <color name="arm_dark_high">@color/arm_black</color>
-    <color name="arm_dark_medium">@color/arm_black</color>
-    <color name="arm_dark_low">@color/arm_selected</color>
-
-    //Light
-    <color name="arm_light_high">#ffffff</color>
-    <color name="arm_light_medium">@color/arm_light_gray</color>
-    <color name="arm_light_low">#8B97B7</color>
-
-
-    // ARM's Original Color Palette
-    <color name="arm_black">#333e48</color>
-    <color name="arm_black_alt">#46535f</color>
-    <color name="arm_black_alt_2">#3e4a56</color>
-    <color name="arm_gray_alt">#5d6c7a</color>
-    <color name="arm_selected">#5A646D</color>
-    <color name="arm_green">#95d600</color>
-    <color name="arm_tab_light">#11809f</color>
-    <color name="arm_dark_gray">#7d868c</color>
-    <color name="arm_light_gray">#e5eceb</color>
-    <color name="arm_dark_blue">#002b49</color>
-    <color name="arm_blue">#0091bd</color>
-    <color name="arm_light_blue">#00c1de</color>
-    <color name="arm_yellow">#ffc700</color>
-    <color name="arm_orange">#ff6b00</color>
-    <color name="arm_red">#e03030</color>
-    <color name="arm_dark_black">#000000</color>
-    <color name="arm_jet_black">#222a30</color>
-    <color name="arm_quartz_white">#f7f7f7</color>
     
     <!-- Pelion Color palette -->
     <color name="pelion_purple_high">#1B154B</color>
@@ -74,12 +26,21 @@
     <color name="pelion_red_high">#E4222B</color>
     <color name="pelion_red_low">#FF686F</color>
     <color name="pelion_white">#FFFFFF</color>
+    <color name="pelion_orange">#ED922B</color>
+    <color name="pelion_green">#4CBD96</color>
 
     <!-- Light Colors -->
     <color name="colorSplashForLight">@color/pelion_purple_high</color>
+    <color name="colorPrimaryForLight">@color/pelion_purple_high</color>
+    <color name="colorAccentForLight">@color/pelion_blue_high</color>
+    <color name="colorTextForLight">@android:color/black</color>
+    <color name="colorBackgroundForLight">@android:color/white</color>
 
     <!-- Dark Colors -->
     <color name="colorSplashForDark">@color/pelion_purple_low</color>
+    <color name="colorPrimaryForDark">@color/pelion_purple_low</color>
+    <color name="colorAccentForDark">@color/pelion_blue_low</color>
+    <color name="colorTextForDark">@android:color/white</color>
 
 
 </resources>
