@@ -35,7 +35,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/arm_black"
+            android:background="@color/colorPrimaryForDark"
             android:elevation="0dp"
             android:theme="@style/AppTheme.Toolbar"
             />
@@ -55,7 +55,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
-        android:background="?attr/cardColor"
+        android:background="@color/colorPrimaryForLight"
         app:menu="@menu/menu_multi_feature"
         app:itemIconTint="?attr/primaryIconColor"
         app:itemTextColor="?attr/primaryTextColor"

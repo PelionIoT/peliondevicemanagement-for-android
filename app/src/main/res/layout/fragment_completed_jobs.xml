@@ -39,7 +39,7 @@
             android:elevation="5dp"
             android:visibility="gone"
             tools:visibility="visible"
-            android:background="@color/arm_yellow">
+            android:background="@color/pelion_orange">
 
             <TextView
                 android:layout_width="match_parent"
@@ -86,13 +86,13 @@
                 android:layout_marginEnd="5dp"
                 android:id="@+id/uploadJobsButton"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                app:strokeColor="@color/arm_dark_black"
-                app:rippleColor="@color/arm_dark_black"
+                app:strokeColor="@android:color/black"
+                app:rippleColor="@android:color/black"
                 app:icon="?attr/iconUpload"
-                app:iconTint="@color/arm_dark_black"
+                app:iconTint="@android:color/black"
                 app:iconPadding="10dp"
                 android:text="@string/upload_text"
-                android:textColor="@color/arm_dark_black"
+                android:textColor="@android:color/black"
                 android:textAllCaps="false"
                 android:fontFamily="@font/lato_bold"
                 />

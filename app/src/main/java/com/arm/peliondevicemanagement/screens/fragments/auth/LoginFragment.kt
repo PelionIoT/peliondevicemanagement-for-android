@@ -119,9 +119,9 @@ class LoginFragment : Fragment() {
         if(brandLogoURL.isNotEmpty()){
             Glide.with(requireView())
                 .load(brandLogoURL)
-                .placeholder(R.drawable.logo_arm)
+                .placeholder(R.drawable.pelion_mixed)
                 .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                .error(R.drawable.logo_arm)
+                .error(R.drawable.pelion_mixed)
                 .into(viewBinder.logoImageView)
             LogHelper.debug(TAG, "CustomBrandingLogo: Available, loaded")
         } else {

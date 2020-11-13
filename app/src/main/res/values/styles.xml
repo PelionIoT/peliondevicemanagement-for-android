@@ -19,21 +19,21 @@
 
     <!-- Light Theme. -->
     <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="colorPrimary">@color/arm_black</item>
-        <item name="colorPrimaryDark">@color/arm_black</item>
+        <item name="colorPrimary">@color/colorPrimaryForLight</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryForLight</item>
         <item name="colorAccent">@color/colorAccentForLight</item>
         <item name="android:windowBackground">@color/colorBackgroundForLight</item>
 
         <item name="colorBackground">@color/colorBackgroundForLight</item>
 
-        <item name="primaryIconColor">@android:color/black</item>
-        <item name="primaryInverseIconColor">@color/colorBackgroundForLight</item>
+        <item name="primaryIconColor">@color/colorTextForLight</item>
+        <item name="primaryInverseIconColor">@color/colorTextForDark</item>
 
-        <item name="primaryTextColor">@color/colorPrimaryForDark</item>
-        <item name="secondaryTextColor">@color/colorPrimaryDarkForDark</item>
+        <item name="primaryTextColor">@color/colorTextForLight</item>
+        <item name="secondaryTextColor">@color/colorTextForLight</item>
 
-        <item name="primaryInverseTextColor">@color/colorBackgroundForLight</item>
-        <item name="secondaryInverseTextColor">@color/arm_light_gray</item>
+        <item name="primaryInverseTextColor">@color/colorTextForDark</item>
+        <item name="secondaryInverseTextColor">@color/colorTextForDark</item>
 
         <item name="dividerColor">?attr/colorOnSurface</item>
 
@@ -43,9 +43,8 @@
 
         <item name="materialAlertDialogTheme">@style/MaterialDialogLight</item>
 
-        <item name="primaryButtonColor">@color/colorPrimaryDarkForLight</item>
+        <item name="primaryButtonColor">?attr/colorAccent</item>
         <item name="cardColor">@color/colorBackgroundForLight</item>
-        <item name="chipColor">@color/arm_light_gray</item>
 
         <item name="iconAccount">@drawable/ic_account_dark</item>
         <item name="iconEmail">@drawable/ic_mail_dark</item>
@@ -95,35 +94,34 @@
 
     <!-- Launch Theme -->
     <style name="AppTheme.Launcher">
-        <item name="android:windowBackground">@drawable/launch_screen</item>
+        <item name="android:windowBackground">@color/colorSplashForLight</item>
     </style>
 
     <style name="AppThemeDark.Launcher">
-        <item name="android:windowBackground">@drawable/launch_screen</item>
+        <item name="android:windowBackground">@color/colorSplashForLight</item>
     </style>
 
     <!-- Dark Theme. -->
     <style name="AppThemeDark" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">@color/colorPrimaryForDark</item>
-        <item name="colorPrimaryDark">@color/arm_black</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryForLight</item>
         <item name="colorAccent">@color/colorAccentForDark</item>
-        <item name="android:windowBackground">@color/colorBackgroundForDark</item>
+        <item name="android:windowBackground">@color/colorPrimaryForLight</item>
 
-        <item name="colorBackground">@color/colorBackgroundForDark</item>
+        <item name="colorBackground">@color/colorPrimaryForLight</item>
 
-        <item name="primaryIconColor">@android:color/white</item>
-        <item name="primaryInverseIconColor">@color/colorBackgroundForDark</item>
+        <item name="primaryIconColor">@color/colorTextForDark</item>
+        <item name="primaryInverseIconColor">@color/colorTextForLight</item>
 
-        <item name="primaryTextColor">@color/colorPrimaryForLight</item>
-        <item name="secondaryTextColor">@color/colorPrimaryDarkForLight</item>
+        <item name="primaryTextColor">@color/colorTextForDark</item>
+        <item name="secondaryTextColor">@color/colorTextForDark</item>
 
-        <item name="primaryInverseTextColor">@color/colorBackgroundForDark</item>
-        <item name="secondaryInverseTextColor">@color/arm_gray_alt</item>
+        <item name="primaryInverseTextColor">@color/colorTextForLight</item>
+        <item name="secondaryInverseTextColor">@color/colorTextForLight</item>
 
         <item name="dividerColor">@android:color/white</item>
-        <item name="primaryButtonColor">@color/colorPrimaryForDark</item>
-        <item name="cardColor">@color/arm_black</item>
-        <item name="chipColor">@color/arm_gray_alt</item>
+        <item name="primaryButtonColor">?attr/colorAccent</item>
+        <item name="cardColor">@color/colorPrimaryForDark</item>
 
         <item name="android:textColor">?attr/primaryTextColor</item>
         <item name="android:editTextColor">?attr/primaryTextColor</item>
@@ -196,7 +194,7 @@
         <!--<item name="android:windowCloseOnTouchOutside">false</item>-->
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowContentOverlay">@null</item>
-        <item name="android:colorBackground">     @android:color/transparent</item>
+        <item name="android:colorBackground">@android:color/transparent</item>
         <item name="android:backgroundDimEnabled">true</item>
         <item name="android:backgroundDimAmount">0.3</item>
         <item name="android:windowFrame">@null</item>
@@ -222,7 +220,7 @@
     </style>
 
     <style name="Alert.Button.Negative.Light" parent="Widget.MaterialComponents.Button.TextButton">
-        <item name="android:textColor">@color/colorPrimaryForDark</item>
+        <item name="android:textColor">@color/colorTextForLight</item>
         <item name="rippleColor">@color/colorAccentForLight</item>
     </style>
 
@@ -230,17 +228,17 @@
     <style name="MaterialDialogDark" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
         <item name="materialAlertDialogTitleTextStyle">@style/Alert.Title.Text</item>
         <item name="materialAlertDialogBodyTextStyle">@style/Alert.Body.Text</item>
-        <item name="colorSurface">@color/colorBackgroundForDark</item>
+        <item name="colorSurface">@color/colorPrimaryForDark</item>
         <item name="buttonBarPositiveButtonStyle">@style/Alert.Button.Positive.Dark</item>
         <item name="buttonBarNegativeButtonStyle">@style/Alert.Button.Negative.Dark</item>
     </style>
 
     <style name="Alert.Title.Text" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
-        <item name="android:textColor">@color/colorPrimaryForLight</item>
+        <item name="android:textColor">@color/colorTextForDark</item>
     </style>
 
     <style name="Alert.Body.Text" parent="MaterialAlertDialog.MaterialComponents.Body.Text">
-        <item name="android:textColor">@color/colorPrimaryForLight</item>
+        <item name="android:textColor">@color/colorTextForDark</item>
     </style>
 
     <style name="Alert.Button.Positive.Dark" parent="Widget.MaterialComponents.Button.TextButton">
@@ -249,7 +247,7 @@
     </style>
 
     <style name="Alert.Button.Negative.Dark" parent="Widget.MaterialComponents.Button.TextButton">
-        <item name="android:textColor">@color/colorPrimaryForLight</item>
+        <item name="android:textColor">@color/colorTextForDark</item>
         <item name="rippleColor">@color/colorAccentForDark</item>
     </style>
 
