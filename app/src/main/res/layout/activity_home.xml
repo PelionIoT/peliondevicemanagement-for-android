@@ -23,7 +23,7 @@
     android:id="@+id/drawerLayout"
     android:background="?attr/colorBackground"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".screens.activities.HomeActivity">
+    tools:context=".screens.activities.JobManagementActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -34,7 +34,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/arm_black"
+            android:background="@color/colorPrimaryForDark"
             android:elevation="10dp"
             android:theme="@style/AppTheme.Toolbar"
             />
@@ -54,8 +54,8 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
-        android:background="?attr/cardColor"
-        app:menu="@menu/menu_multi_account"
+        android:background="@color/colorPrimaryForLight"
+        app:menu="@menu/menu_multi_feature"
         app:itemIconTint="?attr/primaryIconColor"
         app:itemTextColor="?attr/primaryTextColor"
         />

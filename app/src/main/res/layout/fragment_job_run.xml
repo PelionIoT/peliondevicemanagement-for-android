@@ -176,7 +176,7 @@
                 android:paddingEnd="16dp"
                 android:paddingTop="10dp"
                 android:id="@+id/tvDeviceHeader"
-                android:text="@string/devices"
+                android:text="@string/devices_text"
                 android:layout_toEndOf="@id/deviceIconView"
                 android:fontFamily="@font/lato_regular"
                 android:ellipsize="middle"

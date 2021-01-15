@@ -37,7 +37,6 @@
         <attr name="dividerColor" format="color"/>
         <attr name="primaryButtonColor" format="color" />
         <attr name="cardColor" format="color"/>
-        <attr name="chipColor" format="color"/>
 
         <!-- Icons -->
         <attr name="iconAccount" format="reference"/>
@@ -76,6 +75,14 @@
         <attr name="iconBleScan" format="reference"/>
         <attr name="iconKey" format="reference" />
         <attr name="iconImage" format="reference" />
+        <attr name="iconFeature" format="reference"/>
+        <attr name="iconWorkflowManagement" format="reference" />
+        <attr name="iconDeviceManagement" format="reference" />
+        <attr name="iconGateway" format="reference" />
+        <attr name="iconIoTDevice" format="reference" />
+        <attr name="iconCamera" format="reference" />
+        <attr name="iconEnrollDevices" format="reference" />
+        <attr name="iconBack" format="reference" />
 
     </declare-styleable>
 </resources>

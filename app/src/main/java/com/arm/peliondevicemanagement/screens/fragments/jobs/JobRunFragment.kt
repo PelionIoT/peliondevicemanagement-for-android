@@ -428,6 +428,9 @@ class JobRunFragment : Fragment() {
     private fun updateDeviceItemInList(position: Int, deviceName: String, deviceState: String){
         deviceRunModel.workflowDevices[position] = WorkflowDevice(deviceName, deviceState)
         workflowDeviceAdapter.notifyItemChanged(position)
+
+        // Update total-devices-completed in UI
+        setTotalDevicesCompletedStatus()
     }
 
     private fun removeTemporaryDeviceItemFromList() {

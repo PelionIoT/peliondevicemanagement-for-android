@@ -32,7 +32,7 @@
         android:paddingTop="15dp"
         android:id="@+id/tvHomeHeader"
         android:text="@string/app_name"
-        android:textColor="?attr/colorAccent"
+        android:textColor="@android:color/white"
         android:fontFamily="@font/lato_bold"
         android:ellipsize="middle"
         android:singleLine="true"
@@ -48,6 +48,7 @@
         android:layout_marginTop="10dp"
         android:fontFamily="@font/lato_bold"
         android:layout_below="@id/tvHomeHeader"
+        android:textColor="@android:color/white"
         android:textSize="14sp"
         android:id="@+id/tvUserEmailHeader"
         android:textAppearance="@style/TextAppearance.AppCompat.Caption"/>
@@ -65,6 +66,7 @@
         android:layout_marginBottom="10dp"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="16dp"
+        android:textColor="@android:color/white"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"/>
 
     <LinearLayout
@@ -75,7 +77,7 @@
         android:visibility="gone"
         tools:visibility="visible"
         android:orientation="vertical"
-        android:background="?attr/colorAccent">
+        android:background="?attr/cardColor">
 
         <TextView
             android:layout_width="match_parent"
@@ -86,7 +88,7 @@
             android:layout_marginTop="13dp"
             android:textSize="14sp"
             android:fontFamily="@font/lato_bold"
-            android:textColor="?attr/cardColor"
+            android:textColor="?attr/primaryTextColor"
             android:id="@+id/tvUserAccountHeader"
             android:textAppearance="@style/TextAppearance.AppCompat.Caption"/>
 
@@ -97,7 +99,7 @@
             android:ellipsize="end"
             android:textSize="16sp"
             android:singleLine="true"
-            android:textColor="?attr/cardColor"
+            android:textColor="?attr/primaryTextColor"
             android:id="@+id/tvUserAccountName"
             android:layout_marginBottom="15dp"
             android:layout_marginStart="20dp"

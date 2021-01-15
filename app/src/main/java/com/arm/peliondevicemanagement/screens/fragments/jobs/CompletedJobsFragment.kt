@@ -38,7 +38,7 @@ import com.arm.peliondevicemanagement.constants.state.LoadState
 import com.arm.peliondevicemanagement.constants.state.NetworkErrorState
 import com.arm.peliondevicemanagement.databinding.FragmentCompletedJobsBinding
 import com.arm.peliondevicemanagement.helpers.LogHelper
-import com.arm.peliondevicemanagement.screens.activities.HomeActivity
+import com.arm.peliondevicemanagement.screens.activities.JobManagementActivity
 import com.arm.peliondevicemanagement.utils.PlatformUtils
 import com.google.android.material.bottomsheet.BottomSheetDialog
 
@@ -120,7 +120,7 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
             errorBottomSheetDialog = null
             when(activeActionState){
                 ActionState.UNAUTHORIZED -> {
-                    (requireActivity() as HomeActivity).navigateToLoginForReAuth()
+                    (requireActivity() as JobManagementActivity).navigateToLoginForReAuth()
                 }
                 ActionState.UPLOAD -> {
                     prepareForUpload()
@@ -202,7 +202,7 @@ class CompletedJobsFragment : Fragment(), RecyclerItemClickListener {
     }
 
     private fun showSnackbar(message: String){
-        (requireActivity() as HomeActivity).showSnackbar(requireView(), message)
+        (requireActivity() as JobManagementActivity).showSnackbar(requireView(), message)
     }
 
     private fun processErrorUnauthorizedResponse() {
